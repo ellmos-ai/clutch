@@ -1,0 +1,72 @@
+{
+  "_doc": "Streckentypen: Welcher Gang + Gaspedal-Stellung fuer welche Strecke",
+  "strecken": {
+    "feldweg": {
+      "gang": "claude-haiku",
+      "gas": 0.3,
+      "muster": "einzelfahrt",
+      "beschreibung": "Kleine Aenderungen, Formatierung, Typos"
+    },
+    "landstrasse": {
+      "gang": "claude-sonnet",
+      "gas": 0.5,
+      "muster": "einzelfahrt",
+      "beschreibung": "Standard-Feature-Entwicklung, Refactoring"
+    },
+    "bundesstrasse": {
+      "gang": "claude-sonnet",
+      "gas": 0.7,
+      "muster": "einzelfahrt",
+      "beschreibung": "Fehlersuche und -behebung"
+    },
+    "autobahn": {
+      "gang": "claude-opus",
+      "gas": 0.9,
+      "muster": "einzelfahrt",
+      "beschreibung": "Architektur-Entscheidungen, System-Design"
+    },
+    "pruefstrecke": {
+      "gang": "claude-opus",
+      "gas": 0.6,
+      "muster": "einzelfahrt",
+      "beschreibung": "Code-Review, Qualitaetspruefung"
+    },
+    "rallye": {
+      "gang": "claude-haiku",
+      "gas": 0.3,
+      "muster": "schwarm",
+      "beschreibung": "Massenformatierung, Bulk-Operationen"
+    },
+    "konvoi": {
+      "gang": "claude-sonnet",
+      "gas": 0.5,
+      "muster": "kolonne",
+      "beschreibung": "Sequentielle Verarbeitungs-Pipeline"
+    },
+    "teamfahrt": {
+      "gang": "claude-sonnet",
+      "gas": 0.5,
+      "muster": "team",
+      "beschreibung": "Feature ueber mehrere Dateien/Module"
+    },
+    "langstrecke": {
+      "gang": "claude-opus",
+      "gas": 0.9,
+      "muster": "hybrid",
+      "beschreibung": "Grosse, mehrstufige Aufgaben"
+    },
+    "testfahrt": {
+      "gang": "claude-sonnet",
+      "gas": 0.5,
+      "muster": "schwarm",
+      "beschreibung": "Automatische Test-Generierung"
+    }
+  },
+  "standard": {
+    "gang": "claude-sonnet",
+    "gas": 0.5,
+    "muster": "einzelfahrt"
+  },
+  "erkundungsrate": 0.10,
+  "min_fahrten_fuer_routing": 5
+}

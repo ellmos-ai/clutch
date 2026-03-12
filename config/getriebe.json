@@ -1,0 +1,124 @@
+{
+  "_doc": "Getriebe: Alle verfuegbaren Gaenge (Modelle) aller Provider",
+  "gaenge": {
+    "claude-opus": {
+      "provider": "anthropic",
+      "model_id": "claude-opus-4-6",
+      "gang": 5,
+      "leistung": "max",
+      "kosten_input_1k": 0.015,
+      "kosten_output_1k": 0.075,
+      "staerken": ["architektur", "komplexes_reasoning", "code_review", "multi_step"],
+      "schwaechen": ["kosten", "latenz"],
+      "max_context": 200000
+    },
+    "claude-sonnet": {
+      "provider": "anthropic",
+      "model_id": "claude-sonnet-4-6",
+      "gang": 3,
+      "leistung": "hoch",
+      "kosten_input_1k": 0.003,
+      "kosten_output_1k": 0.015,
+      "staerken": ["ausgewogen", "schnelle_entwicklung", "analyse"],
+      "schwaechen": ["sehr_komplexes_reasoning"],
+      "max_context": 200000
+    },
+    "claude-haiku": {
+      "provider": "anthropic",
+      "model_id": "claude-haiku-4-5-20251001",
+      "gang": 1,
+      "leistung": "basis",
+      "kosten_input_1k": 0.001,
+      "kosten_output_1k": 0.005,
+      "staerken": ["speed", "kosten", "mikrotasks", "formatierung"],
+      "schwaechen": ["komplexe_tasks", "architektur"],
+      "max_context": 200000
+    },
+    "gemini-pro": {
+      "provider": "google",
+      "model_id": "gemini-2.5-pro",
+      "gang": 4,
+      "leistung": "hoch",
+      "kosten_input_1k": 0.00125,
+      "kosten_output_1k": 0.01,
+      "staerken": ["reasoning", "grosse_kontexte", "multimodal"],
+      "schwaechen": ["code_ausfuehrung"],
+      "max_context": 1000000
+    },
+    "gemini-flash": {
+      "provider": "google",
+      "model_id": "gemini-2.5-flash",
+      "gang": 2,
+      "leistung": "mittel",
+      "kosten_input_1k": 0.00015,
+      "kosten_output_1k": 0.0006,
+      "staerken": ["speed", "kosten", "bulk"],
+      "schwaechen": ["tiefe_analyse"],
+      "max_context": 1000000
+    },
+    "ollama-qwen3": {
+      "provider": "ollama",
+      "model_id": "qwen3:4b",
+      "gang": 1,
+      "leistung": "basis",
+      "kosten_input_1k": 0.0,
+      "kosten_output_1k": 0.0,
+      "staerken": ["kostenlos", "lokal", "datenschutz"],
+      "schwaechen": ["qualitaet", "kontextlaenge"],
+      "max_context": 32000,
+      "endpoint": "http://localhost:11434"
+    },
+    "ollama-mistral": {
+      "provider": "ollama",
+      "model_id": "mistral:latest",
+      "gang": 2,
+      "leistung": "mittel",
+      "kosten_input_1k": 0.0,
+      "kosten_output_1k": 0.0,
+      "staerken": ["kostenlos", "lokal", "europaeisch"],
+      "schwaechen": ["qualitaet"],
+      "max_context": 32000,
+      "endpoint": "http://localhost:11434"
+    },
+    "claude-code": {
+      "provider": "claude-code",
+      "model_id": "claude-code-session",
+      "gang": 5,
+      "leistung": "max",
+      "kosten_input_1k": 0.0,
+      "kosten_output_1k": 0.0,
+      "_doc": "Claude Code CLI Session -- Fahrer IST das Modell. Hat Zugriff auf Tools (Bash, Read, Write, Agent etc). Kosten laufen ueber Anthropic Max/Pro Plan, nicht API.",
+      "staerken": ["tool_use", "code_ausfuehrung", "dateisystem", "git", "multi_agent", "kontext_bewusstsein"],
+      "schwaechen": ["kein_api_zugang", "session_gebunden"],
+      "max_context": 200000
+    }
+  },
+  "provider": {
+    "anthropic": {
+      "typ": "api",
+      "auth": "ANTHROPIC_API_KEY",
+      "basis_url": "https://api.anthropic.com"
+    },
+    "google": {
+      "typ": "api",
+      "auth": "GOOGLE_API_KEY",
+      "basis_url": "https://generativelanguage.googleapis.com"
+    },
+    "ollama": {
+      "typ": "lokal",
+      "auth": null,
+      "basis_url": "http://localhost:11434"
+    },
+    "claude-code": {
+      "typ": "session",
+      "auth": null,
+      "_doc": "Claude Code CLI -- kein API-Zugang, sondern laufende Session mit Tool-Zugriff",
+      "basis_url": null
+    }
+  },
+  "fahrer_optionen": {
+    "_doc": "Welche Modelle als Fahrer (Orchestrator) fungieren koennen. claude-code = die aktuelle Claude Code Session (z.B. du selbst)",
+    "standard": "claude-code",
+    "alternativen": ["claude-opus", "claude-sonnet", "gemini-pro"]
+  }
+}

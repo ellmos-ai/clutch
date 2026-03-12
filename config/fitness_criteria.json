@@ -1,0 +1,33 @@
+{
+  "criteria": {
+    "efficiency": {
+      "weight": 0.30,
+      "description": "Token-Effizienz (useful_output / total_tokens)"
+    },
+    "quality": {
+      "weight": 0.35,
+      "description": "Erfolgsrate + geringe Korrekturen"
+    },
+    "speed": {
+      "weight": 0.20,
+      "description": "Latenz relativ zur Baseline"
+    },
+    "reliability": {
+      "weight": 0.15,
+      "description": "Geringe Fehler- und Retry-Rate"
+    }
+  },
+  "anomaly_thresholds": {
+    "overkill_score": 5.0,
+    "token_explosion_factor": 2.0,
+    "consecutive_failures": 3,
+    "errors_per_hour_circuit_break": 5,
+    "z_score_anomaly": 2.5
+  },
+  "budget_zones": {
+    "green":  {"min_pct": 0,  "max_pct": 30, "allowed_tiers": [1, 2, 3]},
+    "yellow": {"min_pct": 30, "max_pct": 60, "allowed_tiers": [1, 2]},
+    "orange": {"min_pct": 60, "max_pct": 80, "allowed_tiers": [1]},
+    "red":    {"min_pct": 80, "max_pct": 100, "allowed_tiers": []}
+  }
+}

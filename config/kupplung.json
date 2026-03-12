@@ -1,0 +1,31 @@
+{
+  "fahrer": {
+    "standard_modell": "claude-opus",
+    "gas_standard": 0.5,
+    "einfache_strecken_bypass": true,
+    "alle_entscheidungen_loggen": true,
+    "eskalation_erlaubt": true
+  },
+  "fahrschule": {
+    "min_fahrten_phase1": 200,
+    "erkundungsrate": 0.10,
+    "erkundungs_decay": 0.995,
+    "min_erkundungsrate": 0.02,
+    "decay_rate_taeglich": 0.95,
+    "decay_max_alter_tage": 30
+  },
+  "schwarm": {
+    "max_parallele_worker": 10,
+    "worker_timeout_sekunden": 120
+  },
+  "tankuhr": {
+    "tages_limit_usd": 50.0,
+    "monats_limit_usd": 500.0,
+    "warn_schwelle_prozent": 80
+  },
+  "bach_bridge": {
+    "aktiv": false,
+    "bach_pfad": null,
+    "bach_db_nutzen": false
+  }
+}
