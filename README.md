@@ -81,7 +81,7 @@ The entire system follows a **car/driving metaphor**:
 ## Installation
 
 ```bash
-git clone https://github.com/lukisch/clutch.git
+git clone https://github.com/ellmos-ai/clutch.git
 cd clutch
 pip install -e .
 ```

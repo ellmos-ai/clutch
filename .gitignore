@@ -35,6 +35,10 @@ data/
 Thumbs.db
 desktop.ini
 
+# BACH internal docs
+BACH_EINHÄNGEPUNKTE.md
+BACH_INTEGRATION.md
+
 # Distribution
 *.tar.gz
 *.zip
