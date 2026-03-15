@@ -196,3 +196,68 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 ## License
 
 MIT License. See [LICENSE](LICENSE) for details.
+
+---
+
+## Deutsch
+
+**clutch** (deutsch: *Kupplung*) ist eine provider-neutrale LLM-Orchestration-Engine. Das gesamte System nutzt eine durchgaengige **Auto-Metapher** als Domain Language -- die deutschen Code-Identifier sind bewusst gewaehlt.
+
+### Glossar: Code-Begriffe
+
+| Deutsch (Code) | Englisch | Beschreibung |
+|----------------|----------|--------------|
+| **Fahrer** | Driver | Der Orchestrator -- waehlt Modell, Reasoning-Level und Ausfuehrungsmuster |
+| **Strecke** | Road / Route | Der Task bzw. die Aufgabe, die analysiert und klassifiziert wird |
+| **Getriebe** | Gearbox | Die Modell-Registry -- verwaltet alle Gaenge ueber alle Provider |
+| **Gang** | Gear | Ein konkretes LLM-Modell (G1=Haiku bis G5=Opus) |
+| **Kupplung** | Clutch | Der Schaltmechanismus -- entscheidet wann und wie zwischen Modellen gewechselt wird |
+| **Gas / Bremse** | Throttle / Brake | Reasoning-Level: Gas = gruendlicher (mehr Tokens), Bremse = direkter (weniger) |
+| **MotorBlock** | Engine Block | Die einheitliche API-Aufrufschicht fuer alle Provider |
+| **Tacho** | Speedometer | Metriken-Erfassung waehrend der Task-Ausfuehrung |
+| **Tankuhr** | Fuel Gauge | Budget-Tracking mit 4 Zonen (gruen/gelb/orange/rot) |
+| **Bordcomputer** | Onboard Computer | Health-Monitor mit Circuit-Breaker und Anomalie-Erkennung |
+| **Fahrtenbuch** | Trip Log | SQLite-basierter Metrik-Speicher fuer alle Fahrten |
+| **Fahrschule** | Driving School | Lernengine -- optimiert das Routing durch Fitness-Scoring |
+
+### Streckentypen (Task-Klassifikation)
+
+| Strecke | Schwierigkeit | Beispiel |
+|---------|--------------|----------|
+| **Feldweg** | Trivial | Typos, Formatierung, Kommentare |
+| **Landstrasse** | Standard | Feature-Entwicklung, einfaches Refactoring |
+| **Bundesstrasse** | Mittel | Bugfixes, Debugging |
+| **Autobahn** | Hoch | Architektur-Design, System-Migration |
+| **Pruefstrecke** | Review | Code-Review, Qualitaetspruefung |
+| **Rallye** | Bulk | Massenformatierung, Batch-Operationen |
+| **Konvoi** | Pipeline | Sequentielle Verarbeitung (Output N -> Input N+1) |
+| **Teamfahrt** | Parallel | Multi-File-Features, parallele Spezialisten |
+| **Langstrecke** | Komplex | Grosse mehrstufige Projekte (Hybrid-Muster) |
+| **Testfahrt** | Tests | Automatische Test-Generierung |
+
+### Ausfuehrungsmuster
+
+| Muster | Metapher | Beschreibung |
+|--------|----------|--------------|
+| **Einzelfahrt** | Ein Auto | Ein Modell, ein Task |
+| **Kolonne** | Fahrzeugkolonne | Sequentiell -- Output von Schritt N wird Input fuer N+1 |
+| **Team** | Fahrgemeinschaft | Parallel -- spezialisierte Worker, Ergebnisse zusammengefuehrt |
+| **Schwarm** | Autobahnverkehr | Massiv parallel -- viele guenstige Worker fuer Mikrotasks |
+| **Hybrid** | Rallye mit Etappen | Kombination aus Kolonne- und Team-Phasen |
+
+### Kurzanleitung
+
+```python
+from kupplung import Fahrer
+
+fahrer = Fahrer()
+
+ergebnis = fahrer.fahren(
+    "Fix den Bug in der Auth-Komponente",
+    handler=mein_handler,
+)
+
+print(ergebnis.config.gang.name)    # "claude-sonnet"
+print(ergebnis.config.gas.wert)     # 0.7
+print(fahrer.status()["tankuhr"])   # Budget-Stand
+```

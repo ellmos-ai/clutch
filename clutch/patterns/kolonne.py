@@ -10,7 +10,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Any, Callable
 
-from kupplung.kupplung import FahrtConfig
+from clutch.kupplung import FahrtConfig
 
 
 @dataclass

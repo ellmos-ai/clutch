@@ -1,9 +1,9 @@
 """Fahrt-Muster: Kolonne (sequentiell), Team (parallel), Schwarm (massiv), Hybrid (kombiniert)."""
 
-from kupplung.patterns.kolonne import Kolonne, KolonnenSchritt
-from kupplung.patterns.team import TeamFahrt, TeamMitglied
-from kupplung.patterns.schwarm import Schwarm, SchwarmAufgabe
-from kupplung.patterns.hybrid import HybridFahrt, HybridErgebnis
+from clutch.patterns.kolonne import Kolonne, KolonnenSchritt
+from clutch.patterns.team import TeamFahrt, TeamMitglied
+from clutch.patterns.schwarm import Schwarm, SchwarmAufgabe
+from clutch.patterns.hybrid import HybridFahrt, HybridErgebnis
 
 __all__ = [
     "Kolonne", "KolonnenSchritt",

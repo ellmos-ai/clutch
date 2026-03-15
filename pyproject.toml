@@ -35,4 +35,4 @@ Repository = "https://github.com/ellmos-ai/clutch"
 Issues = "https://github.com/ellmos-ai/clutch/issues"
 
 [tool.setuptools.packages.find]
-include = ["kupplung*"]
+include = ["clutch*"]

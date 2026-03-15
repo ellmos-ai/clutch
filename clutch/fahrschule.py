@@ -12,8 +12,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
-from kupplung.fahrtenbuch import Fahrtenbuch, FahrtStatistik
-from kupplung.kupplung import Kupplung
+from clutch.fahrtenbuch import Fahrtenbuch, FahrtStatistik
+from clutch.kupplung import Kupplung
 
 
 @dataclass

@@ -19,8 +19,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from kupplung.fahrer import Fahrer, FahrtConfig
-from kupplung.motorblock import MotorBlock, MotorErgebnis
+from clutch.fahrer import Fahrer, FahrtConfig
+from clutch.motorblock import MotorBlock, MotorErgebnis
 
 
 # ANSI-Farben
@@ -231,12 +231,12 @@ def live_modus(fahrer: Fahrer, prompt: str = None):
 
 def hybrid_demo(fahrer: Fahrer):
     """Demonstriert das Hybrid-Muster (Kolonne + Team)."""
-    from kupplung.patterns.hybrid import HybridFahrt
-    from kupplung.patterns.kolonne import KolonnenSchritt
-    from kupplung.patterns.team import TeamMitglied
-    from kupplung.kupplung import FahrtConfig
-    from kupplung.getriebe import Gang
-    from kupplung.gas_bremse import GasBremse
+    from clutch.patterns.hybrid import HybridFahrt
+    from clutch.patterns.kolonne import KolonnenSchritt
+    from clutch.patterns.team import TeamMitglied
+    from clutch.kupplung import FahrtConfig
+    from clutch.getriebe import Gang
+    from clutch.gas_bremse import GasBremse
 
     print(f"\n{C.BOLD}{'=' * 60}")
     print(f"  HYBRID-FAHRT Demo")

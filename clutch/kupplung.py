@@ -23,9 +23,9 @@ from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Optional
 
-from kupplung.strecke import StreckenProfil, StreckenTyp, Tempo
-from kupplung.getriebe import Getriebe, Gang
-from kupplung.gas_bremse import GasBremse, GasStellung
+from clutch.strecke import StreckenProfil, StreckenTyp, Tempo
+from clutch.getriebe import Getriebe, Gang
+from clutch.gas_bremse import GasBremse, GasStellung
 
 
 @dataclass

@@ -106,7 +106,7 @@ class Fahrtenbuch:
 
     def __init__(self, db_path: Optional[Path] = None):
         if db_path is None:
-            db_path = Path(__file__).parent.parent / "data" / "kupplung.db"
+            db_path = Path(__file__).parent.parent / "data" / "clutch.db"
         self.db_path = db_path
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._init_db()

@@ -21,16 +21,16 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Optional
 
-from kupplung.strecke import StreckenAnalyse, StreckenProfil
-from kupplung.getriebe import Getriebe, Gang
-from kupplung.kupplung import Kupplung, FahrtConfig
-from kupplung.fahrtenbuch import Fahrtenbuch
-from kupplung.bordcomputer import Bordcomputer
-from kupplung.tankuhr import Tankuhr
-from kupplung.tacho import Tacho
-from kupplung.fahrschule import Fahrschule
+from clutch.strecke import StreckenAnalyse, StreckenProfil
+from clutch.getriebe import Getriebe, Gang
+from clutch.kupplung import Kupplung, FahrtConfig
+from clutch.fahrtenbuch import Fahrtenbuch
+from clutch.bordcomputer import Bordcomputer
+from clutch.tankuhr import Tankuhr
+from clutch.tacho import Tacho
+from clutch.fahrschule import Fahrschule
 
-logger = logging.getLogger("kupplung")
+logger = logging.getLogger("clutch")
 
 
 @dataclass
@@ -108,7 +108,7 @@ class Fahrer:
         if config.gang.name in system_status.gesperrte_modelle:
             runter = self.getriebe.naechster_gang_runter(config.gang.name)
             if runter:
-                from kupplung.gas_bremse import GasBremse
+                from clutch.gas_bremse import GasBremse
                 config = FahrtConfig(
                     gang=runter,
                     gas=config.gas,

@@ -14,11 +14,11 @@ Auto-Metapher:
 
 __version__ = "0.3.0"
 
-from kupplung.fahrer import Fahrer
-from kupplung.strecke import StreckenAnalyse, StreckenTyp
-from kupplung.getriebe import Getriebe, Gang
-from kupplung.kupplung import Kupplung
-from kupplung.motorblock import MotorBlock, MotorErgebnis
+from clutch.fahrer import Fahrer
+from clutch.strecke import StreckenAnalyse, StreckenTyp
+from clutch.getriebe import Getriebe, Gang
+from clutch.kupplung import Kupplung
+from clutch.motorblock import MotorBlock, MotorErgebnis
 
 __all__ = [
     "Fahrer", "StreckenAnalyse", "StreckenTyp",

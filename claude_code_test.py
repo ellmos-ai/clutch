@@ -18,9 +18,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from kupplung.fahrer import Fahrer, FahrtConfig, FahrtErgebnis
-from kupplung.strecke import StreckenAnalyse, StreckenTyp
-from kupplung.getriebe import Getriebe
+from clutch.fahrer import Fahrer, FahrtConfig, FahrtErgebnis
+from clutch.strecke import StreckenAnalyse, StreckenTyp
+from clutch.getriebe import Getriebe
 
 
 class C:

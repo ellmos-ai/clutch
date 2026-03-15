@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
-from kupplung.getriebe import Gang
+from clutch.getriebe import Gang
 
 
 @dataclass

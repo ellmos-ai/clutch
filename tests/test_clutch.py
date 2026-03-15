@@ -6,18 +6,18 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from kupplung.strecke import StreckenAnalyse, StreckenTyp, Tempo
-from kupplung.getriebe import Getriebe, Gang
-from kupplung.gas_bremse import GasBremse
-from kupplung.kupplung import Kupplung, FahrtConfig
-from kupplung.fahrtenbuch import Fahrtenbuch, FahrtEintrag
-from kupplung.bordcomputer import Bordcomputer
-from kupplung.tankuhr import Tankuhr
-from kupplung.tacho import Tacho
-from kupplung.fahrer import Fahrer
-from kupplung.patterns.kolonne import Kolonne, KolonnenSchritt
-from kupplung.patterns.team import TeamFahrt, TeamMitglied
-from kupplung.patterns.schwarm import Schwarm, SchwarmAufgabe
+from clutch.strecke import StreckenAnalyse, StreckenTyp, Tempo
+from clutch.getriebe import Getriebe, Gang
+from clutch.gas_bremse import GasBremse
+from clutch.kupplung import Kupplung, FahrtConfig
+from clutch.fahrtenbuch import Fahrtenbuch, FahrtEintrag
+from clutch.bordcomputer import Bordcomputer
+from clutch.tankuhr import Tankuhr
+from clutch.tacho import Tacho
+from clutch.fahrer import Fahrer
+from clutch.patterns.kolonne import Kolonne, KolonnenSchritt
+from clutch.patterns.team import TeamFahrt, TeamMitglied
+from clutch.patterns.schwarm import Schwarm, SchwarmAufgabe
 
 
 def test_streckenanalyse():
@@ -70,7 +70,7 @@ def test_getriebe():
     # Standard-Fahrer
     fahrer = g.standard_fahrer()
     assert fahrer is not None
-    assert fahrer.name == "claude-opus"
+    assert fahrer.name == "claude-code"
 
     print(f"[OK] Getriebe ({len(g)} Gaenge: {g})")
 
@@ -226,7 +226,7 @@ def test_tankuhr():
 
 
 def test_kolonne():
-    from kupplung.gas_bremse import GasBremse
+    from clutch.gas_bremse import GasBremse
     pedal = GasBremse()
     g = Getriebe()
     haiku = g.gang("claude-haiku")
@@ -251,7 +251,7 @@ def test_kolonne():
 
 
 def test_team():
-    from kupplung.gas_bremse import GasBremse
+    from clutch.gas_bremse import GasBremse
     g = Getriebe()
     sonnet = g.gang("claude-sonnet")
     gas = GasBremse().stellung(0.5)

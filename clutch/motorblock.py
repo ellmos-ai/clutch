@@ -22,10 +22,10 @@ import time
 from dataclasses import dataclass
 from typing import Any, Optional
 
-from kupplung.kupplung import FahrtConfig
-from kupplung.gas_bremse import GasBremse, GasStellung
+from clutch.kupplung import FahrtConfig
+from clutch.gas_bremse import GasBremse, GasStellung
 
-logger = logging.getLogger("kupplung.motorblock")
+logger = logging.getLogger("clutch.motorblock")
 
 
 # ---------------------------------------------------------------------------

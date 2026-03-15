@@ -20,8 +20,8 @@ from urllib.error import URLError
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from kupplung.fahrer import Fahrer, FahrtConfig
-from kupplung.getriebe import Gang
+from clutch.fahrer import Fahrer, FahrtConfig
+from clutch.getriebe import Gang
 
 
 class C:

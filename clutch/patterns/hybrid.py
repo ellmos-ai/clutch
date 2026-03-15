@@ -12,9 +12,9 @@ import time
 from dataclasses import dataclass, field
 from typing import Any, Callable, Optional
 
-from kupplung.kupplung import FahrtConfig
-from kupplung.patterns.kolonne import Kolonne, KolonnenSchritt
-from kupplung.patterns.team import TeamFahrt, TeamMitglied
+from clutch.kupplung import FahrtConfig
+from clutch.patterns.kolonne import Kolonne, KolonnenSchritt
+from clutch.patterns.team import TeamFahrt, TeamMitglied
 
 
 @dataclass

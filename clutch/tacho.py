@@ -12,8 +12,8 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import Optional
 
-from kupplung.fahrtenbuch import Fahrtenbuch, FahrtEintrag
-from kupplung.kupplung import FahrtConfig
+from clutch.fahrtenbuch import Fahrtenbuch, FahrtEintrag
+from clutch.kupplung import FahrtConfig
 
 
 @dataclass
