@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="logo.jpg" alt="clutch logo" width="400">
+</p>
+
 # clutch
 
 > Provider-neutral LLM orchestration engine with auto-learning
