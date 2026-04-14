@@ -1,0 +1,25 @@
+# clutch - Provider-Neutral LLM Orchestration Engine
+
+> clutch (German: Kupplung) uses a driving metaphor to intelligently route tasks to optimal LLM models across providers. It analyzes task complexity, selects the right model and reasoning level, tracks budgets with a four-zone fuel gauge, and learns from experience via fitness scoring and epsilon-greedy exploration.
+
+clutch is the routing layer of the ellmos family (Extra Large Language Model Operating Systems): a provider-neutral orchestration engine that sits in front of Anthropic (Claude), Google (Gemini), Ollama (local), and Claude Code. Every concept is mapped onto a car metaphor -- Fahrer (driver/orchestrator), Getriebe (gearbox/model registry, gears G1-G5 from Haiku to Opus), Gas/Bremse (throttle, reasoning level 0-100%), Kupplung (clutch, model switching), Tankuhr (fuel gauge, budget tracking), Fahrtenbuch (trip log, SQLite metrics), Fahrschule (learning engine). Current version v0.3.0. Python 3.10+, MIT.
+
+Execution patterns: single (one task), convoy (chain), team (parallel workers), swarm (bulk). Road types classify tasks by difficulty: Feldweg (trivial, Haiku), Landstrasse (standard, Sonnet), Autobahn (architecture, Opus), Rallye (bulk, Haiku swarm), Konvoi (pipeline, Sonnet chain), Langstrecke (complex, Opus hybrid). Budget tracking uses four zones: green / yellow / orange / red with daily and monthly limits. Circuit breakers, latency tracking, and provider failover are built in (Bordcomputer).
+
+## Docs
+
+- [README](https://github.com/ellmos-ai/clutch/blob/main/README.md): Overview, architecture, road types, installation, quickstart
+- [LICENSE](https://github.com/ellmos-ai/clutch/blob/main/LICENSE): MIT license text
+
+## ellmos family (related projects)
+
+- [USMC](https://github.com/ellmos-ai/usmc): Shared memory primitive (Tier 1)
+- [Rinnsal](https://github.com/ellmos-ai/rinnsal): Lightweight agent infrastructure (Tier 2)
+- [BACH](https://github.com/ellmos-ai/bach): Full text-based OS for LLMs (Tier 3)
+- [Gardener](https://github.com/ellmos-ai/gardener): Database-based OS counterpart
+- [MarbleRun / llmauto](https://github.com/ellmos-ai/MarbleRun): Chain-execution framework
+- [Skills](https://github.com/ellmos-ai/skills): Portable skill library
+
+## Optional
+
+- [GitHub Issues](https://github.com/ellmos-ai/clutch/issues): Bug reports and feature requests
