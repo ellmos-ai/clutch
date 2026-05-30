@@ -66,7 +66,7 @@ class Getriebe:
     """
 
     def __init__(self, config_dir: Optional[Path] = None):
-        self.config_dir = config_dir or Path(__file__).parent.parent / "config"
+        self.config_dir = config_dir or Path(__file__).parent / "config"
         self._gaenge: dict[str, Gang] = {}
         self._provider: dict[str, ProviderInfo] = {}
         self._fahrer_optionen: dict = {}

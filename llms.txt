@@ -8,8 +8,9 @@ Execution patterns: single (one task), convoy (chain), team (parallel workers), 
 
 ## Docs
 
-- [README](https://github.com/ellmos-ai/clutch/blob/main/README.md): Overview, architecture, road types, installation, quickstart
-- [LICENSE](https://github.com/ellmos-ai/clutch/blob/main/LICENSE): MIT license text
+- [README](https://github.com/ellmos-ai/clutch/blob/master/README.md): Overview, architecture, road types, installation, quickstart
+- [GLOSSARY](https://github.com/ellmos-ai/clutch/blob/master/GLOSSARY.md): German automotive code terms mapped to English
+- [LICENSE](https://github.com/ellmos-ai/clutch/blob/master/LICENSE): MIT license text
 
 ## ellmos family (related projects)
 

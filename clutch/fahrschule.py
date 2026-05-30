@@ -105,7 +105,7 @@ class Fahrschule:
         self.kupplung = kupplung
         self.bewerter = FitnessBewerter()
 
-        config_dir = config_dir or Path(__file__).parent.parent / "config"
+        config_dir = config_dir or Path(__file__).parent / "config"
         config = self._load_config(config_dir)
 
         self.min_fahrten = config.get("min_fahrten_phase1", 200)

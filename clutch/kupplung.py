@@ -79,7 +79,7 @@ class Kupplung:
     ):
         self.getriebe = getriebe
         self.pedal = GasBremse()
-        self.config_dir = config_dir or Path(__file__).parent.parent / "config"
+        self.config_dir = config_dir or Path(__file__).parent / "config"
         self._strecken_config = self._load_strecken()
         self._standard = self._strecken_config.get("standard", {})
         self._erkundungsrate = self._strecken_config.get("erkundungsrate", 0.10)

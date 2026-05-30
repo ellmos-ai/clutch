@@ -34,7 +34,7 @@ class Tankuhr:
     """Trackt Kosten ueber alle Provider."""
 
     def __init__(self, config_dir: Optional[Path] = None):
-        config_dir = config_dir or Path(__file__).parent.parent / "config"
+        config_dir = config_dir or Path(__file__).parent / "config"
         config = self._load_config(config_dir)
 
         self.tages_limit = config.get("tages_limit_usd", 50.0)

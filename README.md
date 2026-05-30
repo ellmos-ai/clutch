@@ -101,7 +101,7 @@ pip install -e .
 ## Quick Start
 
 ```python
-from kupplung import Fahrer
+from clutch import Fahrer
 
 # Create a driver (uses all configured providers)
 fahrer = Fahrer()
@@ -128,7 +128,9 @@ fahrer.trainieren()
 
 ## Configuration
 
-All config lives in `config/`:
+Default config lives in `clutch/config/` so editable installs and wheels use the
+same bundled routing defaults. Pass a custom `base_dir` with its own `config/`
+folder to `Fahrer` if you want project-specific overrides.
 
 | File | Purpose |
 |------|---------|
@@ -165,37 +167,52 @@ All config lives in `config/`:
 ## Project Structure
 
 ```
-Kupplung/
-├── kupplung/
-│   ├── __init__.py
-│   ├── fahrer.py          # Orchestrator
-│   ├── strecke.py         # Task analysis
-│   ├── getriebe.py        # Model registry
-│   ├── kupplung.py        # Model switching
-│   ├── motorblock.py      # Unified API layer
-│   ├── gas_bremse.py      # Reasoning level
-│   ├── fahrtenbuch.py     # SQLite metrics
-│   ├── bordcomputer.py    # Health monitor
-│   ├── tankuhr.py         # Budget tracking
-│   ├── tacho.py           # Metrics
-│   ├── fahrschule.py      # Learning engine
-│   └── patterns/
-│       ├── kolonne.py     # Chain pattern
-│       ├── team.py        # Parallel pattern
-│       └── schwarm.py     # Swarm pattern
-├── config/
-│   ├── kupplung.json
-│   ├── getriebe.json
-│   ├── strecken.json
-│   └── fitness_criteria.json
-├── tests/
-│   └── test_kupplung.py
-└── data/                  # Runtime data (not tracked)
+clutch/
++-- clutch/
+|   +-- __init__.py
+|   +-- fahrer.py          # Orchestrator
+|   +-- strecke.py         # Task analysis
+|   +-- getriebe.py        # Model registry
+|   +-- kupplung.py        # Model switching
+|   +-- motorblock.py      # Unified API layer
+|   +-- gas_bremse.py      # Reasoning level
+|   +-- fahrtenbuch.py     # SQLite metrics
+|   +-- bordcomputer.py    # Health monitor
+|   +-- tankuhr.py         # Budget tracking
+|   +-- tacho.py           # Metrics
+|   +-- fahrschule.py      # Learning engine
+|   +-- patterns/
+|       +-- kolonne.py     # Chain pattern
+|       +-- team.py        # Parallel pattern
+|       +-- schwarm.py     # Swarm pattern
+|       +-- hybrid.py      # Hybrid pattern
+|   +-- config/
+|       +-- kupplung.json
+|       +-- getriebe.json
+|       +-- strecken.json
+|       +-- fitness_criteria.json
++-- tests/
+|   +-- test_clutch.py
+|   +-- test_learning.py
+|   +-- test_patterns.py
+|   +-- test_route.py
++-- data/                  # Runtime data (not tracked)
 ```
+
+## Tests
+
+```bash
+pip install -e . pytest
+pytest -q
+```
+
+Pytest is configured to collect only `tests/`. Root-level smoke scripts such as
+`demo.py`, `live_test.py`, and `claude_code_test.py` are manual provider checks.
 
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+For the German automotive API terms, see [GLOSSARY.md](GLOSSARY.md).
 
 ## License
 
@@ -205,23 +222,23 @@ MIT License. See [LICENSE](LICENSE) for details.
 
 ## Deutsch
 
-**clutch** (deutsch: *Kupplung*) ist eine provider-neutrale LLM-Orchestration-Engine. Das gesamte System nutzt eine durchgaengige **Auto-Metapher** als Domain Language -- die deutschen Code-Identifier sind bewusst gewaehlt.
+**clutch** (deutsch: *Kupplung*) ist eine provider-neutrale LLM-Orchestration-Engine. Das gesamte System nutzt eine durchgängige **Auto-Metapher** als Domain Language -- die deutschen Code-Identifier sind bewusst gewählt.
 
 ### Glossar: Code-Begriffe
 
 | Deutsch (Code) | Englisch | Beschreibung |
 |----------------|----------|--------------|
-| **Fahrer** | Driver | Der Orchestrator -- waehlt Modell, Reasoning-Level und Ausfuehrungsmuster |
+| **Fahrer** | Driver | Der Orchestrator -- wählt Modell, Reasoning-Level und Ausführungsmuster |
 | **Strecke** | Road / Route | Der Task bzw. die Aufgabe, die analysiert und klassifiziert wird |
-| **Getriebe** | Gearbox | Die Modell-Registry -- verwaltet alle Gaenge ueber alle Provider |
+| **Getriebe** | Gearbox | Die Modell-Registry -- verwaltet alle Gänge über alle Provider |
 | **Gang** | Gear | Ein konkretes LLM-Modell (G1=Haiku bis G5=Opus) |
 | **Kupplung** | Clutch | Der Schaltmechanismus -- entscheidet wann und wie zwischen Modellen gewechselt wird |
-| **Gas / Bremse** | Throttle / Brake | Reasoning-Level: Gas = gruendlicher (mehr Tokens), Bremse = direkter (weniger) |
-| **MotorBlock** | Engine Block | Die einheitliche API-Aufrufschicht fuer alle Provider |
-| **Tacho** | Speedometer | Metriken-Erfassung waehrend der Task-Ausfuehrung |
-| **Tankuhr** | Fuel Gauge | Budget-Tracking mit 4 Zonen (gruen/gelb/orange/rot) |
+| **Gas / Bremse** | Throttle / Brake | Reasoning-Level: Gas = gründlicher (mehr Tokens), Bremse = direkter (weniger) |
+| **MotorBlock** | Engine Block | Die einheitliche API-Aufrufschicht für alle Provider |
+| **Tacho** | Speedometer | Metriken-Erfassung während der Task-Ausführung |
+| **Tankuhr** | Fuel Gauge | Budget-Tracking mit 4 Zonen (grün/gelb/orange/rot) |
 | **Bordcomputer** | Onboard Computer | Health-Monitor mit Circuit-Breaker und Anomalie-Erkennung |
-| **Fahrtenbuch** | Trip Log | SQLite-basierter Metrik-Speicher fuer alle Fahrten |
+| **Fahrtenbuch** | Trip Log | SQLite-basierter Metrik-Speicher für alle Fahrten |
 | **Fahrschule** | Driving School | Lernengine -- optimiert das Routing durch Fitness-Scoring |
 
 ### Streckentypen (Task-Klassifikation)
@@ -232,27 +249,27 @@ MIT License. See [LICENSE](LICENSE) for details.
 | **Landstrasse** | Standard | Feature-Entwicklung, einfaches Refactoring |
 | **Bundesstrasse** | Mittel | Bugfixes, Debugging |
 | **Autobahn** | Hoch | Architektur-Design, System-Migration |
-| **Pruefstrecke** | Review | Code-Review, Qualitaetspruefung |
+| **Prüfstrecke** | Review | Code-Review, Qualitätsprüfung |
 | **Rallye** | Bulk | Massenformatierung, Batch-Operationen |
 | **Konvoi** | Pipeline | Sequentielle Verarbeitung (Output N -> Input N+1) |
 | **Teamfahrt** | Parallel | Multi-File-Features, parallele Spezialisten |
-| **Langstrecke** | Komplex | Grosse mehrstufige Projekte (Hybrid-Muster) |
+| **Langstrecke** | Komplex | Große mehrstufige Projekte (Hybrid-Muster) |
 | **Testfahrt** | Tests | Automatische Test-Generierung |
 
-### Ausfuehrungsmuster
+### Ausführungsmuster
 
 | Muster | Metapher | Beschreibung |
 |--------|----------|--------------|
 | **Einzelfahrt** | Ein Auto | Ein Modell, ein Task |
-| **Kolonne** | Fahrzeugkolonne | Sequentiell -- Output von Schritt N wird Input fuer N+1 |
-| **Team** | Fahrgemeinschaft | Parallel -- spezialisierte Worker, Ergebnisse zusammengefuehrt |
-| **Schwarm** | Autobahnverkehr | Massiv parallel -- viele guenstige Worker fuer Mikrotasks |
+| **Kolonne** | Fahrzeugkolonne | Sequentiell -- Output von Schritt N wird Input für N+1 |
+| **Team** | Fahrgemeinschaft | Parallel -- spezialisierte Worker, Ergebnisse zusammengeführt |
+| **Schwarm** | Autobahnverkehr | Massiv parallel -- viele günstige Worker für Mikrotasks |
 | **Hybrid** | Rallye mit Etappen | Kombination aus Kolonne- und Team-Phasen |
 
 ### Kurzanleitung
 
 ```python
-from kupplung import Fahrer
+from clutch import Fahrer
 
 fahrer = Fahrer()
 

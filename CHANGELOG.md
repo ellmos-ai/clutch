@@ -1,27 +1,39 @@
 # Changelog
 
-Alle wesentlichen Aenderungen an **clutch** werden hier dokumentiert.
+Alle wesentlichen Änderungen an **clutch** werden hier dokumentiert.
 
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased]
+
+### Added
+- `GLOSSARY.md` für die deutschen Code-Begriffe der Auto-Metapher.
+- GitHub Actions Test-Workflow für Python 3.10 bis 3.12.
+
+### Changed
+- README-Quickstart, Projektstruktur und Testanleitung an das tatsächliche Paket `clutch` angepasst.
+- Community-Workflows auf aktuelle Actions-Versionen aktualisiert.
+- Default-Konfiguration in `clutch/config/` paketiert, damit Wheel-Installationen die Routing-Defaults enthalten.
+- Pytest-Konfiguration auf `tests/` begrenzt, damit manuelle Provider-Smokes im Repo-Root nicht als Unit-Tests gesammelt werden.
+
 ## [0.3.0] -- 2026-03-12
 
-Erster oeffentlicher Release als `ellmos-ai/clutch`.
+Erster öffentlicher Release als `ellmos-ai/clutch`.
 
 ### Added
 - Provider-neutrale LLM-Orchestration mit Auto-Metapher (Fahrer, Getriebe, Kupplung, etc.)
 - Multi-Provider-Support: Anthropic (Claude), Google (Gemini), Ollama (lokal), Claude Code
 - Streckenanalyse (Task-Klassifikation) mit 10 Streckentypen (Feldweg bis Langstrecke)
-- Getriebe: Modell-Registry mit 8 vordefinierten Gaengen (G1--G5)
+- Getriebe: Modell-Registry mit 8 vordefinierten Gängen (G1--G5)
 - Kupplung: Automatischer Modellwechsel basierend auf Strecke, Budget und Health
 - Gas/Bremse: Reasoning-Level-Steuerung (0%--100%)
 - Tankuhr: Budget-Tracking mit 4-Zonen-System (green/yellow/orange/red)
 - Bordcomputer: Health-Monitor mit Circuit-Breaker pro Modell
 - Fahrtenbuch: SQLite-basierte Metrik-Speicherung
 - Fahrschule: Lernengine mit Epsilon-Greedy Exploration und Fitness-Scoring
-- Tacho: Metriken-Erfassung waehrend der Laufzeit
+- Tacho: Metriken-Erfassung während der Laufzeit
 - Execution Patterns: Einzelfahrt, Kolonne (Chain), Team (Parallel), Schwarm (Bulk), Hybrid
 - JSON-basierte Konfiguration (getriebe.json, strecken.json, kupplung.json, fitness_criteria.json)
 - 13 Unit-Tests (test_kupplung.py)
@@ -36,4 +48,4 @@ Erster oeffentlicher Release als `ellmos-ai/clutch`.
 - Personenbezogene Daten bereinigt
 
 ### Fixed
-- `.gitignore` um BACH-Dateien ergaenzt
+- `.gitignore` um BACH-Dateien ergänzt

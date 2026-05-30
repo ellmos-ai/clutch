@@ -67,7 +67,7 @@ class Fahrer:
     """
 
     def __init__(self, base_dir: Optional[Path] = None):
-        self.base_dir = base_dir or Path(__file__).parent.parent
+        self.base_dir = base_dir or Path(__file__).parent
         config_dir = self.base_dir / "config"
 
         # Kern-Komponenten (Auto-Teile)

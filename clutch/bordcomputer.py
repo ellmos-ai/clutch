@@ -49,7 +49,7 @@ class Bordcomputer:
         self._circuits: dict[str, CircuitState] = {}
         self._fehler_log: dict[str, list[float]] = defaultdict(list)
 
-        config_dir = config_dir or Path(__file__).parent.parent / "config"
+        config_dir = config_dir or Path(__file__).parent / "config"
         schwellwerte = self._load_schwellwerte(config_dir)
 
         self.overkill_schwelle = schwellwerte.get("overkill_score", 5.0)
