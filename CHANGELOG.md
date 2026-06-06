@@ -17,6 +17,7 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1
 - Community-Workflows auf aktuelle Actions-Versionen aktualisiert.
 - Default-Konfiguration in `clutch/config/` paketiert, damit Wheel-Installationen die Routing-Defaults enthalten.
 - Pytest-Konfiguration auf `tests/` begrenzt, damit manuelle Provider-Smokes im Repo-Root nicht als Unit-Tests gesammelt werden.
+- `TODO.md` um einen aktuellen Public-Readiness-Status ergänzt und `.gitignore` um ein explizites `*.pyc`-Muster erweitert.
 
 ## [0.3.0] -- 2026-03-12
 

@@ -16,6 +16,20 @@ provider-neutral LLM orchestration library.
   English descriptions.
 - [ ] Verify current provider model IDs before the next release.
 
+## STATUS
+
+| Category | Status | Notes |
+|----------|--------|-------|
+| Secrets | PASS | Gate check found no secret patterns in tracked files. |
+| Private Data (PII) | PASS | Gate check found no known PII patterns. |
+| .gitignore | PASS | Minimum release entries are present, including explicit `*.pyc`. |
+| Language (English) | PASS | README is English-first; German domain terms are intentional. |
+| BACH Internals | PASS | BACH-internal release blocker files are absent. |
+| Database Files | PASS | No tracked `.db` files. |
+| README.md | PASS | Public README is present. |
+| LICENSE | PASS | MIT license is present. |
+| Overall | READY | Public repository is already published; current follow-ups are non-blocking. |
+
 ## Done
 
 - [x] Removed BACH-internal public-readiness blockers before publication.
