@@ -409,6 +409,14 @@
     <div class="stat-zeile"><span>Kosten heute</span><span class="stat-wert" id="stat-kosten">—</span></div>
     <div class="stat-zeile"><span>Zone</span><span class="stat-wert" id="stat-zone">—</span></div>
   </div>
+
+  <div class="sidebar-section">API-Schlüssel</div>
+  <div id="keys-box">
+    <div id="keys-liste" style="font-size:12px;margin-bottom:6px;"></div>
+    <input type="text" id="key-name" placeholder="z. B. MOONSHOT_API_KEY" style="width:100%;margin-bottom:4px;">
+    <input type="password" id="key-wert" placeholder="Wert (wird nie angezeigt)" style="width:100%;margin-bottom:4px;">
+    <button id="btn-key-speichern" style="width:100%;">Schlüssel speichern</button>
+  </div>
 </aside>
 
 <!-- ============ HAUPT-BEREICH ============ -->
@@ -833,11 +841,59 @@ promptSuche.addEventListener("input", () => {
 // Initialisierung
 // ============================================================
 
+// ============================================================
+// API-Schluessel (Werte werden nie angezeigt)
+// ============================================================
+const keysListe = document.getElementById("keys-liste");
+const keyName = document.getElementById("key-name");
+const keyWert = document.getElementById("key-wert");
+const btnKeySpeichern = document.getElementById("btn-key-speichern");
+
+async function keysAktualisieren() {
+  try {
+    const daten = await apiFetch("/api/credentials");
+    keysListe.innerHTML = "";
+    const keys = daten.keys || [];
+    if (!keys.length) { keysListe.textContent = "Keine Schluessel hinterlegt."; return; }
+    keys.forEach(k => {
+      const el = document.createElement("div");
+      el.className = "stat-zeile";
+      const label = document.createElement("span");
+      label.innerHTML = `${escHtml(k.name)} <small>(${escHtml(k.quelle)})</small>`;
+      el.appendChild(label);
+      if (k.im_store) {
+        const del = document.createElement("button");
+        del.textContent = "✕"; del.title = "Aus Store entfernen";
+        del.addEventListener("click", async () => {
+          try {
+            await apiFetch("/api/credentials/" + encodeURIComponent(k.name), { method: "DELETE" });
+            keysAktualisieren();
+          } catch (e) { console.error("Key entfernen fehlgeschlagen:", e); }
+        });
+        el.appendChild(del);
+      }
+      keysListe.appendChild(el);
+    });
+  } catch (e) { console.error("Keys laden fehlgeschlagen:", e); }
+}
+
+btnKeySpeichern.addEventListener("click", async () => {
+  const name = keyName.value.trim();
+  const wert = keyWert.value;
+  if (!name || !wert) return;
+  try {
+    await apiFetch("/api/credentials", { method: "POST", body: JSON.stringify({ name, value: wert }) });
+    keyName.value = ""; keyWert.value = "";
+    keysAktualisieren();
+  } catch (e) { console.error("Key speichern fehlgeschlagen:", e); }
+});
+
 async function init() {
   await Promise.all([
     sessionsAktualisieren(),
     modelleAktualisieren(),
     statistikAktualisieren(),
+    keysAktualisieren(),
   ]);
 }
 

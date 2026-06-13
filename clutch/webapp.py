@@ -88,7 +88,7 @@ def create_app(
     app = FastAPI(
         title="clutch Web-API",
         description="Provider-neutraler LLM-Router — Web-Oberfläche (M6)",
-        version="0.3.0",
+        version="0.4.0",
     )
 
     app.add_middleware(
@@ -329,6 +329,87 @@ def create_app(
         """Gibt die Nutzungsstatistik zurück."""
         try:
             return rt.nutzungsstatistik()
+        except Exception as e:
+            raise HTTPException(status_code=500, detail="Interner Fehler") from e
+
+    # --- M6+: Credential- und Config-Verwaltung (spiegelt die CLI) ---------
+    # WICHTIG: Key-WERTE werden NIE zurückgegeben — nur Namen + Quelle.
+
+    import os as _os
+    from clutch.credentials import CredentialStore as _CredStore
+    from clutch import cli as _cli
+
+    @app.get("/api/credentials")
+    async def credentials_liste() -> dict:
+        """Listet Key-Namen + Quelle (env/store). Niemals Werte."""
+        try:
+            store = _CredStore()
+            store_namen = store.namen()
+            env_namen = sorted(k for k in _os.environ if k.endswith("_API_KEY"))
+            namen = sorted(set(store_namen) | set(env_namen))
+            return {
+                "keys": [
+                    {
+                        "name": n,
+                        "quelle": "env" if n in env_namen else "store",
+                        "im_store": n in store_namen,
+                    }
+                    for n in namen
+                ],
+                "env_erkannt": env_namen,
+            }
+        except Exception as e:
+            raise HTTPException(status_code=500, detail="Interner Fehler") from e
+
+    @app.post("/api/credentials")
+    async def credentials_setzen(request: Request) -> dict:
+        """Speichert einen API-Key im lokalen Store. Wert wird nicht zurückgegeben."""
+        try:
+            daten = await request.json()
+        except Exception:
+            raise HTTPException(status_code=400, detail="Ungültiges JSON")
+        name = (daten.get("name") or "").strip()
+        wert = daten.get("value") or ""
+        if not name or not wert:
+            raise HTTPException(status_code=422, detail="name und value erforderlich")
+        try:
+            _CredStore().set(name, wert)
+            return {"ok": True, "name": name}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail="Interner Fehler") from e
+
+    @app.delete("/api/credentials/{name}")
+    async def credentials_entfernen(name: str) -> dict:
+        """Entfernt einen Key aus dem lokalen Store."""
+        try:
+            entfernt = _CredStore().remove(name)
+            return {"ok": True, "entfernt": entfernt}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail="Interner Fehler") from e
+
+    @app.get("/api/config")
+    async def config_lesen() -> dict:
+        """Liest die CLI-Konfiguration (~/.clutch/cli_config.json)."""
+        try:
+            return _cli._lade_config()
+        except Exception as e:
+            raise HTTPException(status_code=500, detail="Interner Fehler") from e
+
+    @app.post("/api/config")
+    async def config_setzen(request: Request) -> dict:
+        """Setzt einen Konfigurationswert."""
+        try:
+            daten = await request.json()
+        except Exception:
+            raise HTTPException(status_code=400, detail="Ungültiges JSON")
+        key = (daten.get("key") or "").strip()
+        if not key:
+            raise HTTPException(status_code=422, detail="key erforderlich")
+        try:
+            cfg = _cli._lade_config()
+            cfg[key] = daten.get("value")
+            _cli._speichere_config(cfg)
+            return {"ok": True, "key": key}
         except Exception as e:
             raise HTTPException(status_code=500, detail="Interner Fehler") from e
 

@@ -8,6 +8,12 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1
 
 ## [Unreleased]
 
+### Added
+- **Web-UI: CLI-/Env-Spiegel (M6+):** Endpunkte `GET/POST /api/credentials` +
+  `DELETE /api/credentials/{name}` und `GET/POST /api/config`; Sidebar-Panel „API-Schlüssel"
+  zum Setzen/Löschen von Keys (Werte werden NIE angezeigt/zurückgegeben; nur Namen + Quelle
+  env/store). Tests in `test_m12_web_settings.py` (inkl. Wert-Leak-Schutz).
+
 ## [0.4.0] -- 2026-06-14
 
 Großer Ausbau von der Library zur Routing-**Anwendung** (CLI + Web + API), Kimi-Anbindung,
