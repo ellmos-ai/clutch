@@ -8,6 +8,13 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1
 
 ## [Unreleased]
 
+### Packaging
+- **PyPI-Vorbereitung (noch nicht veröffentlicht):** Distributionsname `clutch-llm`
+  (Import bleibt `clutch`; `clutch` auf PyPI vergeben). package-data erweitert um
+  `locales/*.json` + `web/*.html` (sonst fehlten i18n + Web-UI im pip-Paket). Classifiers/
+  keywords/URLs ergänzt. GitHub-Action `publish.yml` (PyPI Trusted Publishing/OIDC, triggert
+  auf `v*`-Tags) — Release erfolgt erst nach der Testphase + einmaliger PyPI-Publisher-Einrichtung.
+
 ### Added
 - **Web-UI: CLI-/Env-Spiegel (M6+):** Endpunkte `GET/POST /api/credentials` +
   `DELETE /api/credentials/{name}` und `GET/POST /api/config`; Sidebar-Panel „API-Schlüssel"

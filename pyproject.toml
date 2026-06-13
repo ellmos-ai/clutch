@@ -3,24 +3,32 @@ requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "clutch"
+# Import-Name bleibt `clutch`; PyPI-Distributionsname ist `clutch-llm`,
+# weil `clutch` auf PyPI bereits vergeben ist (altes GAE-Framework).
+name = "clutch-llm"
 version = "0.4.0"
-description = "Provider-neutral LLM orchestration engine with auto-learning"
+description = "Provider-neutral LLM orchestration engine and router (CLI/Web/API) with auto-learning"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"
 authors = [
     {name = "Lukas Geiger"},
 ]
-keywords = ["llm", "orchestration", "ai", "multi-provider", "claude", "gemini", "ollama"]
+keywords = [
+    "llm", "orchestration", "router", "ai", "multi-provider", "model-routing",
+    "claude", "gemini", "ollama", "kimi", "openai-compatible", "cli", "agent",
+]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
+    "Environment :: Console",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
     "anthropic>=0.40.0",
@@ -39,6 +47,7 @@ web = [
 Homepage = "https://github.com/ellmos-ai/clutch"
 Repository = "https://github.com/ellmos-ai/clutch"
 Issues = "https://github.com/ellmos-ai/clutch/issues"
+Changelog = "https://github.com/ellmos-ai/clutch/blob/master/CHANGELOG.md"
 
 [project.scripts]
 clutch = "clutch.cli:main"
@@ -47,7 +56,7 @@ clutch = "clutch.cli:main"
 include = ["clutch*"]
 
 [tool.setuptools.package-data]
-clutch = ["config/*.json"]
+clutch = ["config/*.json", "locales/*.json", "web/*.html"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
