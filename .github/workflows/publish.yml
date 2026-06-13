@@ -1,11 +1,11 @@
 name: Publish to PyPI
 
-# Veroeffentlicht clutch-llm bei PyPI, sobald ein Tag `v*` gepusht wird.
+# Veroeffentlicht clutch-router bei PyPI, sobald ein Tag `v*` gepusht wird.
 # Nutzt PyPI Trusted Publishing (OIDC) -- KEIN API-Token noetig.
 #
 # Einmalige PyPI-Einrichtung (vor dem ersten echten Release):
 #   PyPI -> Account -> Publishing -> Add a new pending publisher:
-#     PyPI Project Name: clutch-llm
+#     PyPI Project Name: clutch-router
 #     Owner:             ellmos-ai
 #     Repository name:   clutch
 #     Workflow name:     publish.yml
@@ -48,7 +48,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     environment:
       name: pypi
-      url: https://pypi.org/p/clutch-llm
+      url: https://pypi.org/p/clutch-router
     permissions:
       id-token: write   # OIDC fuer Trusted Publishing
     steps:

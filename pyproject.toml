@@ -3,9 +3,9 @@ requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-# Import-Name bleibt `clutch`; PyPI-Distributionsname ist `clutch-llm`,
+# Import-Name bleibt `clutch`; PyPI-Distributionsname ist `clutch-router`,
 # weil `clutch` auf PyPI bereits vergeben ist (altes GAE-Framework).
-name = "clutch-llm"
+name = "clutch-router"
 version = "0.4.0"
 description = "Provider-neutral LLM orchestration engine and router (CLI/Web/API) with auto-learning"
 readme = "README.md"
