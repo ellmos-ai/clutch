@@ -29,6 +29,7 @@ from clutch.bordcomputer import Bordcomputer
 from clutch.tankuhr import Tankuhr
 from clutch.tacho import Tacho
 from clutch.fahrschule import Fahrschule
+from clutch.scorer import get_scorer
 
 logger = logging.getLogger("clutch")
 
@@ -66,19 +67,26 @@ class Fahrer:
         print(fahrer.status())
     """
 
-    def __init__(self, base_dir: Optional[Path] = None):
+    def __init__(self, base_dir: Optional[Path] = None, db_path: Optional[Path] = None):
         self.base_dir = base_dir or Path(__file__).parent
         config_dir = self.base_dir / "config"
+
+        # DB-Pfad: NICHT ins Repo/OneDrive schreiben. Default = User-Home.
+        if db_path is None:
+            db_path = Path.home() / ".clutch" / "clutch.db"
+        db_path = Path(db_path)
+        db_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Kern-Komponenten (Auto-Teile)
         self.analyse = StreckenAnalyse()
         self.getriebe = Getriebe(config_dir=config_dir)
         self.kupplungs_mechanik = Kupplung(self.getriebe, config_dir=config_dir)
-        self.buch = Fahrtenbuch()
+        self.buch = Fahrtenbuch(db_path=db_path)
         self.bordcomputer = Bordcomputer(self.buch, config_dir=config_dir)
         self.tankuhr = Tankuhr(config_dir=config_dir)
         self.tacho = Tacho(self.buch)
         self.fahrschule = Fahrschule(self.buch, self.kupplungs_mechanik, config_dir=config_dir)
+        self.scorer = get_scorer()
 
         # Fahrer-Config
         self._config = self._load_config(config_dir)
@@ -91,8 +99,15 @@ class Fahrer:
         """Analysiert die Strecke (den Task)."""
         return self.analyse.analysiere(beschreibung, kontext)
 
-    def kuppeln(self, profil: StreckenProfil) -> FahrtConfig:
-        """Kuppelt: Waehlt Gang und Gas basierend auf Strecke + Systemzustand."""
+    def kuppeln(self, profil: StreckenProfil, zweck: Optional[str] = None,
+                vertrauenswuerdig: bool = True) -> FahrtConfig:
+        """Kuppelt: Waehlt Gang und Gas basierend auf Strecke + Systemzustand.
+
+        zweck (coding/vision/research/...) steuert das Zweck-Routing (M2):
+        Gaenge werden nach passenden staerken-Tags ausgewaehlt.
+        vertrauenswuerdig=False (z.B. Web/API) schliesst agentische CLI-Motoren
+        mit Auto-Approve aus.
+        """
 
         # Bordcomputer checken
         verbrauch_pct = self.tankuhr.verbrauch_pct()
@@ -102,6 +117,8 @@ class Fahrer:
             profil,
             budget_zone=system_status.budget_zone,
             gesperrte_modelle=system_status.gesperrte_modelle,
+            zweck=zweck,
+            vertrauenswuerdig=vertrauenswuerdig,
         )
 
         # Gesperrtes Modell Fallback
@@ -146,8 +163,13 @@ class Fahrer:
         # 1. Strecke analysieren
         profil = self.strecke_analysieren(beschreibung, kontext)
 
-        # 2. Kuppeln
-        config = self.kuppeln(profil)
+        # 1b. Zweck/Modalitaet erkennen (M2) -- Bild-Anhang erzwingt vision
+        hat_bild = bool(kontext and kontext.get("hat_bild"))
+        zweck = self.scorer.erkenne_zweck(beschreibung, hat_bild=hat_bild)
+        vertrauenswuerdig = bool(kontext.get("vertrauenswuerdig", True)) if kontext else True
+
+        # 2. Kuppeln (zweck-bewusst)
+        config = self.kuppeln(profil, zweck=zweck, vertrauenswuerdig=vertrauenswuerdig)
 
         # 3. Fahren + messen
         fahrt_id = self.tacho.start(profil.typ.value, config)
@@ -159,6 +181,9 @@ class Fahrer:
             output = None
             erfolg = False
             logger.error(f"Fahrt {fahrt_id} gescheitert: {e}")
+
+        # 3b. Tokens + Kosten verbuchen (falls Handler ein MotorErgebnis lieferte)
+        self._verbuchen(fahrt_id, config, output)
 
         # 4. Tacho stoppen
         eintrag = self.tacho.stop(fahrt_id, erfolg=erfolg)
@@ -196,6 +221,7 @@ class Fahrer:
             erfolg = False
             logger.error(f"Fahrt {fahrt_id} gescheitert: {e}")
 
+        self._verbuchen(fahrt_id, config, output)
         eintrag = self.tacho.stop(fahrt_id, erfolg=erfolg)
         warnungen = self.bordcomputer.fahrt_auswerten(eintrag) if eintrag else []
 
@@ -208,6 +234,26 @@ class Fahrer:
             total_tokens=eintrag.total_tokens if eintrag else 0,
             warnungen=warnungen,
         )
+
+    def _verbuchen(self, fahrt_id: str, config: Optional[FahrtConfig], output: Any) -> None:
+        """Uebernimmt Tokens/Kosten aus einem MotorErgebnis (Duck-Typing).
+
+        Verdrahtet den Token-Fluss in Tacho (Metriken) und Tankuhr (Budget) --
+        zuvor blieben beide auf Null (Fahrtenbuch/Fahrschule lernten auf Nulldaten).
+        Handler die kein MotorErgebnis liefern, bleiben unberuehrt.
+        """
+        in_tok = getattr(output, "input_tokens", None)
+        out_tok = getattr(output, "output_tokens", None)
+        if in_tok is None and out_tok is None:
+            return
+        in_tok = int(in_tok or 0)
+        out_tok = int(out_tok or 0)
+        self.tacho.update(fahrt_id, total_tokens=in_tok + out_tok)
+        if config and getattr(config, "gang", None):
+            try:
+                self.tankuhr.tanken(config.gang, in_tok, out_tok)
+            except Exception as e:  # Budget-Buchung darf die Fahrt nie kippen
+                logger.warning(f"Tankuhr-Buchung fehlgeschlagen: {e}")
 
     def trainieren(self) -> dict:
         """Fahrschule: Lernt aus bisherigen Fahrten."""

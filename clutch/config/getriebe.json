@@ -80,6 +80,19 @@
       "max_context": 32000,
       "endpoint": "http://localhost:11434"
     },
+    "ollama-kimi-k2": {
+      "provider": "ollama",
+      "model_id": "kimi-k2.7-code:cloud",
+      "gang": 4,
+      "leistung": "hoch",
+      "kosten_input_1k": 0.00095,
+      "kosten_output_1k": 0.004,
+      "_doc": "Kimi K2.7 Code (Rohmodell) ueber Ollama Cloud. ACHTUNG: ':cloud'-Tag laeuft NICHT lokal -- das Modell (~1T Params MoE) laeuft auf Moonshot/Ollama-Servern, einmalig 'ollama signin' + 'ollama pull <modell>' noetig, Internet erforderlich. VERIFIZIERT 2026-06-13: erfordert ein kostenpflichtiges Ollama-Cloud-Abo -- ohne Abo liefert /api/generate 403 ('this model requires a subscription'). Token-Usage wird vom OllamaMotor erfasst (prompt_eval_count/eval_count). Kosten sind Naeherung an die K2.6-API-Preise.",
+      "staerken": ["coding", "agentisch", "grosse_kontexte", "usage_tracking", "token_effizient"],
+      "schwaechen": ["cloud_nicht_lokal", "account_login", "internet_noetig"],
+      "max_context": 256000,
+      "endpoint": "http://localhost:11434"
+    },
     "claude-code": {
       "provider": "claude-code",
       "model_id": "claude-code-session",
@@ -91,6 +104,54 @@
       "staerken": ["tool_use", "code_ausfuehrung", "dateisystem", "git", "multi_agent", "kontext_bewusstsein"],
       "schwaechen": ["kein_api_zugang", "session_gebunden"],
       "max_context": 200000
+    },
+    "kimi-cli": {
+      "provider": "kimi-cli",
+      "model_id": "kimi-cli-session",
+      "gang": 4,
+      "leistung": "hoch",
+      "kosten_input_1k": 0.0,
+      "kosten_output_1k": 0.0,
+      "_doc": "Kimi CLI (kimi-cli.exe, Python-Linie) als Subprozess im Print-Modus. Login via Moonshot-Account (Device-Code), kein API-Key. Print-Modus liefert keine Token-/Usage-Daten -- Budget nicht gemessen.",
+      "staerken": ["tool_use", "code_ausfuehrung", "agent_cli", "mcp", "acp"],
+      "schwaechen": ["kein_usage_tracking", "login_noetig"],
+      "max_context": 200000
+    },
+    "kimi-code": {
+      "provider": "kimi-code",
+      "model_id": "kimi-code-session",
+      "gang": 4,
+      "leistung": "hoch",
+      "kosten_input_1k": 0.0,
+      "kosten_output_1k": 0.0,
+      "_doc": "Kimi Code CLI (kimi-code.exe, TS-Linie) als Subprozess im Print-Modus (-p ... --output-format text -y). Login via Moonshot-Account (Device-Code), kein API-Key. Print-Modus liefert keine Token-/Usage-Daten -- Budget nicht gemessen.",
+      "staerken": ["tool_use", "code_ausfuehrung", "subagents", "mcp", "plugins"],
+      "schwaechen": ["kein_usage_tracking", "login_noetig"],
+      "max_context": 200000
+    },
+    "kimi-api-code": {
+      "provider": "kimi-api",
+      "model_id": "kimi-k2.7-code",
+      "gang": 4,
+      "leistung": "hoch",
+      "kosten_input_1k": 0.00095,
+      "kosten_output_1k": 0.004,
+      "_doc": "Kimi K2.7 Code via Moonshot-API (OpenAI-kompatibel, api.moonshot.ai/v1). Key: MOONSHOT_API_KEY. Volle Token-Usage. Coding-Schwerpunkt, agentisch.",
+      "staerken": ["coding", "agentisch", "reasoning", "usage_tracking", "token_effizient"],
+      "schwaechen": ["api_kosten"],
+      "max_context": 262144
+    },
+    "kimi-api-vision": {
+      "provider": "kimi-api",
+      "model_id": "kimi-k2.6",
+      "gang": 4,
+      "leistung": "hoch",
+      "kosten_input_1k": 0.00095,
+      "kosten_output_1k": 0.004,
+      "_doc": "Kimi K2.6 via Moonshot-API (OpenAI-kompatibel). Native Multimodal: text+Bild+Video als EINGABE (Vision/Verstehen), KEINE Bildgenerierung. Key: MOONSHOT_API_KEY.",
+      "staerken": ["vision", "multimodal", "reasoning", "grosse_kontexte", "usage_tracking"],
+      "schwaechen": ["api_kosten", "keine_bildgenerierung"],
+      "max_context": 262144
     }
   },
   "provider": {
@@ -114,6 +175,24 @@
       "auth": null,
       "_doc": "Claude Code CLI -- kein API-Zugang, sondern laufende Session mit Tool-Zugriff",
       "basis_url": null
+    },
+    "kimi-cli": {
+      "typ": "cli",
+      "auth": null,
+      "_doc": "kimi-cli.exe -- Print-Modus Subprozess, Login via Moonshot Device-Code, kein API-Key",
+      "basis_url": null
+    },
+    "kimi-code": {
+      "typ": "cli",
+      "auth": null,
+      "_doc": "kimi-code.exe -- Print-Modus Subprozess, Login via Moonshot Device-Code, kein API-Key",
+      "basis_url": null
+    },
+    "kimi-api": {
+      "typ": "api",
+      "auth": "MOONSHOT_API_KEY",
+      "_doc": "Moonshot/Kimi-API, OpenAI-kompatibel. Voller Usage. Modelle: kimi-k2.7-code, kimi-k2.6.",
+      "basis_url": "https://api.moonshot.ai/v1"
     }
   },
   "fahrer_optionen": {

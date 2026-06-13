@@ -24,6 +24,7 @@ from typing import Any, Optional
 
 from clutch.kupplung import FahrtConfig
 from clutch.gas_bremse import GasBremse, GasStellung
+from clutch.credentials import get_api_key
 
 logger = logging.getLogger("clutch.motorblock")
 
@@ -104,7 +105,7 @@ class AnthropicMotor(Motor):
 
     def __init__(self, api_key: Optional[str] = None):
         super().__init__()
-        self._api_key = api_key or os.environ.get("ANTHROPIC_API_KEY", "")
+        self._api_key = api_key or get_api_key("ANTHROPIC_API_KEY")
         self._client = None
 
     def _get_client(self):
@@ -174,7 +175,7 @@ class GeminiMotor(Motor):
 
     def __init__(self, api_key: Optional[str] = None):
         super().__init__()
-        self._api_key = api_key or os.environ.get("GOOGLE_API_KEY", "")
+        self._api_key = api_key or get_api_key("GOOGLE_API_KEY")
         self._client = None
 
     def _get_client(self):
@@ -389,6 +390,210 @@ class ClaudeCodeMotor(Motor):
 
 
 # ---------------------------------------------------------------------------
+# Kimi CLI Motoren (CLI subprocess, Print-Modus)
+# ---------------------------------------------------------------------------
+
+class _KimiBasisMotor(Motor):
+    """Gemeinsame Basis fuer die Kimi-CLI-Motoren (kimi-cli / kimi-code).
+
+    Beide werden als Subprozess im nicht-interaktiven Print-Modus aufgerufen.
+    Der Login laeuft ueber den Moonshot-Account (Device-Code-Flow) -- es gibt
+    KEINEN API-Key. Der Print-Modus liefert KEINE Token-/Usage-Daten, daher
+    bleiben input_tokens/output_tokens bewusst 0 (Budget-Tracking fuer
+    Kimi-Gaenge = nicht gemessen). Sobald Kimi spaeter doch Usage liefert oder
+    ein API-Zugang besteht, kann das hier nachgezogen werden.
+    """
+
+    binary: str = "kimi"
+
+    def ist_verfuegbar(self) -> bool:
+        try:
+            result = subprocess.run(
+                [self.binary, "--version"],
+                capture_output=True, text=True, timeout=10,
+            )
+            return result.returncode == 0
+        except Exception:
+            return False
+
+    def _argv(self, vollprompt: str) -> list[str]:
+        raise NotImplementedError
+
+    def _stdin(self, vollprompt: str) -> Optional[str]:
+        return None
+
+    def ausfuehren(self, config: FahrtConfig, prompt: str) -> MotorErgebnis:
+        t0 = time.time()
+        vollprompt = self._prompt_mit_gas(config, prompt)
+        timeout = self._timeout(config, basis=120.0)
+
+        try:
+            result = subprocess.run(
+                self._argv(vollprompt),
+                input=self._stdin(vollprompt),
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                env={**os.environ, "PYTHONIOENCODING": "utf-8"},
+            )
+
+            if result.returncode != 0:
+                raise RuntimeError(
+                    f"{self.binary} CLI exit code {result.returncode}: "
+                    f"{result.stderr[:500]}"
+                )
+
+            # Print-Modus liefert reinen Text auf stdout, keine Usage-Daten.
+            return MotorErgebnis(
+                text=result.stdout.strip(),
+                input_tokens=0,
+                output_tokens=0,
+                model_id=config.model_id,
+                provider=self.provider_name,
+                latenz_sekunden=time.time() - t0,
+            )
+
+        except subprocess.TimeoutExpired:
+            logger.error(f"{self.__class__.__name__} Timeout nach {timeout}s")
+            return MotorErgebnis(
+                text="",
+                model_id=config.model_id,
+                provider=self.provider_name,
+                latenz_sekunden=time.time() - t0,
+                erfolg=False,
+                fehler=f"Timeout nach {timeout:.0f}s",
+            )
+        except Exception as e:
+            logger.error(f"{self.__class__.__name__} Fehler: {e}")
+            return MotorErgebnis(
+                text="",
+                model_id=config.model_id,
+                provider=self.provider_name,
+                latenz_sekunden=time.time() - t0,
+                erfolg=False,
+                fehler=str(e),
+            )
+
+
+class KimiCliMotor(_KimiBasisMotor):
+    """Motor fuer Kimi CLI (kimi-cli.exe, Python-Linie) im Print-Modus.
+
+    Aufruf: prompt via stdin, `--print` aktiviert implizit `--yolo`
+    (Auto-Approve), so dass tool-pflichtige Tasks nicht haengen bleiben.
+    """
+
+    provider_name = "kimi-cli"
+    binary = "kimi-cli"
+
+    def _argv(self, vollprompt: str) -> list[str]:
+        return [self.binary, "--print", "--output-format", "text"]
+
+    def _stdin(self, vollprompt: str) -> Optional[str]:
+        return vollprompt
+
+
+class KimiCodeMotor(_KimiBasisMotor):
+    """Motor fuer Kimi Code CLI (kimi-code.exe, TS-Linie) im Print-Modus.
+
+    Aufruf: `kimi-code -p <prompt> --output-format text -y`. Das `-y`/`--yolo`
+    approved Tool-Aktionen automatisch, damit der nicht-interaktive Lauf nicht
+    auf eine Bestaetigung wartet (analog zum ClaudeCodeMotor-Verhalten).
+    """
+
+    provider_name = "kimi-code"
+    binary = "kimi-code"
+
+    def _argv(self, vollprompt: str) -> list[str]:
+        return [self.binary, "-p", vollprompt, "--output-format", "text", "-y"]
+
+
+# ---------------------------------------------------------------------------
+# OpenAI-kompatibler Motor (Moonshot/Kimi-API, Codex/GPT, OpenRouter, LM Studio)
+# ---------------------------------------------------------------------------
+
+class OpenAICompatibleMotor(Motor):
+    """Motor fuer jede OpenAI-kompatible Chat-Completions-API.
+
+    Generische Basis: base_url + Bearer-Key (aus Env). Subklassen setzen
+    base_url/api_key_env/provider_name. Deckt Moonshot/Kimi-API, Codex/GPT,
+    OpenRouter und LM Studio ab. Liefert volle Token-Usage (prompt_tokens/
+    completion_tokens) -- anders als die Kimi-CLI-Motoren.
+    """
+
+    provider_name = "openai-compatible"
+    base_url = "https://api.openai.com/v1"
+    api_key_env = "OPENAI_API_KEY"
+
+    def __init__(self, base_url: Optional[str] = None, api_key: Optional[str] = None,
+                 api_key_env: Optional[str] = None):
+        super().__init__()
+        if base_url:
+            self.base_url = base_url
+        if api_key_env:
+            self.api_key_env = api_key_env
+        self._api_key = api_key or get_api_key(self.api_key_env)
+
+    def ist_verfuegbar(self) -> bool:
+        return bool(self._api_key)
+
+    def ausfuehren(self, config: FahrtConfig, prompt: str) -> MotorErgebnis:
+        t0 = time.time()
+        vollprompt = self._prompt_mit_gas(config, prompt)
+        max_tok = self._max_tokens(config)
+        timeout = self._timeout(config)
+
+        try:
+            import requests
+
+            response = requests.post(
+                f"{self.base_url.rstrip('/')}/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {self._api_key}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "model": config.model_id,
+                    "max_tokens": max_tok,
+                    "messages": [{"role": "user", "content": vollprompt}],
+                },
+                timeout=timeout,
+            )
+            response.raise_for_status()
+            data = response.json()
+
+            text = data["choices"][0]["message"]["content"]
+            usage = data.get("usage", {})
+
+            return MotorErgebnis(
+                text=text,
+                input_tokens=usage.get("prompt_tokens", 0),
+                output_tokens=usage.get("completion_tokens", 0),
+                model_id=config.model_id,
+                provider=self.provider_name,
+                latenz_sekunden=time.time() - t0,
+            )
+
+        except Exception as e:
+            logger.error(f"{self.__class__.__name__} Fehler: {e}")
+            return MotorErgebnis(
+                text="",
+                model_id=config.model_id,
+                provider=self.provider_name,
+                latenz_sekunden=time.time() - t0,
+                erfolg=False,
+                fehler=str(e),
+            )
+
+
+class KimiApiMotor(OpenAICompatibleMotor):
+    """Moonshot/Kimi-API (OpenAI-kompatibel). Key: MOONSHOT_API_KEY."""
+
+    provider_name = "kimi-api"
+    base_url = "https://api.moonshot.ai/v1"
+    api_key_env = "MOONSHOT_API_KEY"
+
+
+# ---------------------------------------------------------------------------
 # MotorBlock -- Factory
 # ---------------------------------------------------------------------------
 
@@ -410,6 +615,9 @@ class MotorBlock:
             "google": GeminiMotor(),
             "ollama": OllamaMotor(),
             "claude-code": ClaudeCodeMotor(),
+            "kimi-cli": KimiCliMotor(),
+            "kimi-code": KimiCodeMotor(),
+            "kimi-api": KimiApiMotor(),
         }
 
     def motor_fuer(self, provider: str) -> Motor:

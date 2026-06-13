@@ -122,6 +122,7 @@ class Getriebe:
         min_gang: Optional[int] = None,
         nur_lokal: bool = False,
         nur_kostenlos: bool = False,
+        staerke: Optional[str] = None,
     ) -> list[Gang]:
         """Filtert Gaenge nach Kriterien."""
         result = list(self._gaenge.values())
@@ -136,6 +137,8 @@ class Getriebe:
             result = [g for g in result if g.ist_lokal]
         if nur_kostenlos:
             result = [g for g in result if g.ist_kostenlos]
+        if staerke:
+            result = [g for g in result if staerke in g.staerken]
 
         return sorted(result, key=lambda g: g.gang)
 

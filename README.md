@@ -2,25 +2,31 @@
   <img src="logo.jpg" alt="clutch logo" width="400">
 </p>
 
+[English](README.md) · [Deutsch](README_de.md) · [Español](README_es.md) · [简体中文](README_zh-Hans.md) · [日本語](README_ja.md) · [Русский](README_ru.md)
+
 # clutch
 
 > Provider-neutral LLM orchestration engine with auto-learning
 
 ![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![License MIT](https://img.shields.io/badge/License-MIT-green)
-![Version 0.3.0](https://img.shields.io/badge/Version-0.3.0-orange)
+![Version 0.4.0](https://img.shields.io/badge/Version-0.4.0-orange)
 
-**clutch** (German: *Kupplung*) uses a driving metaphor to intelligently route tasks to optimal LLM models across multiple providers. It analyzes task complexity, selects the right model and reasoning level, tracks budgets, and learns from experience.
+**clutch** (German: *Kupplung*) uses a driving metaphor to intelligently route tasks to optimal LLM models across multiple providers. It analyzes task complexity and purpose, selects the right model and reasoning level, tracks budgets, and learns from experience. Use it as a **library**, a **CLI**, or a **local web app**.
 
 ## Features
 
-- **Provider-neutral** -- seamlessly switch between Anthropic (Claude), Google (Gemini), Ollama (local), and Claude Code
-- **Auto-routing** -- analyzes task complexity and picks the optimal model + reasoning level
+- **Provider-neutral** -- Anthropic (Claude), Google (Gemini), Ollama (local & remote), Claude Code, and **Kimi** (Moonshot API / CLI / Ollama Cloud)
+- **Auto-routing** -- analyzes task complexity *and purpose* (coding, vision, research, bulk) and picks the optimal model + reasoning level
+- **Purpose & vision aware** -- routes image/document input to vision-capable models; matches tasks to model strengths
+- **CLI + Web UI** -- `clutch route/run/chat/models/stats`, plus an optional FastAPI web chat (`clutch serve --web`)
+- **Credential store** -- keep API keys in `~/.clutch/credentials.json` (`clutch keys ...`); env vars take precedence
+- **Model discovery** -- auto-detect installed Ollama models (local/remote) and OpenAI-compatible `/v1/models`
 - **Budget tracking** -- four-zone fuel gauge (green/yellow/orange/red) with daily and monthly limits
 - **Learning engine** -- fitness scoring and epsilon-greedy exploration that improves routing over time
 - **Execution patterns** -- single tasks, chains (convoy), parallel teams, and swarm processing
-- **Health monitoring** -- circuit breakers, latency tracking, and provider failover
-- **SQLite metrics** -- persistent trip log for analysis and optimization
+- **Health monitoring** -- circuit breakers, latency tracking, overkill/token-explosion alerts, provider failover
+- **SQLite metrics** -- persistent trip log, chat sessions, prompt library, and profiles
 
 ## Architecture
 
@@ -126,6 +132,36 @@ print(status["getriebe"])            # "Getriebe[haiku(G1), flash(G2), ...]"
 fahrer.trainieren()
 ```
 
+## Command-Line Interface
+
+After `pip install -e .` the `clutch` command is available:
+
+```bash
+clutch route "Fix the auth bug"      # show the routing decision (dry-run, no LLM call)
+clutch "Explain quantum computing"    # one-shot: route + execute, print the answer
+clutch run "..." --json               # machine-readable output (for other agents)
+clutch chat                           # interactive REPL
+clutch models [--json]                # list all gears (models)
+clutch stats                          # usage / budget / health dashboard
+clutch config <key> [value]           # read/set CLI settings
+clutch keys set MOONSHOT_API_KEY      # store an API key (hidden input; values never shown)
+clutch keys list                      # list stored key names (not values)
+clutch serve --web                    # start the web UI (needs: pip install clutch[web])
+```
+
+Three usage modes: **console** (humans), **web UI** (humans, graphical), and **CLI/API**
+(other LLMs/agents routing tasks via `--json` or the OpenAI-compatible web endpoint).
+
+## API Keys & Credentials
+
+clutch resolves keys in this order (first non-empty wins):
+
+1. Environment variable (e.g. `MOONSHOT_API_KEY`) -- preferred for CI/servers
+2. clutch store `~/.clutch/credentials.json` (via `clutch keys set`, file mode 0600)
+3. `~/.credentials/<name>` files (interop with sibling tools)
+
+Values are never printed, logged, or committed.
+
 ## Configuration
 
 Default config lives in `clutch/config/` so editable installs and wheels use the
@@ -154,8 +190,10 @@ folder to `Fahrer` if you want project-specific overrides.
 |----------|--------|-------|
 | **Anthropic** | Claude Haiku, Sonnet, Opus | No |
 | **Google** | Gemini Flash, Pro | No |
-| **Ollama** | Qwen, Mistral, and more | Yes |
-| **Claude Code** | Via subprocess | Yes |
+| **Ollama** | Qwen, Mistral, and more (local & remote) | Yes |
+| **Claude Code** | Via subprocess (CLI session) | Yes |
+| **Kimi (Moonshot)** | `kimi-k2.7-code`, `kimi-k2.6` via OpenAI-compatible API; `kimi-cli`/`kimi-code` CLI; Ollama Cloud | API / CLI |
+| **OpenAI-compatible** | Any `/v1/chat/completions` endpoint (set `base_url`) | No |
 
 ## Execution Patterns
 

@@ -40,6 +40,10 @@ desktop.ini
 BACH_EINHÄNGEPUNKTE.md
 BACH_INTEGRATION.md
 
+# Interne Planungs-/Migrationsdocs (enthalten interne Pfade/Refs, nicht oeffentlich)
+DEVELOPMENT_PLAN.md
+docs/BACH_MIGRATION.md
+
 # Distribution
 *.tar.gz
 *.zip

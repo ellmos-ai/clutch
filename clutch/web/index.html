@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>clutch — LLM-Router</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #1a1a1e;
+      --bg-panel:   #25252d;
+      --bg-input:   #2e2e38;
+      --border:     #3a3a48;
+      --accent:     #6b8cff;
+      --accent-dim: #3d4f99;
+      --text:       #e2e2ea;
+      --text-dim:   #888899;
+      --user-bg:    #2a3060;
+      --asst-bg:    #252530;
+      --radius:     8px;
+      --sidebar-w:  280px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 14px;
+      background: var(--bg);
+      color: var(--text);
+      height: 100dvh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* ============ SIDEBAR ============ */
+    #sidebar {
+      width: var(--sidebar-w);
+      min-width: var(--sidebar-w);
+      background: var(--bg-panel);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #sidebar h2 {
+      padding: 16px 12px 8px;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -0.3px;
+    }
+
+    .sidebar-section {
+      padding: 8px 12px 4px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-dim);
+      margin-top: 8px;
+    }
+
+    #btn-neue-session {
+      margin: 8px 12px;
+      padding: 8px 12px;
+      background: var(--accent-dim);
+      border: none;
+      border-radius: var(--radius);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 13px;
+      text-align: left;
+      transition: background 0.15s;
+    }
+    #btn-neue-session:hover { background: var(--accent); }
+
+    /* Einstellungen-Box in Sidebar */
+    #einstellungen-box {
+      padding: 8px 12px;
+      border-top: 1px solid var(--border);
+      margin-top: 4px;
+    }
+    .setting-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 0;
+      font-size: 13px;
+    }
+    .setting-row label { cursor: pointer; flex: 1; }
+    .setting-row input[type="checkbox"] { accent-color: var(--accent); }
+    .setting-row select {
+      flex: 1;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      padding: 3px 6px;
+      font-size: 12px;
+    }
+
+    /* Sessions-Liste */
+    #sessions-liste {
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px 8px;
+    }
+    .session-item {
+      padding: 7px 10px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--text-dim);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 2px;
+      transition: background 0.1s;
+    }
+    .session-item:hover { background: var(--bg-input); color: var(--text); }
+    .session-item.aktiv { background: var(--accent-dim); color: var(--text); }
+
+    /* Stats-Box */
+    #stats-box {
+      padding: 10px 12px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+    #stats-box .stat-zeile { display: flex; justify-content: space-between; padding: 2px 0; }
+    #stats-box .stat-wert  { color: var(--text); font-variant-numeric: tabular-nums; }
+
+    /* Modell-Box */
+    #modell-box {
+      padding: 8px 12px;
+      border-top: 1px solid var(--border);
+      max-height: 140px;
+      overflow-y: auto;
+    }
+    .modell-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 3px 0;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+    .modell-name { font-weight: 500; color: var(--text); }
+    .modell-gang { color: var(--accent); }
+
+    /* ============ HAUPT-BEREICH ============ */
+    #main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Verlauf */
+    #verlauf {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .nachricht {
+      max-width: 80%;
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .nachricht.user {
+      background: var(--user-bg);
+      align-self: flex-end;
+      border-bottom-right-radius: 2px;
+    }
+    .nachricht.assistant {
+      background: var(--asst-bg);
+      align-self: flex-start;
+      border-bottom-left-radius: 2px;
+      border: 1px solid var(--border);
+    }
+    .nachricht .meta {
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-top: 5px;
+    }
+
+    /* Ladeanzeige */
+    #lade-anzeige {
+      display: none;
+      align-self: flex-start;
+      padding: 10px 14px;
+      background: var(--asst-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      font-style: italic;
+    }
+
+    /* Eingabe-Bereich */
+    #eingabe-bereich {
+      padding: 12px 20px 16px;
+      border-top: 1px solid var(--border);
+      background: var(--bg-panel);
+    }
+
+    /* Bild-Upload-Anzeige */
+    #upload-info {
+      display: none;
+      font-size: 12px;
+      color: var(--accent);
+      margin-bottom: 6px;
+      padding: 4px 8px;
+      background: var(--accent-dim);
+      border-radius: 4px;
+      align-items: center;
+      gap: 6px;
+    }
+    #upload-info.sichtbar { display: flex; }
+    #btn-upload-loeschen {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      padding: 0 2px;
+    }
+    #btn-upload-loeschen:hover { color: #ff6b6b; }
+
+    #eingabe-reihe {
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+    }
+
+    #eingabe-upload {
+      display: none;
+    }
+
+    #btn-bild {
+      padding: 9px 12px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1;
+      transition: background 0.15s, color 0.15s;
+      flex-shrink: 0;
+    }
+    #btn-bild:hover { background: var(--border); color: var(--text); }
+
+    #eingabe-text {
+      flex: 1;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      padding: 10px 14px;
+      font-size: 14px;
+      resize: none;
+      min-height: 44px;
+      max-height: 180px;
+      line-height: 1.5;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    #eingabe-text:focus { border-color: var(--accent); }
+    #eingabe-text::placeholder { color: var(--text-dim); }
+
+    #btn-senden {
+      padding: 10px 18px;
+      background: var(--accent);
+      border: none;
+      border-radius: var(--radius);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.15s, opacity 0.15s;
+    }
+    #btn-senden:hover { background: #8aaeff; }
+    #btn-senden:disabled { opacity: 0.4; cursor: default; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* Willkommensnachricht */
+    #willkommen {
+      color: var(--text-dim);
+      text-align: center;
+      margin: auto;
+      padding: 40px;
+    }
+    #willkommen h3 { color: var(--text); font-size: 20px; margin-bottom: 8px; }
+    #willkommen p  { line-height: 1.6; }
+
+    /* Prompt-Bibliothek-Panel */
+    #prompt-panel {
+      display: none;
+      position: fixed;
+      right: 20px;
+      bottom: 90px;
+      width: 320px;
+      max-height: 400px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      z-index: 100;
+      overflow: hidden;
+      flex-direction: column;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    #prompt-panel.sichtbar { display: flex; }
+    #prompt-panel-header {
+      display: flex;
+      align-items: center;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      gap: 8px;
+    }
+    #prompt-panel-header h4 { flex: 1; font-size: 13px; }
+    #btn-prompt-panel-schliessen {
+      background: none; border: none; color: var(--text-dim);
+      cursor: pointer; font-size: 16px;
+    }
+    #prompt-suche {
+      margin: 8px 10px;
+      padding: 6px 10px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+      width: calc(100% - 20px);
+    }
+    #prompt-liste {
+      overflow-y: auto;
+      flex: 1;
+      padding: 4px 8px 8px;
+    }
+    .prompt-item {
+      padding: 6px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      margin-bottom: 2px;
+    }
+    .prompt-item:hover { background: var(--bg-input); }
+    .prompt-item .p-name { font-weight: 500; }
+    .prompt-item .p-typ  { font-size: 10px; color: var(--text-dim); margin-left: 4px; }
+    .prompt-item .p-preview {
+      font-size: 11px; color: var(--text-dim);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;
+    }
+
+    #btn-prompts {
+      padding: 9px 12px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 13px;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    #btn-prompts:hover { background: var(--border); color: var(--text); }
+  </style>
+</head>
+<body>
+
+<!-- ============ SIDEBAR ============ -->
+<aside id="sidebar">
+  <h2>⚙ clutch</h2>
+
+  <button id="btn-neue-session">+ Neue Sitzung</button>
+
+  <div id="einstellungen-box">
+    <div class="setting-row">
+      <label for="chk-systemprompt">Systemprompt (CLUTCH.md)</label>
+      <input type="checkbox" id="chk-systemprompt" checked>
+    </div>
+  </div>
+
+  <div class="sidebar-section">Sitzungen</div>
+  <div id="sessions-liste"></div>
+
+  <div class="sidebar-section">Modelle</div>
+  <div id="modell-box">
+    <div style="color:var(--text-dim);font-size:12px;padding:4px 0">Lädt…</div>
+  </div>
+
+  <div class="sidebar-section">Statistik</div>
+  <div id="stats-box">
+    <div class="stat-zeile"><span>Sitzungen</span><span class="stat-wert" id="stat-sessions">—</span></div>
+    <div class="stat-zeile"><span>Kosten heute</span><span class="stat-wert" id="stat-kosten">—</span></div>
+    <div class="stat-zeile"><span>Zone</span><span class="stat-wert" id="stat-zone">—</span></div>
+  </div>
+</aside>
+
+<!-- ============ HAUPT-BEREICH ============ -->
+<main id="main">
+  <div id="verlauf">
+    <div id="willkommen">
+      <h3>Willkommen bei clutch</h3>
+      <p>Erstelle eine neue Sitzung oder wähle eine bestehende.<br>
+         Nachrichten werden automatisch an das passende Modell geroutet.</p>
+    </div>
+    <div id="lade-anzeige">Antwort wird generiert…</div>
+  </div>
+
+  <div id="eingabe-bereich">
+    <div id="upload-info">
+      <span id="upload-name"></span>
+      <button id="btn-upload-loeschen" title="Upload entfernen">✕</button>
+    </div>
+    <div id="eingabe-reihe">
+      <input type="file" id="eingabe-upload" accept="image/*">
+      <button id="btn-bild" title="Bild hochladen">🖼</button>
+      <textarea id="eingabe-text" placeholder="Nachricht eingeben… (Eingabe = Senden, Shift+Eingabe = Zeilenumbruch)"
+                rows="1"></textarea>
+      <button id="btn-prompts" title="Prompt-Bibliothek">📚 Prompts</button>
+      <button id="btn-senden" disabled>Senden</button>
+    </div>
+  </div>
+</main>
+
+<!-- ============ PROMPT-BIBLIOTHEK-PANEL ============ -->
+<div id="prompt-panel">
+  <div id="prompt-panel-header">
+    <h4>📚 Prompt-Bibliothek</h4>
+    <button id="btn-prompt-panel-schliessen">✕</button>
+  </div>
+  <input type="text" id="prompt-suche" placeholder="Suchen…">
+  <div id="prompt-liste"></div>
+</div>
+
+<script>
+/* ============================================================
+   clutch Web-UI — Vanilla JS, kein Framework
+   ============================================================ */
+
+const API = "";   // Gleiche Origin, kein Präfix nötig
+
+// --- Zustand ---
+let aktiveSitzungId = null;
+let hatBild = false;
+let promptSucheTimer = null;
+
+// --- DOM-Referenzen ---
+const verlaufEl      = document.getElementById("verlauf");
+const willkommenEl   = document.getElementById("willkommen");
+const ladeEl         = document.getElementById("lade-anzeige");
+const eingabeText    = document.getElementById("eingabe-text");
+const btnSenden      = document.getElementById("btn-senden");
+const btnNeueSitzung = document.getElementById("btn-neue-session");
+const sessionsListe  = document.getElementById("sessions-liste");
+const chkSystemprompt = document.getElementById("chk-systemprompt");
+const eingabeUpload  = document.getElementById("eingabe-upload");
+const btnBild        = document.getElementById("btn-bild");
+const uploadInfo     = document.getElementById("upload-info");
+const uploadName     = document.getElementById("upload-name");
+const btnUploadLoeschen = document.getElementById("btn-upload-loeschen");
+const modellBox      = document.getElementById("modell-box");
+const statSessions   = document.getElementById("stat-sessions");
+const statKosten     = document.getElementById("stat-kosten");
+const statZone       = document.getElementById("stat-zone");
+const btnPrompts     = document.getElementById("btn-prompts");
+const promptPanel    = document.getElementById("prompt-panel");
+const btnPromptSchliessen = document.getElementById("btn-prompt-panel-schliessen");
+const promptSuche    = document.getElementById("prompt-suche");
+const promptListe    = document.getElementById("prompt-liste");
+
+// ============================================================
+// Hilfsfunktionen
+// ============================================================
+
+async function apiFetch(url, optionen = {}) {
+  const antwort = await fetch(API + url, {
+    headers: { "Content-Type": "application/json", ...optionen.headers },
+    ...optionen,
+  });
+  if (!antwort.ok) {
+    const fehler = await antwort.text();
+    throw new Error(`API-Fehler ${antwort.status}: ${fehler}`);
+  }
+  return antwort.json();
+}
+
+function nachrichtAnzeigen(role, text, meta = "") {
+  // Willkommen-Nachricht ausblenden
+  willkommenEl.style.display = "none";
+
+  const el = document.createElement("div");
+  el.className = `nachricht ${role}`;
+  el.textContent = text;
+  if (meta) {
+    const metaEl = document.createElement("div");
+    metaEl.className = "meta";
+    metaEl.textContent = meta;
+    el.appendChild(metaEl);
+  }
+  verlaufEl.insertBefore(el, ladeEl);
+  verlaufEl.scrollTop = verlaufEl.scrollHeight;
+}
+
+function ladeAnzeigen(an) {
+  ladeEl.style.display = an ? "block" : "none";
+  if (an) verlaufEl.scrollTop = verlaufEl.scrollHeight;
+}
+
+function eingabeSperren(gesperrt) {
+  eingabeText.disabled = gesperrt;
+  btnSenden.disabled = gesperrt || !eingabeText.value.trim();
+}
+
+// ============================================================
+// Sessions
+// ============================================================
+
+async function sitzungLaden(id) {
+  aktiveSitzungId = id;
+  hatBild = false;
+  uploadInfo.classList.remove("sichtbar");
+
+  // Verlauf leeren (ohne Willkommen + Lade-Indikator)
+  const behalten = [willkommenEl, ladeEl];
+  [...verlaufEl.children].forEach(kind => {
+    if (!behalten.includes(kind)) kind.remove();
+  });
+  willkommenEl.style.display = "none";
+
+  // Aktive Session in Sidebar markieren
+  document.querySelectorAll(".session-item").forEach(el => {
+    el.classList.toggle("aktiv", el.dataset.id === id);
+  });
+
+  // Verlauf laden
+  try {
+    const daten = await apiFetch(`/api/sessions/${id}`);
+    daten.nachrichten.forEach(m => {
+      let meta = "";
+      if (m.model) meta += `Modell: ${m.model}`;
+      if (m.tokens) meta += `  |  ${m.tokens} Tokens`;
+      nachrichtAnzeigen(m.role, m.content, meta);
+    });
+  } catch (e) {
+    console.error("Verlauf laden fehlgeschlagen:", e);
+  }
+
+  eingabeText.focus();
+  btnSenden.disabled = !eingabeText.value.trim();
+}
+
+async function sessionsAktualisieren() {
+  try {
+    const sitzungen = await apiFetch("/api/sessions");
+    sessionsListe.innerHTML = "";
+    sitzungen.forEach(s => {
+      const el = document.createElement("div");
+      el.className = "session-item";
+      el.dataset.id = s.id;
+      if (s.id === aktiveSitzungId) el.classList.add("aktiv");
+      const zeitstempel = new Date(s.updated_at).toLocaleString("de-DE", {
+        day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"
+      });
+      el.textContent = s.titel || `Sitzung ${zeitstempel}`;
+      el.title = el.textContent;
+      el.addEventListener("click", () => sitzungLaden(s.id));
+      sessionsListe.appendChild(el);
+    });
+  } catch (e) {
+    console.error("Sessions laden fehlgeschlagen:", e);
+  }
+}
+
+btnNeueSitzung.addEventListener("click", async () => {
+  aktiveSitzungId = null;
+  hatBild = false;
+  uploadInfo.classList.remove("sichtbar");
+
+  // Verlauf leeren
+  [...verlaufEl.children].forEach(kind => {
+    if (kind !== willkommenEl && kind !== ladeEl) kind.remove();
+  });
+  willkommenEl.style.display = "";
+
+  document.querySelectorAll(".session-item").forEach(el => el.classList.remove("aktiv"));
+  eingabeText.focus();
+  btnSenden.disabled = !eingabeText.value.trim();
+});
+
+// ============================================================
+// Modelle laden
+// ============================================================
+
+async function modelleAktualisieren() {
+  try {
+    const gaenge = await apiFetch("/api/models");
+    modellBox.innerHTML = "";
+    if (!gaenge.length) {
+      modellBox.innerHTML = "<div style='color:var(--text-dim);font-size:12px'>Keine Modelle</div>";
+      return;
+    }
+    gaenge.forEach(g => {
+      const el = document.createElement("div");
+      el.className = "modell-item";
+      el.innerHTML = `
+        <span class="modell-name">${escHtml(g.name)}</span>
+        <span class="modell-gang">G${g.gang}</span>
+      `;
+      el.title = `${g.provider} | ${g.leistung} | ${g.kosten_input_1k}$/1K in`;
+      modellBox.appendChild(el);
+    });
+  } catch (e) {
+    console.error("Modelle laden fehlgeschlagen:", e);
+  }
+}
+
+// ============================================================
+// Statistik
+// ============================================================
+
+async function statistikAktualisieren() {
+  try {
+    const stats = await apiFetch("/api/stats");
+    statSessions.textContent = stats.sessions ?? "—";
+    const kosten = stats.tankuhr?.kosten_heute_usd;
+    statKosten.textContent = kosten != null ? `$${Number(kosten).toFixed(4)}` : "—";
+    statZone.textContent = stats.tankuhr?.zone ?? "—";
+  } catch (e) {
+    console.error("Statistik laden fehlgeschlagen:", e);
+  }
+}
+
+// ============================================================
+// Bild-Upload
+// ============================================================
+
+btnBild.addEventListener("click", () => eingabeUpload.click());
+
+eingabeUpload.addEventListener("change", async () => {
+  const datei = eingabeUpload.files?.[0];
+  if (!datei) return;
+
+  try {
+    const formData = new FormData();
+    formData.append("datei", datei);
+    const antwort = await fetch(API + "/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+    if (!antwort.ok) throw new Error(await antwort.text());
+    const ergebnis = await antwort.json();
+    hatBild = ergebnis.hat_bild;
+    uploadName.textContent = `🖼 ${ergebnis.name}`;
+    uploadInfo.classList.add("sichtbar");
+  } catch (e) {
+    console.error("Upload fehlgeschlagen:", e);
+    alert(`Upload fehlgeschlagen: ${e.message}`);
+  }
+
+  eingabeUpload.value = "";
+});
+
+btnUploadLoeschen.addEventListener("click", () => {
+  hatBild = false;
+  uploadInfo.classList.remove("sichtbar");
+  uploadName.textContent = "";
+});
+
+// ============================================================
+// Chat senden
+// ============================================================
+
+async function senden() {
+  const text = eingabeText.value.trim();
+  if (!text) return;
+
+  eingabeText.value = "";
+  eingabeText.style.height = "auto";
+  eingabeSperren(true);
+  ladeAnzeigen(true);
+
+  nachrichtAnzeigen("user", text, hatBild ? "📎 Bild angehängt" : "");
+
+  const bild = hatBild;
+  hatBild = false;
+  uploadInfo.classList.remove("sichtbar");
+
+  try {
+    const nutzlast = {
+      text,
+      hat_bild: bild,
+    };
+
+    if (!aktiveSitzungId) {
+      // Neue Session — Systemprompt-Toggle mitgeben
+      nutzlast.system_prompt_on = chkSystemprompt.checked;
+    } else {
+      nutzlast.session_id = aktiveSitzungId;
+    }
+
+    const antwort = await apiFetch("/api/chat", {
+      method: "POST",
+      body: JSON.stringify(nutzlast),
+    });
+
+    aktiveSitzungId = antwort.session_id;
+
+    let meta = "";
+    if (antwort.model)   meta += `Modell: ${antwort.model}`;
+    if (antwort.gang)    meta += `  |  Gang: ${antwort.gang}`;
+    if (antwort.tokens)  meta += `  |  ${antwort.tokens} Tokens`;
+    if (antwort.latenz)  meta += `  |  ${Number(antwort.latenz).toFixed(2)}s`;
+
+    nachrichtAnzeigen("assistant", antwort.text || "(keine Antwort)", meta);
+
+    // Warnungen ausgeben
+    if (antwort.warnungen?.length) {
+      antwort.warnungen.forEach(w => {
+        const el = document.createElement("div");
+        el.style.cssText = "color:#ffaa44;font-size:11px;text-align:center;padding:2px";
+        el.textContent = `⚠ ${w}`;
+        verlaufEl.insertBefore(el, ladeEl);
+      });
+    }
+
+    await sessionsAktualisieren();
+    await statistikAktualisieren();
+
+  } catch (e) {
+    nachrichtAnzeigen("assistant", `Fehler: ${e.message}`);
+    console.error("Chat-Fehler:", e);
+  } finally {
+    ladeAnzeigen(false);
+    eingabeSperren(false);
+    eingabeText.focus();
+  }
+}
+
+btnSenden.addEventListener("click", senden);
+
+eingabeText.addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    if (!btnSenden.disabled) senden();
+  }
+});
+
+eingabeText.addEventListener("input", () => {
+  btnSenden.disabled = !eingabeText.value.trim();
+  // Auto-Höhe
+  eingabeText.style.height = "auto";
+  eingabeText.style.height = Math.min(eingabeText.scrollHeight, 180) + "px";
+});
+
+// ============================================================
+// Prompt-Bibliothek
+// ============================================================
+
+function escHtml(str) {
+  return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+async function promptsLaden(suche = "") {
+  try {
+    const url = suche ? `/api/prompts?suche=${encodeURIComponent(suche)}` : "/api/prompts";
+    const items = await apiFetch(url);
+    promptListe.innerHTML = "";
+    if (!items.length) {
+      promptListe.innerHTML = "<div style='color:var(--text-dim);font-size:12px;padding:8px'>Keine Einträge gefunden.</div>";
+      return;
+    }
+    items.forEach(item => {
+      const el = document.createElement("div");
+      el.className = "prompt-item";
+      el.innerHTML = `
+        <div>
+          <span class="p-name">${escHtml(item.name)}</span>
+          <span class="p-typ">${escHtml(item.typ)}</span>
+        </div>
+        <div class="p-preview">${escHtml((item.content || "").slice(0, 80))}</div>
+      `;
+      el.addEventListener("click", () => {
+        // Content in Eingabe einfügen
+        const aktuell = eingabeText.value;
+        eingabeText.value = aktuell ? aktuell + "\n\n" + item.content : item.content;
+        eingabeText.style.height = "auto";
+        eingabeText.style.height = Math.min(eingabeText.scrollHeight, 180) + "px";
+        btnSenden.disabled = false;
+        promptPanel.classList.remove("sichtbar");
+        eingabeText.focus();
+      });
+      promptListe.appendChild(el);
+    });
+  } catch (e) {
+    console.error("Prompts laden fehlgeschlagen:", e);
+  }
+}
+
+btnPrompts.addEventListener("click", () => {
+  promptPanel.classList.toggle("sichtbar");
+  if (promptPanel.classList.contains("sichtbar")) {
+    promptsLaden();
+    promptSuche.focus();
+  }
+});
+
+btnPromptSchliessen.addEventListener("click", () => {
+  promptPanel.classList.remove("sichtbar");
+});
+
+promptSuche.addEventListener("input", () => {
+  clearTimeout(promptSucheTimer);
+  promptSucheTimer = setTimeout(() => promptsLaden(promptSuche.value), 250);
+});
+
+// ============================================================
+// Initialisierung
+// ============================================================
+
+async function init() {
+  await Promise.all([
+    sessionsAktualisieren(),
+    modelleAktualisieren(),
+    statistikAktualisieren(),
+  ]);
+}
+
+init();
+</script>
+</body>
+</html>

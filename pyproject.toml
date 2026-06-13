@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "clutch"
-version = "0.3.0"
+version = "0.4.0"
 description = "Provider-neutral LLM orchestration engine with auto-learning"
 readme = "README.md"
 license = "MIT"
@@ -28,10 +28,20 @@ dependencies = [
     "requests>=2.31.0",
 ]
 
+[project.optional-dependencies]
+web = [
+    "fastapi>=0.110",
+    "uvicorn>=0.27",
+    "python-multipart>=0.0.9",
+]
+
 [project.urls]
 Homepage = "https://github.com/ellmos-ai/clutch"
 Repository = "https://github.com/ellmos-ai/clutch"
 Issues = "https://github.com/ellmos-ai/clutch/issues"
+
+[project.scripts]
+clutch = "clutch.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["clutch*"]

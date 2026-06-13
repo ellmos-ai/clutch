@@ -110,9 +110,9 @@ def test_kupplung_mechanik():
     assert config.gang.name in [g.name for g in getriebe.alle_gaenge()]
     assert config.muster in ("einzelfahrt", "kolonne", "team", "schwarm", "hybrid")
 
-    # Budget-Constraint: Orange -> nur guenstige Gaenge
+    # Budget-Constraint: Orange -> nur guenstige Gaenge (SSOT: G1-G2, s. M0/README)
     config_orange = kupplung.einlegen(profil, budget_zone="orange")
-    assert config_orange.gang.gang <= 1, f"In Orange max Gang 1, got {config_orange.gang.gang}"
+    assert config_orange.gang.gang <= 2, f"In Orange max Gang 2, got {config_orange.gang.gang}"
 
     # Eilig -> kein Opus
     profil_eilig = analyse.analysiere("Schnell den Typo fixen!", {"tempo": "eilig"})

@@ -27,6 +27,10 @@ from clutch.strecke import StreckenProfil, StreckenTyp, Tempo
 from clutch.getriebe import Getriebe, Gang
 from clutch.gas_bremse import GasBremse, GasStellung
 
+# Agentische CLI-Motoren fuehren Tools mit Auto-Approve (--yolo) auf dem Host aus.
+# Aus untrusted Quellen (Web/API) duerfen sie NICHT automatisch gewaehlt werden.
+AGENTIC_CLI_PROVIDERS = {"claude-code", "kimi-cli", "kimi-code"}
+
 
 @dataclass
 class FahrtConfig:
@@ -91,6 +95,8 @@ class Kupplung:
         budget_zone: Optional[str] = None,
         max_gang: Optional[int] = None,
         gesperrte_modelle: Optional[list[str]] = None,
+        zweck: Optional[str] = None,
+        vertrauenswuerdig: bool = True,
     ) -> FahrtConfig:
         """Bestimmt die optimale FahrtConfig fuer ein StreckenProfil.
 
@@ -132,17 +138,24 @@ class Kupplung:
                 gang = hochgeschaltet
 
         # 6. Budget-Constraint
+        limit = max_gang if max_gang is not None else 5
         if budget_zone:
-            zone_max = {"green": 5, "yellow": 3, "orange": 1, "red": 0}
-            limit = zone_max.get(budget_zone, 5)
-            if max_gang is not None:
-                limit = min(limit, max_gang)
+            # SSOT: identisch zu bordcomputer._budget_zonen / README (orange = G1-G2).
+            zone_max = {"green": 5, "yellow": 3, "orange": 2, "red": 0}
+            limit = min(limit, zone_max.get(budget_zone, 5))
             if gang and gang.gang > limit:
                 guenstigere = self.getriebe.filter(max_gang=limit)
                 if guenstigere:
                     gang = guenstigere[-1]  # Hoechster erlaubter Gang
                 elif limit == 0:
                     gang = None  # Budget erschoepft
+
+        # 6b. Zweck-Refinement: Gang nach Zweck/Modalitaet anpassen (staerken-Match).
+        #     Bildbewusst: zweck="vision" erzwingt ein vision-faehiges Modell (M2).
+        if gang and zweck and zweck != "general":
+            passend = self._zweck_gang(zweck, gang, limit, gesperrte)
+            if passend and passend.name != gang.name:
+                gang = passend
 
         # 7. Gesperrte Modelle
         if gang and gang.name in gesperrte:
@@ -168,10 +181,31 @@ class Kupplung:
         if random.random() < self._erkundungsrate:
             gang, gas_wert, ist_erkundung = self._erkunden(gang, gas_wert)
 
+        # 10b. Harte Modalitaet: vision darf NICHT durch Exploration gebrochen werden
+        #      (ein Nicht-Vision-Modell kann das Bild nicht sehen). Wiederherstellen.
+        zusatz_grund = ""
+        if zweck == "vision" and gang and "vision" not in gang.staerken:
+            passend = self._zweck_gang("vision", gang, limit, gesperrte)
+            if passend:
+                gang = passend
+                ist_erkundung = False
+            else:
+                # Kein vision-faehiges Modell verfuegbar -- transparent machen.
+                zusatz_grund += " | WARN: kein vision-Modell verfuegbar"
+
+        # 10c. Untrusted (Web/API): keine agentischen CLI-Motoren mit Auto-Approve.
+        if not vertrauenswuerdig and gang and gang.provider in AGENTIC_CLI_PROVIDERS:
+            sicher = [g for g in self.getriebe.filter(max_gang=limit)
+                      if g.provider not in AGENTIC_CLI_PROVIDERS and g.name not in gesperrte]
+            if sicher:
+                gang = sicher[-1]
+                ist_erkundung = False
+                zusatz_grund += " | untrusted: agentische CLI ausgeschlossen"
+
         # Gas-Stellung berechnen
         gas_stellung = self.pedal.stellung(gas_wert)
 
-        grund = self._grund_bauen(profil, gang, ist_erkundung)
+        grund = self._grund_bauen(profil, gang, ist_erkundung) + zusatz_grund
 
         return FahrtConfig(
             gang=gang,
@@ -189,6 +223,26 @@ class Kupplung:
         self._erkundungsrate = max(0.0, min(1.0, rate))
 
     # --- Private ---
+
+    def _zweck_gang(self, zweck: str, aktuell: Gang, limit: int,
+                    gesperrte: list[str]) -> Optional[Gang]:
+        """Waehlt einen Gang dessen staerken den Zweck abdecken.
+
+        Kandidaten: zweck in staerken, nicht gesperrt, gang <= limit. Wenn der
+        aktuelle Gang bereits passt, bleibt er. Sonst der Kandidat mit der
+        kleinsten Stufendifferenz (Tie-Break: hoehere Stufe = mehr Qualitaet).
+        Gibt None zurueck, wenn kein passender Gang existiert (Aufrufer behaelt
+        den aktuellen Gang -- z.B. wenn kein vision-Modell verfuegbar ist).
+        """
+        if zweck in aktuell.staerken:
+            return aktuell
+        kandidaten = [
+            g for g in self.getriebe.filter(staerke=zweck, max_gang=limit)
+            if g.name not in gesperrte
+        ]
+        if not kandidaten:
+            return None
+        return min(kandidaten, key=lambda g: (abs(g.gang - aktuell.gang), -g.gang))
 
     def _muster_waehlen(self, basis_muster: str, profil: StreckenProfil) -> str:
         """Bestimmt das Ausfuehrungsmuster basierend auf dem Profil."""
