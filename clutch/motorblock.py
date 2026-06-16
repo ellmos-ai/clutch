@@ -253,10 +253,22 @@ class OllamaMotor(Motor):
         super().__init__()
         self._basis_url = basis_url.rstrip("/")
 
-    def ist_verfuegbar(self) -> bool:
+    def _ziel_url(self, config: Optional[FahrtConfig] = None) -> str:
+        """Basis-URL des Ziel-Hosts.
+
+        Bevorzugt den ``endpoint`` des gewaehlten Gangs (z.B. ein per Discovery
+        gefundener Remote-Ollama-Host im VPN) und faellt auf die bei der
+        Konstruktion gesetzte Basis-URL zurueck. Ohne diese Aufloesung wuerde
+        ein Remote-Gang stets gegen ``localhost`` laufen.
+        """
+        gang = getattr(config, "gang", None)
+        endpoint = getattr(gang, "endpoint", None)
+        return (endpoint or self._basis_url).rstrip("/")
+
+    def ist_verfuegbar(self, config: Optional[FahrtConfig] = None) -> bool:
         try:
             import requests
-            r = requests.get(f"{self._basis_url}/api/tags", timeout=3)
+            r = requests.get(f"{self._ziel_url(config)}/api/tags", timeout=3)
             return r.status_code == 200
         except Exception:
             return False
@@ -270,7 +282,7 @@ class OllamaMotor(Motor):
             import requests
 
             response = requests.post(
-                f"{self._basis_url}/api/generate",
+                f"{self._ziel_url(config)}/api/generate",
                 json={
                     "model": config.model_id,
                     "prompt": vollprompt,
@@ -634,7 +646,14 @@ class MotorBlock:
         """Fuehrt einen LLM-Call mit dem passenden Motor aus."""
         motor = self.motor_fuer(config.provider)
 
-        if not motor.ist_verfuegbar():
+        # Ollama-Verfuegbarkeit gegen den Ziel-Host des Gangs pruefen (Remote),
+        # nicht stur gegen localhost. Andere Motoren: Signatur ohne config.
+        verfuegbar = (
+            motor.ist_verfuegbar(config)
+            if config.provider == "ollama"
+            else motor.ist_verfuegbar()
+        )
+        if not verfuegbar:
             logger.warning(
                 f"Motor '{config.provider}' nicht verfuegbar. "
                 f"Fehlender API-Key oder Service offline."

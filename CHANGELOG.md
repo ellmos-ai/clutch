@@ -21,6 +21,16 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1
   zum Setzen/Löschen von Keys (Werte werden NIE angezeigt/zurückgegeben; nur Namen + Quelle
   env/store). Tests in `test_m12_web_settings.py` (inkl. Wert-Leak-Schutz).
 
+### Fixed
+- **Ollama-Remote-Host wurde ignoriert:** `OllamaMotor` lief bei Ausführung *und*
+  Verfügbarkeitscheck stets gegen die bei Konstruktion gesetzte Basis-URL
+  (Default `localhost:11434`) und ignorierte den per Discovery gesetzten
+  `Gang.endpoint`. Dadurch war ein entdeckter Remote-Ollama-Host (z. B. im VPN)
+  nie erreichbar. Jetzt bevorzugt der Motor `Gang.endpoint` und fällt nur ohne
+  Endpoint auf die Basis-URL zurück; `MotorBlock.ausfuehren` prüft die
+  Ollama-Verfügbarkeit gegen denselben Ziel-Host. Regressionstests in
+  `test_ollama_endpoint.py`.
+
 ## [0.4.0] -- 2026-06-14
 
 Großer Ausbau von der Library zur Routing-**Anwendung** (CLI + Web + API), Kimi-Anbindung,
