@@ -123,6 +123,51 @@ def test_default_bleibt_localhost(monkeypatch):
     print("[OK] Default bleibt localhost")
 
 
+def _capture_timeout(monkeypatch):
+    erfasst = {}
+
+    class FakeResp:
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return {"response": "ok"}
+
+    def fake_post(url, json=None, timeout=None):
+        erfasst["timeout"] = timeout
+        return FakeResp()
+
+    monkeypatch.setitem(sys.modules, "requests", SimpleNamespace(post=fake_post))
+    return erfasst
+
+
+def test_timeout_basis_parameter(monkeypatch):
+    """Grosse Lokalmodelle: Timeout-Basis per Parameter erhöhbar (Default 60)."""
+    erfasst = _capture_timeout(monkeypatch)
+    OllamaMotor(timeout_basis=300).ausfuehren(_remote_cfg(), "hi")
+    assert erfasst["timeout"] >= 300, erfasst["timeout"]
+    print("[OK] timeout_basis Parameter")
+
+
+def test_timeout_basis_env(monkeypatch):
+    """Env CLUTCH_OLLAMA_TIMEOUT überschreibt den Default."""
+    monkeypatch.setenv("CLUTCH_OLLAMA_TIMEOUT", "200")
+    erfasst = _capture_timeout(monkeypatch)
+    OllamaMotor().ausfuehren(_remote_cfg(), "hi")
+    assert erfasst["timeout"] >= 200, erfasst["timeout"]
+    print("[OK] CLUTCH_OLLAMA_TIMEOUT Env")
+
+
+def test_timeout_default_unveraendert(monkeypatch):
+    """Ohne Konfiguration bleibt der bisherige 60s-Basis-Default."""
+    monkeypatch.delenv("CLUTCH_OLLAMA_TIMEOUT", raising=False)
+    erfasst = _capture_timeout(monkeypatch)
+    OllamaMotor().ausfuehren(_remote_cfg(), "hi")
+    # 60 * gas.timeout_multiplikator (gas 0.5 -> ~1.0–1.2); jedenfalls < 100.
+    assert 50 <= erfasst["timeout"] < 100, erfasst["timeout"]
+    print("[OK] Default-Timeout unverändert")
+
+
 if __name__ == "__main__":
     import pytest
     raise SystemExit(pytest.main([__file__, "-v"]))

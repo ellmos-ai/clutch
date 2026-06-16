@@ -31,6 +31,13 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1
   Ollama-Verfügbarkeit gegen denselben Ziel-Host. Regressionstests in
   `test_ollama_endpoint.py`.
 
+### Added
+- **Ollama-Timeout konfigurierbar:** Der bisher fest auf 60 s gesetzte Basis-Timeout
+  des `OllamaMotor` ist jetzt über den Konstruktor-Parameter `timeout_basis` bzw. die
+  Env-Variable `CLUTCH_OLLAMA_TIMEOUT` (Sekunden) einstellbar. Grosse lokale Modelle
+  (30B+) brauchen beim Kaltstart länger als der Cloud-orientierte Default; ohne
+  Override bleibt das Verhalten unverändert (60 s). Tests in `test_ollama_endpoint.py`.
+
 ## [0.4.0] -- 2026-06-14
 
 Großer Ausbau von der Library zur Routing-**Anwendung** (CLI + Web + API), Kimi-Anbindung,

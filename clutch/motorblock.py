@@ -249,9 +249,19 @@ class OllamaMotor(Motor):
 
     provider_name = "ollama"
 
-    def __init__(self, basis_url: str = "http://localhost:11434"):
+    def __init__(self, basis_url: str = "http://localhost:11434",
+                 timeout_basis: Optional[float] = None):
         super().__init__()
         self._basis_url = basis_url.rstrip("/")
+        # Lokale Modelle (v.a. grosse, z.B. 30B+) brauchen beim Kaltstart
+        # leicht laenger als der Cloud-orientierte 60s-Default. Konfigurierbar
+        # via Parameter oder Env CLUTCH_OLLAMA_TIMEOUT (Sekunden), sonst 60.
+        if timeout_basis is None:
+            try:
+                timeout_basis = float(os.environ.get("CLUTCH_OLLAMA_TIMEOUT", "60"))
+            except (TypeError, ValueError):
+                timeout_basis = 60.0
+        self._timeout_basis = timeout_basis
 
     def _ziel_url(self, config: Optional[FahrtConfig] = None) -> str:
         """Basis-URL des Ziel-Hosts.
@@ -276,7 +286,7 @@ class OllamaMotor(Motor):
     def ausfuehren(self, config: FahrtConfig, prompt: str) -> MotorErgebnis:
         t0 = time.time()
         vollprompt = self._prompt_mit_gas(config, prompt)
-        timeout = self._timeout(config, basis=60.0)
+        timeout = self._timeout(config, basis=self._timeout_basis)
 
         try:
             import requests
