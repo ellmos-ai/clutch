@@ -178,8 +178,25 @@ class Kupplung:
 
         # 10. Exploration (Epsilon-Greedy)
         ist_erkundung = False
+        gang_vor_erkundung = gang  # Referenz fuer Mindest-Qualitaet (10a)
         if random.random() < self._erkundungsrate:
             gang, gas_wert, ist_erkundung = self._erkunden(gang, gas_wert)
+
+        # 10a. Harte Schranken nach Exploration wiederherstellen.
+        #      Exploration darf weder Budget-Zone (limit) noch Strecken-Mindestqualitaet
+        #      (min_gang = Strecken-Basis-Gang) noch eilig-Gas-Kappung verletzen.
+        if ist_erkundung:
+            min_gang_erkundung = gang_vor_erkundung.gang if gang_vor_erkundung else 1
+            if gang and gang.gang > limit:
+                guenstigere = self.getriebe.filter(max_gang=limit)
+                if guenstigere:
+                    gang = guenstigere[-1]
+            if gang and gang.gang < min_gang_erkundung:
+                teurere = self.getriebe.filter(min_gang=min_gang_erkundung, max_gang=limit)
+                if teurere:
+                    gang = teurere[0]
+            if profil.tempo == Tempo.EILIG:
+                gas_wert = min(gas_wert, 0.5)
 
         # 10b. Harte Modalitaet: vision darf NICHT durch Exploration gebrochen werden
         #      (ein Nicht-Vision-Modell kann das Bild nicht sehen). Wiederherstellen.
