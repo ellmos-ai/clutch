@@ -18,6 +18,9 @@ on:
       - "v*"
   workflow_dispatch: {}   # manueller Start moeglich (baut nur, publisht nur bei Tag)
 
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Build distributions
