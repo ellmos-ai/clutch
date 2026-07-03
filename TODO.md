@@ -241,12 +241,11 @@ Einschränkung, **niedrig** = Hygiene/Konsistenz.
   OneDrive-Ordner (Sync-Last). Sie sind korrekt gitignored, sollten aber
   lokal gelöscht werden; `data/clutch.db` entsteht durch Fix
   "Fahrer akzeptiert keinen DB-Pfad" künftig nicht mehr.
-- [ ] **(niedrig) CHANGELOG-Inkonsistenzen:** (a) `[0.3.0-rc1] -- 2026-03-15`
-  steht UNTER `[0.3.0] -- 2026-03-12`, ist aber später datiert als das finale
-  Release — Datum oder Reihenfolge korrigieren. (b) "13 Unit-Tests
-  (test_kupplung.py)" — die Datei heißt `tests/test_clutch.py`, und es gibt
-  inzwischen 4 Testdateien (test_clutch, test_learning, test_patterns,
-  test_route).
+- [x] **(niedrig) CHANGELOG-Inkonsistenzen:** Erledigt 2026-07-03:
+  Der historische `[0.3.0-rc1] -- 2026-03-15`-Abschnitt steht jetzt vor
+  `[0.3.0] -- 2026-03-12`; die initiale Testreferenz nennt
+  `tests/test_clutch.py` statt des alten `test_kupplung.py`-Namens.
+  Aktueller Smoke: `python -m pytest --collect-only -q` sammelt 280 Tests.
 - [ ] **(niedrig) README-Architekturdiagramm vs. Code:** Diagramm nennt
   "G2: Flash, G4: Gemini Pro" als feste Zuordnung — konsistent mit
   `getriebe.json`, aber die Road-Types-Tabelle (README) listet 8 Typen,

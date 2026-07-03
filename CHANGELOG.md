@@ -22,6 +22,9 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1
   env/store). Tests in `test_m12_web_settings.py` (inkl. Wert-Leak-Schutz).
 
 ### Fixed
+- **Changelog-Hygiene:** Die historische `0.3.0-rc1`-Sektion steht jetzt vor
+  dem finalen `0.3.0`-Release, und die initiale Testreferenz nennt die
+  tatsächliche Datei `tests/test_clutch.py`.
 - **Ollama-Remote-Host wurde ignoriert:** `OllamaMotor` lief bei Ausführung *und*
   Verfügbarkeitscheck stets gegen die bei Konstruktion gesetzte Basis-URL
   (Default `localhost:11434`) und ignorierte den per Discovery gesetzten
@@ -92,6 +95,16 @@ Zweck-/bildbewusstes Routing, Modell-Discovery, Service-Layer, Credential-Store 
 - `TODO.md` um einen aktuellen Public-Readiness-Status ergänzt und `.gitignore` um ein explizites `*.pyc`-Muster erweitert.
 - `llms.txt` um `Last-checked`, Audience und Suchphrasen für LLM-/Crawler-Discovery ergänzt.
 
+## [0.3.0-rc1] -- 2026-03-15
+
+### Changed
+- Repo-Referenzen auf `ellmos-ai/clutch` aktualisiert
+- BACH-interne Dokumente (BACH_EINHAENGEPUNKTE.md, BACH_INTEGRATION.md) entfernt
+- Personenbezogene Daten bereinigt
+
+### Fixed
+- `.gitignore` um BACH-Dateien ergänzt
+
 ## [0.3.0] -- 2026-03-12
 
 Erster öffentlicher Release als `ellmos-ai/clutch`.
@@ -110,16 +123,6 @@ Erster öffentlicher Release als `ellmos-ai/clutch`.
 - Tacho: Metriken-Erfassung während der Laufzeit
 - Execution Patterns: Einzelfahrt, Kolonne (Chain), Team (Parallel), Schwarm (Bulk), Hybrid
 - JSON-basierte Konfiguration (getriebe.json, strecken.json, kupplung.json, fitness_criteria.json)
-- 13 Unit-Tests (test_kupplung.py)
+- 13 initiale Unit-Tests (`tests/test_clutch.py`)
 - README mit Architektur-Diagramm und Quick Start
 - MIT-Lizenz
-
-## [0.3.0-rc1] -- 2026-03-15
-
-### Changed
-- Repo-Referenzen auf `ellmos-ai/clutch` aktualisiert
-- BACH-interne Dokumente (BACH_EINHAENGEPUNKTE.md, BACH_INTEGRATION.md) entfernt
-- Personenbezogene Daten bereinigt
-
-### Fixed
-- `.gitignore` um BACH-Dateien ergänzt
