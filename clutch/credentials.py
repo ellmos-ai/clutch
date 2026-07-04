@@ -41,13 +41,24 @@ class CredentialStore:
             return {}
 
     def _speichern(self, data: dict) -> None:
+        # Verzeichnis nur fuer den Eigentuemer zugaenglich anlegen (0700).
         self.pfad.parent.mkdir(parents=True, exist_ok=True)
-        self.pfad.write_text(json.dumps(data, indent=2), encoding="utf-8")
-        # Best-effort Rechte einschraenken (nur Eigentuemer lesen/schreiben).
+        try:
+            os.chmod(self.pfad.parent, stat.S_IRWXU)
+        except OSError:
+            pass  # Windows / FS ohne POSIX-Rechte -- ignorieren
+        inhalt = json.dumps(data, indent=2)
+        # Datei mit engen Rechten ANLEGEN (0600), damit kein Fenster mit zu
+        # weiten Rechten zwischen Erstellung und chmod entsteht.
+        flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
+        fd = os.open(str(self.pfad), flags, stat.S_IRUSR | stat.S_IWUSR)
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(inhalt)
+        # Bestehende Dateien (aus aelteren Versionen) nachtraeglich absichern.
         try:
             os.chmod(self.pfad, stat.S_IRUSR | stat.S_IWUSR)
         except OSError:
-            pass  # Windows / FS ohne POSIX-Rechte -- ignorieren
+            pass
 
     def get(self, name: str) -> Optional[str]:
         wert = self._laden().get(name)

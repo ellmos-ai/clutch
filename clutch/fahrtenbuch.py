@@ -113,8 +113,16 @@ class Fahrtenbuch:
 
     @contextmanager
     def _conn(self):
-        conn = sqlite3.connect(str(self.db_path))
+        # timeout=15s + WAL: unter dem Web-Server (clutch serve) schreiben
+        # gleichzeitige /api/chat-Requests in dieselbe DB. Ohne WAL sperrt der
+        # DELETE-Journal-Modus exklusiv -> sporadisch "database is locked".
+        conn = sqlite3.connect(str(self.db_path), timeout=15.0)
         conn.row_factory = sqlite3.Row
+        try:
+            conn.execute("PRAGMA journal_mode=WAL")
+            conn.execute("PRAGMA busy_timeout=15000")
+        except sqlite3.Error:
+            pass  # z.B. read-only-FS: Betrieb im Default-Modus fortsetzen
         try:
             yield conn
             conn.commit()

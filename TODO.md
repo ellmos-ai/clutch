@@ -4,6 +4,22 @@ Public-readiness was completed before the repository was published as
 `ellmos-ai/clutch`. This file now tracks follow-up work for a public,
 provider-neutral LLM orchestration library.
 
+## Review 2026-07-04 (Modul-Review-Loop, Subagent-Review — alle 4 Funde gefixt)
+
+- [x] **(hoch)** Web-API ohne jede Authentifizierung (Credential-/Config-CRUD offen)
+  → DNS-Rebinding-Schutz (TrustedHostMiddleware), optionales Token-Gate
+  (`CLUTCH_WEB_TOKEN`), Bind-Schutz in `serve()` (nicht-loopback ⇒ Token-Pflicht),
+  CORS gehärtet. Tests in `test_webapp_security.py`.
+- [x] **(mittel)** Circuit-Breaker las `consecutive_failures`, nutzte es nie —
+  jetzt zusätzlicher Serien-Auslöser (Regressionstest).
+- [x] **(mittel)** Fahrtenbuch-SQLite ohne WAL unter dem Web-Server → WAL +
+  Busy-Timeout.
+- [x] **(niedrig)** credentials.json chmod-Race → atomare Anlage mit 0600.
+- [ ] **(Folge)** Optional: das Web-Token beim Loopback-Start automatisch
+  generieren und in die ausgelieferte UI injizieren, damit auch andere lokale
+  Prozesse ohne Token nicht auf `/api/*` zugreifen können (aktuell ist das
+  Loopback-Gate opt-in per `CLUTCH_WEB_TOKEN`).
+
 ## Current
 
 - [ ] **M6 Web-UI: CLI- + Env-/Key-Verwaltung spiegeln** — Settings-Panel in der

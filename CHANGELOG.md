@@ -8,6 +8,36 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1
 
 ## [Unreleased]
 
+### Security
+- **Web-API härtung (Code-Review 2026-07-04).** Die FastAPI-Web-UI war ohne
+  jede Zugriffskontrolle erreichbar — inkl. Credential-CRUD (`POST/DELETE
+  /api/credentials`) und Config-Schreiben (`POST /api/config`).
+  - **DNS-Rebinding-Schutz:** `TrustedHostMiddleware` akzeptiert nur noch
+    Loopback-Host-Header (`localhost`/`127.0.0.1`/`::1`, plus den Bind-Host bei
+    absichtlichem Netzwerk-Bind). Eine bösartige Webseite kann die lokale API
+    nicht mehr per Rebinding auslesen.
+  - **Optionales Token-Gate:** Ist `CLUTCH_WEB_TOKEN` gesetzt, erfordert jeder
+    `/api/*`-Zugriff `Authorization: Bearer <token>` (oder `X-Clutch-Token`);
+    die UI-Seite selbst bleibt ungeschützt erreichbar.
+  - **Bind-Schutz:** `serve()` verweigert den Start an einem nicht-loopback-Host
+    (z. B. `--host 0.0.0.0`) ohne gesetztes `CLUTCH_WEB_TOKEN` und warnt beim
+    Netzwerk-Bind.
+  - **CORS:** `allow_credentials` auf `False` (keine Cookie-Auth), Origins auf
+    die tatsächliche UI-Origin (mit Port) beschränkt.
+- **credentials.json wird atomar mit 0600 angelegt** (`os.open` mit engem Modus
+  statt `write_text` + nachträglichem `chmod`) — kein Zeitfenster mehr mit zu
+  weiten Rechten bei Neuanlage; das Elternverzeichnis wird auf 0700 gesetzt.
+
+### Fixed
+- **Circuit-Breaker: `consecutive_failures` wird jetzt tatsächlich ausgewertet.**
+  Die aus der Fitness-Config geladene Schwelle (`max_fehler_serie`, Default 3)
+  war nie referenziert; nur das Stundenlimit (5/h) löste aus. Fällt ein Modell
+  bei niedriger Anfragefrequenz mit 3–4 Fehlern in Folge aus, öffnet der Breaker
+  nun, statt weiter blind auf das kaputte Modell zu routen.
+- **SQLite unter dem Web-Server: WAL-Modus + 15 s Busy-Timeout.** Gleichzeitige
+  `/api/chat`-Requests schrieben ohne WAL in dieselbe DB (DELETE-Journal sperrt
+  exklusiv) und konnten sporadisch `database is locked` auslösen.
+
 ### Packaging
 - **PyPI-Vorbereitung (noch nicht veröffentlicht):** Distributionsname `clutch-router`
   (Import bleibt `clutch`; `clutch` auf PyPI vergeben). package-data erweitert um

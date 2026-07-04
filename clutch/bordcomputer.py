@@ -150,13 +150,22 @@ class Bordcomputer:
         cutoff = now - 3600
         self._fehler_log[modell] = [t for t in self._fehler_log[modell] if t > cutoff]
 
-        if len(self._fehler_log[modell]) >= self.fehler_pro_stunde_limit:
+        # Zwei Ausloeser: Fehler in Folge (consecutive_failures) ODER
+        # Fehler pro Stunde. Der Serien-Ausloeser greift auch bei niedriger
+        # Anfragefrequenz, wenn ein Modell komplett ausfaellt, aber unter dem
+        # Stundenlimit bleibt. fehler_zaehler wird bei Erfolg zurueckgesetzt
+        # (siehe _erfolg_verarbeiten) und zaehlt daher Fehler in Folge.
+        anzahl_stunde = len(self._fehler_log[modell])
+        ausloeser = None
+        if circuit.fehler_zaehler >= self.max_fehler_serie:
+            ausloeser = f"{circuit.fehler_zaehler} Fehler in Folge"
+        elif anzahl_stunde >= self.fehler_pro_stunde_limit:
+            ausloeser = f"{anzahl_stunde} Fehler/Stunde"
+
+        if ausloeser and circuit.zustand != "open":
             circuit.zustand = "open"
             circuit.geoeffnet_um = now
-            warnungen.append(
-                f"Circuit-Breaker OPEN fuer {modell}: "
-                f"{len(self._fehler_log[modell])} Fehler/Stunde"
-            )
+            warnungen.append(f"Circuit-Breaker OPEN fuer {modell}: {ausloeser}")
 
         return warnungen
 

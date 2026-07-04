@@ -31,7 +31,8 @@ def _client(tmp, monkeypatch):
     db = Path(tmp) / "clutch.db"
     rt = ChatRuntime(db_path=db, handler=_handler)
     from clutch.webapp import create_app
-    return TestClient(create_app(db_path=db, runtime=rt))
+    return TestClient(create_app(db_path=db, runtime=rt),
+                      base_url="http://127.0.0.1")
 
 
 def test_credentials_set_list_delete_und_kein_wert_leak(monkeypatch):

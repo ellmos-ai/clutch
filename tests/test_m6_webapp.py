@@ -52,7 +52,8 @@ def _make_client(tmp_dir: str) -> TestClient:
 
     from clutch.webapp import create_app
     app = create_app(db_path=db_path, runtime=rt)
-    return TestClient(app)
+    # base_url 127.0.0.1 -> Host-Header passt zur TrustedHostMiddleware.
+    return TestClient(app, base_url="http://127.0.0.1")
 
 
 # ---------------------------------------------------------------------------

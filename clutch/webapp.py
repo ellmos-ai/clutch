@@ -48,6 +48,8 @@ def _require_fastapi() -> None:
 def create_app(
     db_path: Optional[Path] = None,
     runtime: Optional[Any] = None,
+    allowed_hosts: Optional[List[str]] = None,
+    auth_token: Optional[str] = None,
 ) -> Any:
     """Erstellt und gibt die FastAPI-App zurück.
 
@@ -58,12 +60,23 @@ def create_app(
     runtime:
         Optionale ChatRuntime-Instanz (wird für Tests injiziert).
         Wenn None, wird eine neue Instanz erzeugt.
+    allowed_hosts:
+        Erlaubte Werte des HTTP-Host-Headers (Schutz gegen DNS-Rebinding).
+        Standard: nur Loopback (localhost/127.0.0.1/::1).
+    auth_token:
+        Wenn gesetzt, erfordert jeder /api/*-Zugriff den Header
+        ``Authorization: Bearer <token>`` (oder ``X-Clutch-Token``). Ohne Token
+        (Standard) ist die API ungeschützt — nur für reinen Loopback-Betrieb
+        gedacht, wo `serve()` das erzwingt.
     """
     _require_fastapi()
 
+    import secrets as _secrets
+
     from fastapi import FastAPI, HTTPException, UploadFile, File, Query, Request
     from fastapi.middleware.cors import CORSMiddleware
-    from fastapi.responses import HTMLResponse
+    from fastapi.responses import HTMLResponse, JSONResponse
+    from starlette.middleware.trustedhost import TrustedHostMiddleware
 
     from clutch.chat_runtime import ChatRuntime
     from clutch.profile_manager import Profil
@@ -91,14 +104,34 @@ def create_app(
         version="0.4.0",
     )
 
+    # DNS-Rebinding-Schutz: nur erlaubte Host-Header akzeptieren. Eine boesartige
+    # Webseite kann ihren eigenen Hostnamen per DNS-Rebinding auf 127.0.0.1
+    # zeigen lassen; der Host-Header traegt dann aber die Angreifer-Domain.
+    app.add_middleware(
+        TrustedHostMiddleware,
+        allowed_hosts=allowed_hosts or ["localhost", "127.0.0.1", "::1"],
+    )
+
+    # CORS: keine Cookie-Auth -> allow_credentials=False; nur die eigene UI-Origin.
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost", "http://127.0.0.1",
-                       "http://localhost:8760", "http://127.0.0.1:8760"],
-        allow_credentials=True,
+        allow_origins=["http://localhost:8760", "http://127.0.0.1:8760"],
+        allow_credentials=False,
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    # Token-Gate fuer /api/* (nur aktiv, wenn ein Token gesetzt ist).
+    if auth_token:
+        @app.middleware("http")
+        async def _token_gate(request: Request, call_next):  # noqa: ANN001
+            if request.url.path.startswith("/api/"):
+                header = request.headers.get("authorization", "")
+                vorgelegt = header[7:] if header.startswith("Bearer ") else ""
+                vorgelegt = vorgelegt or request.headers.get("x-clutch-token", "")
+                if not vorgelegt or not _secrets.compare_digest(vorgelegt, auth_token):
+                    return JSONResponse({"detail": "Unauthorized"}, status_code=401)
+            return await call_next(request)
 
     # --- Endpunkte --------------------------------------------------------
 
@@ -432,9 +465,33 @@ def serve(
     """
     _require_fastapi()
 
+    import os
+
     import uvicorn
 
-    app = create_app(db_path=db_path)
+    loopback_hosts = {"127.0.0.1", "localhost", "::1"}
+    ist_loopback = host in loopback_hosts
+    token = os.environ.get("CLUTCH_WEB_TOKEN") or None
+
+    # Bei Bind an ein nicht-loopback-Interface (z.B. 0.0.0.0) ist die API im
+    # Netzwerk erreichbar. Ohne Token waere der Credential-/Config-CRUD dann
+    # ungeschuetzt exponiert -> Token zur Pflicht machen.
+    if not ist_loopback and not token:
+        raise RuntimeError(
+            f"Bind an nicht-loopback-Host '{host}' erfordert ein Auth-Token. "
+            "Setze die Umgebungsvariable CLUTCH_WEB_TOKEN=<geheim>, sonst ist "
+            "die Web-API (inkl. Credential-Verwaltung) offen im Netzwerk erreichbar."
+        )
+
+    allowed_hosts = ["localhost", "127.0.0.1", "::1"]
+    if not ist_loopback:
+        allowed_hosts.append(host)
+
+    app = create_app(db_path=db_path, allowed_hosts=allowed_hosts, auth_token=token)
     print(f"clutch Web-Oberfläche startet auf http://{host}:{port}")
+    if not ist_loopback:
+        print(f"WARNUNG: gebunden an {host} — im Netzwerk erreichbar.")
+    if token:
+        print("Auth-Token aktiv: /api/* erfordert 'Authorization: Bearer <token>'.")
     print("Zum Beenden: Ctrl+C")
     uvicorn.run(app, host=host, port=port)

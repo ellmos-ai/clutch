@@ -47,3 +47,6 @@ docs/BACH_MIGRATION.md
 # Distribution
 *.tar.gz
 *.zip
+
+# Interne Multi-Agenten-Koordination (LOCK-System)
+LOCK*.txt

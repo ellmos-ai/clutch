@@ -205,6 +205,25 @@ def test_bordcomputer():
         print("[OK] Bordcomputer")
 
 
+def test_circuit_breaker_consecutive_failures():
+    """3 Fehler in Folge oeffnen den Breaker auch unter dem Stundenlimit (5)."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        buch = Fahrtenbuch(db_path=Path(tmpdir) / "test.db")
+        bc = Bordcomputer(buch)
+        assert bc.max_fehler_serie == 3
+
+        for i in range(3):
+            assert bc.modell_verfuegbar("gemini-pro")  # noch offen vor dem 3.
+            bc.fahrt_auswerten(FahrtEintrag(
+                fahrt_id=f"cf_{i}", strecken_typ="autobahn", gang="gemini-pro",
+                provider="google", gas=0.8, muster="einzelfahrt", erfolg=False,
+            ))
+        # 3 Fehler in Folge < 5 Fehler/Stunde -> muss trotzdem gesperrt sein
+        assert not bc.modell_verfuegbar("gemini-pro")
+
+        print("[OK] Circuit-Breaker consecutive failures")
+
+
 def test_tankuhr():
     tank = Tankuhr()
 
