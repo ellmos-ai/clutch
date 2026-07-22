@@ -60,8 +60,20 @@ Modelle müssen **entdeckbar**, **aktualisierbar** und **nutzeranpassbar** sein.
   **OpenAI-kompatiblen Motor** anlegen (`base_url` konfigurierbar) — deckt
   zugleich Codex/GPT und weitere OpenAI-kompatible Provider ab. Dann
   Kimi-Gang `kimi-api` mit echten Kosten/Usage statt der CLI-Naeherung.
-- [ ] **Fable 5 fehlt:** Claude Fable 5 (`claude-fable-5`) als kreativer
-  Gang (G3-G4 Niveau) in getriebe.json aufnehmen.
+- [ ] **Fable 5 fehlt:** Claude Fable 5 (`claude-fable-5`) als **höchsten Gang
+  (Spitzen-Niveau, oberhalb Opus 4.8)** in getriebe.json aufnehmen.
+  **ACHTUNG — frühere Beschreibung war falsch [U 2026-07-11]:** Hier stand
+  "kreativer Gang (G3-G4 Niveau)". Fable 5 ist **kein Kreativmodell**, sondern
+  das Modell für die **schwersten** Aufgaben: Mathematik/Beweisführung,
+  Wissenschafts-Pipeline (`.RESEARCH`), anspruchsvolle App-/Software-Entwicklung,
+  Spieleentwicklung. Rolle laut `.TOPICS/FABLE-SOL-PLAN.md` (User-Diktat 2026-07-03):
+  *"Fable = der Forscher, das Gehirn"* — Gehirn/Operator/Advisor/Orchestrator.
+  Benchmark: SWE-bench Pro 80,3 % (vs. Sonnet 5: 63,2 %).
+  **Kostenprofil beim Einsortieren beachten:** teuerstes Modell ($10/$50 pro MTok
+  = 5× Sonnet 5, 2× Opus 4.8) UND Extended Thinking nicht abschaltbar → auf
+  Routine-Arbeit 3-5× mehr Output-Tokens (effektiv ~10× Sonnet). Auf schweren
+  Aufgaben schrumpft der Abstand auf ~2×. Router-Regel: **höchster Gang, nur für
+  das Schwerste — niemals als Default-Worker für Masse/Mechanik.**
 - [ ] **Gemini-Modelle veraltet:** Aktuelle IDs sind `gemini-2.5-*`, real
   verfügbar sind `gemini-3.5-flash` und `gemini-3.5-pro`. Model-IDs und
   Kostenstruktur aktualisieren.
