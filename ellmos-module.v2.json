@@ -1,0 +1,43 @@
+{
+  "schema": "ellmos.module.v2",
+  "id": "clutch",
+  "display_name": "clutch",
+  "category": "orchestration",
+  "kind": "router",
+  "status": "active",
+  "visibility": "public-candidate",
+  "provides": [
+    "routing.default",
+    "routing.model",
+    "routing.pattern",
+    "swarm.patterns"
+  ],
+  "requires": [],
+  "optional": [
+    "runtime.model-provider"
+  ],
+  "conflicts": [],
+  "surfaces": [
+    "library",
+    "cli"
+  ],
+  "state": {
+    "ownership": "module",
+    "location": "user-home"
+  },
+  "boundaries": {
+    "network": "optional",
+    "data": "application-defined",
+    "platforms": [
+      "windows",
+      "macos",
+      "linux"
+    ]
+  },
+  "source_of_truth": {
+    "type": "local-directory",
+    "path": ".",
+    "repository": "https://github.com/ellmos-ai/clutch"
+  },
+  "adapters": []
+}
