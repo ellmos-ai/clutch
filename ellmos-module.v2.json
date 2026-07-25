@@ -5,7 +5,7 @@
   "category": "orchestration",
   "kind": "router",
   "status": "active",
-  "visibility": "public-candidate",
+  "visibility": "public",
   "provides": [
     "routing.default",
     "routing.model",

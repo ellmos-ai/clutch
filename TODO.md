@@ -65,8 +65,8 @@ Modelle müssen **entdeckbar**, **aktualisierbar** und **nutzeranpassbar** sein.
   **ACHTUNG — frühere Beschreibung war falsch [U 2026-07-11]:** Hier stand
   "kreativer Gang (G3-G4 Niveau)". Fable 5 ist **kein Kreativmodell**, sondern
   das Modell für die **schwersten** Aufgaben: Mathematik/Beweisführung,
-  Wissenschafts-Pipeline (`.RESEARCH`), anspruchsvolle App-/Software-Entwicklung,
-  Spieleentwicklung. Rolle laut `.TOPICS/FABLE-SOL-PLAN.md` (User-Diktat 2026-07-03):
+  wissenschaftliche Arbeit und Beweisführung, anspruchsvolle App-/Software-Entwicklung,
+  Spieleentwicklung. Rolle laut interner Modell-Strategie:
   *"Fable = der Forscher, das Gehirn"* — Gehirn/Operator/Advisor/Orchestrator.
   Benchmark: SWE-bench Pro 80,3 % (vs. Sonnet 5: 63,2 %).
   **Kostenprofil beim Einsortieren beachten:** teuerstes Modell ($10/$50 pro MTok
