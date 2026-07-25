@@ -9,8 +9,11 @@
 > Provider-neutrale LLM-Orchestrierungsengine mit automatischem Lernen
 
 ![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue)
-![License MIT](https://img.shields.io/badge/License-MIT-green)
+![Lizenz MIT](https://img.shields.io/badge/Lizenz-MIT-green)
 ![Version 0.4.0](https://img.shields.io/badge/Version-0.4.0-orange)
+![Pytest](https://img.shields.io/badge/Pytest-97%20bestanden-brightgreen)
+![Provider](https://img.shields.io/badge/Provider-Anthropic%20%7C%20Gemini%20%7C%20Ollama%20%7C%20Kimi-purple)
+![LLM-Ready](https://img.shields.io/badge/LLM--Ready-llms.txt-blue)
 
 **clutch** (deutsch: *Kupplung*) verwendet eine Fahrmetapher, um Aufgaben intelligent an optimale LLM-Modelle verschiedener Anbieter weiterzuleiten. Das System analysiert Aufgabenkomplexität und -zweck, wählt das passende Modell und Reasoning-Level, verfolgt Budgets und lernt aus Erfahrungen. Verwendbar als **Bibliothek**, **CLI** oder **lokale Web-App**.
 
@@ -34,6 +37,26 @@
 ## Architektur
 
 Das gesamte System folgt einer **Auto-/Fahrmetapher**:
+
+```mermaid
+graph TD
+    User([Benutzer / API / CLI / Web UI]) --> Fahrer["FAHRER (Orchestrierung)"]
+    Fahrer --> Strecke["STRECKE (Aufgaben- & Zweckanalyse)"]
+    Fahrer --> Getriebe["GETRIEBE (Modell-Register G1-G5 & Ollama)"]
+    Fahrer --> GasBremse["GAS/BREMSE (Denktiefe / Reasoning 0-100%)"]
+    Fahrer --> Kupplung["KUPPLUNG (Modellwechsel / Failover)"]
+    Kupplung --> MotorBlock["MOTORBLOCK (Einheitliche Provider-API)"]
+    MotorBlock --> Anthropic["Anthropic (Claude)"]
+    MotorBlock --> Gemini["Google (Gemini)"]
+    MotorBlock --> Ollama["Ollama (Lokal / Remote)"]
+    MotorBlock --> Kimi["Kimi (Moonshot API)"]
+    MotorBlock --> Bordcomputer["BORDCOMPUTER (Gesundheit & Circuit Breaker)"]
+    Bordcomputer --> Tankuhr["TANKUHR (Budget 4-Zonen)"]
+    Bordcomputer --> Tacho["TACHO (Latenz & Metriken)"]
+    Tacho --> Fahrtenbuch[("FAHRTENBUCH (SQLite-Protokoll)")]
+    Fahrtenbuch --> Fahrschule["FAHRSCHULE (Auto-Lern-Engine)"]
+    Fahrschule -. Fitness-Feedback .-> Getriebe
+```
 
 ```
                     +----------------------------------+
@@ -149,7 +172,7 @@ clutch stats                          # Nutzungs- / Budget- / Gesundheits-Dashbo
 clutch config <key> [value]           # CLI-Einstellungen lesen/setzen
 clutch keys set MOONSHOT_API_KEY      # API-Key speichern (verdeckte Eingabe; Werte nie angezeigt)
 clutch keys list                      # Gespeicherte Key-Namen auflisten (keine Werte)
-clutch serve --web                    # Web-UI starten (benötigt: pip install -e ".[web]")
+clutch serve --web                    # Web-UI starten (benötigt: pip install clutch[web])
 ```
 
 Drei Nutzungsmodi: **Konsole** (Menschen), **Web-UI** (Menschen, grafisch) und **CLI/API**

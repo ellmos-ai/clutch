@@ -9,6 +9,7 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1
 ## [Unreleased]
 
 ### Documentation
+- **Discoverability & Marketing Refresh (2026-07-25):** `llms.txt` Last-checked Datum auf `2026-07-25` und 97 passing unit tests verifiziert. Visual Shields.io Badges (Pytest 97 passed, Multi-Provider, LLM-Ready `llms.txt`), KI/LLM-Integrationshinweise und Mermaid Systemarchitektur- & Datenfluss-Diagramm in `README.md` und `README_de.md` integriert.
 - **AI/LLM-Indexierung & Metadaten-Sync (2026-07-25):** `llms.txt` Header auf `Last-checked: 2026-07-25` aktualisiert; Referenzhinweis auf `llms.txt` in `README.md` und `README_de.md` ergänzt.
 
 ### Security

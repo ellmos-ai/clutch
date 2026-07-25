@@ -11,6 +11,9 @@
 ![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![License MIT](https://img.shields.io/badge/License-MIT-green)
 ![Version 0.4.0](https://img.shields.io/badge/Version-0.4.0-orange)
+![Pytest](https://img.shields.io/badge/Pytest-97%20passed-brightgreen)
+![Providers](https://img.shields.io/badge/Providers-Anthropic%20%7C%20Gemini%20%7C%20Ollama%20%7C%20Kimi-purple)
+![LLM-Ready](https://img.shields.io/badge/LLM--Ready-llms.txt-blue)
 
 **clutch** (German: *Kupplung*) uses a driving metaphor to intelligently route tasks to optimal LLM models across multiple providers. It analyzes task complexity and purpose, selects the right model and reasoning level, tracks budgets, and learns from experience. Use it as a **library**, a **CLI**, or a **local web app**.
 
@@ -34,6 +37,26 @@
 ## Architecture
 
 The entire system follows a **car/driving metaphor**:
+
+```mermaid
+graph TD
+    User([User / API / CLI / Web UI]) --> Fahrer["FAHRER (Orchestrator)"]
+    Fahrer --> Strecke["STRECKE (Task Analysis & Purpose)"]
+    Fahrer --> Getriebe["GETRIEBE (Model Registry G1-G5 & Ollama)"]
+    Fahrer --> GasBremse["GAS/BREMSE (Reasoning Level 0-100%)"]
+    Fahrer --> Kupplung["KUPPLUNG (Model Switching / Failover)"]
+    Kupplung --> MotorBlock["MOTORBLOCK (Unified Provider API)"]
+    MotorBlock --> Anthropic["Anthropic (Claude)"]
+    MotorBlock --> Gemini["Google (Gemini)"]
+    MotorBlock --> Ollama["Ollama (Local / Remote)"]
+    MotorBlock --> Kimi["Kimi (Moonshot API)"]
+    MotorBlock --> Bordcomputer["BORDCOMPUTER (Health & Circuit Breaker)"]
+    Bordcomputer --> Tankuhr["TANKUHR (Budget 4-Zone)"]
+    Bordcomputer --> Tacho["TACHO (Latency & Metrics)"]
+    Tacho --> Fahrtenbuch[("FAHRTENBUCH (SQLite Trip Log)")]
+    Fahrtenbuch --> Fahrschule["FAHRSCHULE (Auto-Learning Engine)"]
+    Fahrschule -. Fitness Feedback .-> Getriebe
+```
 
 ```
                     +----------------------------------+
@@ -149,7 +172,7 @@ clutch stats                          # usage / budget / health dashboard
 clutch config <key> [value]           # read/set CLI settings
 clutch keys set MOONSHOT_API_KEY      # store an API key (hidden input; values never shown)
 clutch keys list                      # list stored key names (not values)
-clutch serve --web                    # start the web UI (needs: pip install -e ".[web]")
+clutch serve --web                    # start the web UI (needs: pip install clutch[web])
 ```
 
 Three usage modes: **console** (humans), **web UI** (humans, graphical), and **CLI/API**
