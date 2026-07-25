@@ -14,6 +14,9 @@
 
 **clutch** (German: *Kupplung*) uses a driving metaphor to intelligently route tasks to optimal LLM models across multiple providers. It analyzes task complexity and purpose, selects the right model and reasoning level, tracks budgets, and learns from experience. Use it as a **library**, a **CLI**, or a **local web app**.
 
+> [!NOTE]
+> For AI agents and automated indexers, machine-readable summary metadata and discovery context are available in [llms.txt](llms.txt).
+
 ## Features
 
 - **Provider-neutral** -- Anthropic (Claude), Google (Gemini), Ollama (local & remote), Claude Code, and **Kimi** (Moonshot API / CLI / Ollama Cloud)

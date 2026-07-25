@@ -14,6 +14,9 @@
 
 **clutch** (deutsch: *Kupplung*) verwendet eine Fahrmetapher, um Aufgaben intelligent an optimale LLM-Modelle verschiedener Anbieter weiterzuleiten. Das System analysiert Aufgabenkomplexität und -zweck, wählt das passende Modell und Reasoning-Level, verfolgt Budgets und lernt aus Erfahrungen. Verwendbar als **Bibliothek**, **CLI** oder **lokale Web-App**.
 
+> [!NOTE]
+> Für KI-Agenten und automatisierte Indexierer stehen maschinenlesbare Zusammenfassungs- und Suchmetadaten in [llms.txt](llms.txt) bereit.
+
 ## Funktionen
 
 - **Provider-neutral** -- Anthropic (Claude), Google (Gemini), Ollama (lokal & remote), Claude Code sowie **Kimi** (Moonshot API / CLI / Ollama Cloud)

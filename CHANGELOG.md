@@ -8,6 +8,9 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1
 
 ## [Unreleased]
 
+### Documentation
+- **AI/LLM-Indexierung & Metadaten-Sync (2026-07-25):** `llms.txt` Header auf `Last-checked: 2026-07-25` aktualisiert; Referenzhinweis auf `llms.txt` in `README.md` und `README_de.md` ergänzt.
+
 ### Security
 - **Web-API härtung (Code-Review 2026-07-04).** Die FastAPI-Web-UI war ohne
   jede Zugriffskontrolle erreichbar — inkl. Credential-CRUD (`POST/DELETE
