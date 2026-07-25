@@ -146,7 +146,7 @@ clutch stats                          # 使用量 / 予算 / ヘルスダッシ�
 clutch config <key> [value]           # CLI 設定を読み取り/設定
 clutch keys set MOONSHOT_API_KEY      # API キーを保存（非表示入力；値は表示されない）
 clutch keys list                      # 保存済みキー名を一覧表示（値は非表示）
-clutch serve --web                    # Web UI を起動（要：pip install clutch[web]）
+clutch serve --web                    # Web UI を起動（要：pip install -e ".[web]"）
 ```
 
 3 つの使用モード：**コンソール**（人間向け）、**Web UI**（人間向け、グラフィカル）、**CLI/API**（他の LLM/エージェントが `--json` または OpenAI 互換 Web エンドポイントでタスクをルーティング）。

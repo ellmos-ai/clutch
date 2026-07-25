@@ -146,7 +146,7 @@ clutch stats                          # panel de uso / presupuesto / salud
 clutch config <key> [value]           # leer/establecer configuración CLI
 clutch keys set MOONSHOT_API_KEY      # almacenar una clave API (entrada oculta; valores nunca mostrados)
 clutch keys list                      # listar nombres de claves almacenadas (sin valores)
-clutch serve --web                    # iniciar la interfaz web (requiere: pip install clutch[web])
+clutch serve --web                    # iniciar la interfaz web (requiere: pip install -e ".[web]")
 ```
 
 Tres modos de uso: **consola** (personas), **interfaz web** (personas, gráfica) y **CLI/API**

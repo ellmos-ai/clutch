@@ -146,7 +146,7 @@ clutch stats                          # 使用量 / 预算 / 健康仪表板
 clutch config <key> [value]           # 读取/设置 CLI 配置
 clutch keys set MOONSHOT_API_KEY      # 存储 API 密钥（隐藏输入；值从不显示）
 clutch keys list                      # 列出已存储密钥名称（不显示值）
-clutch serve --web                    # 启动 Web 界面（需要：pip install clutch[web]）
+clutch serve --web                    # 启动 Web 界面（需要：pip install -e ".[web]"）
 ```
 
 三种使用模式：**控制台**（人工使用）、**Web 界面**（人工使用，图形化）和 **CLI/API**（其他 LLM/Agent 通过 `--json` 或 OpenAI 兼容 Web 端点路由任务）。

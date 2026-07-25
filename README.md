@@ -149,7 +149,7 @@ clutch stats                          # usage / budget / health dashboard
 clutch config <key> [value]           # read/set CLI settings
 clutch keys set MOONSHOT_API_KEY      # store an API key (hidden input; values never shown)
 clutch keys list                      # list stored key names (not values)
-clutch serve --web                    # start the web UI (needs: pip install clutch[web])
+clutch serve --web                    # start the web UI (needs: pip install -e ".[web]")
 ```
 
 Three usage modes: **console** (humans), **web UI** (humans, graphical), and **CLI/API**
