@@ -11,7 +11,7 @@
 ![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![License MIT](https://img.shields.io/badge/License-MIT-green)
 ![Version 0.4.0](https://img.shields.io/badge/Version-0.4.0-orange)
-![Pytest](https://img.shields.io/badge/Pytest-97%20passed-brightgreen)
+![Pytest](https://img.shields.io/badge/Pytest-286%20passed-brightgreen)
 ![Providers](https://img.shields.io/badge/Providers-Anthropic%20%7C%20Gemini%20%7C%20Ollama%20%7C%20Kimi-purple)
 ![LLM-Ready](https://img.shields.io/badge/LLM--Ready-llms.txt-blue)
 
