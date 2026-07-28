@@ -11,7 +11,7 @@
 ![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![Lizenz MIT](https://img.shields.io/badge/Lizenz-MIT-green)
 ![Version 0.4.0](https://img.shields.io/badge/Version-0.4.0-orange)
-![Pytest](https://img.shields.io/badge/Pytest-286%20bestanden-brightgreen)
+![Pytest](https://img.shields.io/badge/Pytest-295%20bestanden-brightgreen)
 ![Provider](https://img.shields.io/badge/Provider-Anthropic%20%7C%20Gemini%20%7C%20Ollama%20%7C%20Kimi-purple)
 ![LLM-Ready](https://img.shields.io/badge/LLM--Ready-llms.txt-blue)
 
@@ -22,7 +22,7 @@
 
 ## Funktionen
 
-- **Provider-neutral** -- Anthropic (Claude), Google (Gemini), Ollama (lokal & remote), Claude Code sowie **Kimi** (Moonshot API / CLI / Ollama Cloud)
+- **Provider-neutral** -- Anthropic (Claude), Google (Gemini), Ollama (lokal & remote), Claude Code, **agy via companion-for-agy** sowie **Kimi** (Moonshot API / CLI / Ollama Cloud)
 - **Automatisches Routing** -- analysiert Aufgabenkomplexität *und Zweck* (Coding, Vision, Recherche, Bulk) und wählt optimales Modell + Reasoning-Level
 - **Zweck- und Vision-bewusst** -- leitet Bild-/Dokumenteingaben an vision-fähige Modelle weiter; passt Aufgaben an Modellstärken an
 - **CLI + Web-UI** -- `clutch route/run/chat/models/stats`, plus optionale FastAPI-Web-Chat-Oberfläche (`clutch serve --web`)
@@ -49,6 +49,7 @@ graph TD
     MotorBlock --> Anthropic["Anthropic (Claude)"]
     MotorBlock --> Gemini["Google (Gemini)"]
     MotorBlock --> Ollama["Ollama (Lokal / Remote)"]
+    MotorBlock --> Agy["agy (companion-for-agy)"]
     MotorBlock --> Kimi["Kimi (Moonshot API)"]
     MotorBlock --> Bordcomputer["BORDCOMPUTER (Gesundheit & Circuit Breaker)"]
     Bordcomputer --> Tankuhr["TANKUHR (Budget 4-Zonen)"]
@@ -236,6 +237,7 @@ auf den Mac-Studio-Compute-Pfad.
 | **Google** | Gemini Flash, Pro | Nein |
 | **Ollama** | Qwen, Mistral und weitere (lokal & remote) | Ja |
 | **Claude Code** | Via Subprocess (CLI-Session) | Ja |
+| **agy** | Live ermittelter Gemini-, Claude- und GPT-OSS-Katalog via `companion-for-agy` | CLI-Session |
 | **Kimi (Moonshot)** | `kimi-k2.7-code`, `kimi-k2.6` via OpenAI-kompatibler API; `kimi-cli`/`kimi-code` CLI; Ollama Cloud | API / CLI |
 | **OpenAI-kompatibel** | Jeder `/v1/chat/completions`-Endpunkt (set `base_url`) | Nein |
 

@@ -29,7 +29,7 @@ from clutch.gas_bremse import GasBremse, GasStellung
 
 # Agentische CLI-Motoren fuehren Tools mit Auto-Approve (--yolo) auf dem Host aus.
 # Aus untrusted Quellen (Web/API) duerfen sie NICHT automatisch gewaehlt werden.
-AGENTIC_CLI_PROVIDERS = {"claude-code", "kimi-cli", "kimi-code"}
+AGENTIC_CLI_PROVIDERS = {"claude-code", "kimi-cli", "kimi-code", "agy"}
 ERLAUBTE_EFFORTS = {"high", "xhigh", "max-delegate"}
 
 

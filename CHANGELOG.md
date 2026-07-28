@@ -8,6 +8,9 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1
 
 ## [Unreleased]
 
+### Added
+- **agy model registry and motor (2026-07-28):** Six models live-verified against agy 1.1.8 are registered with effort variants and catalog provenance. `AgyCompanionMotor` executes them through `companion-for-agy`, maps Clutch effort levels to supported agy efforts, and keeps agy classified as an agentic CLI provider.
+
 ### Documentation
 - **Discoverability & Mermaid Architecture (2026-07-26):** Embedded Mermaid system architecture flowchart diagram, LLM-ready discovery badges, and GFM `> [!NOTE]` callouts for `llms.txt` machine-readable metadata in both English and German documentation. Updated `llms.txt` verification timestamp to 2026-07-26 and verified 286 passing unit tests (100% green).
 - **Discoverability & Marketing Refresh (2026-07-25):** `llms.txt` Last-checked Datum auf `2026-07-25` und 286 passing unit tests verifiziert. Visual Shields.io Badges (Pytest 286 passed, Multi-Provider, LLM-Ready `llms.txt`), KI/LLM-Integrationshinweise und Mermaid Systemarchitektur- & Datenfluss-Diagramm in `README.md` und `README_de.md` integriert.

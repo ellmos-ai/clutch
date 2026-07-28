@@ -17,6 +17,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import shutil
 import subprocess
 import time
 from dataclasses import dataclass
@@ -616,6 +617,112 @@ class KimiApiMotor(OpenAICompatibleMotor):
 
 
 # ---------------------------------------------------------------------------
+# agy Companion Motor (CLI subprocess)
+# ---------------------------------------------------------------------------
+
+class AgyCompanionMotor(Motor):
+    """agy-Modelle ueber den nicht-interaktiven companion-for-agy-Wrapper."""
+
+    provider_name = "agy"
+
+    def __init__(self, binary: Optional[str] = None):
+        super().__init__()
+        self.binary = (
+            binary
+            or os.environ.get("CLUTCH_AGY_COMPANION")
+            or shutil.which("companion-for-agy")
+            or "companion-for-agy"
+        )
+
+    def ist_verfuegbar(self) -> bool:
+        try:
+            result = subprocess.run(
+                [self.binary, "--version"],
+                capture_output=True, text=True, timeout=10,
+            )
+            return result.returncode == 0
+        except Exception:
+            return False
+
+    @staticmethod
+    def _effort(config: FahrtConfig) -> Optional[str]:
+        erlaubt = list(getattr(config.gang, "efforts", []) or [])
+        if not erlaubt:
+            return None
+        angefordert = (config.effort or "").lower()
+        if angefordert in erlaubt:
+            return angefordert
+        if angefordert in {"high", "xhigh", "max-delegate"} and "high" in erlaubt:
+            return "high"
+        for kandidat in ("high", "thinking", "medium", "low"):
+            if kandidat in erlaubt:
+                return kandidat
+        return None
+
+    def _argv(self, config: FahrtConfig, vollprompt: str) -> list[str]:
+        argv = [
+            self.binary,
+            "--json",
+            "--sandbox",
+            "--model",
+            config.model_id,
+        ]
+        effort = self._effort(config)
+        if effort:
+            argv.extend(["--effort", effort])
+        argv.extend(["--", vollprompt])
+        return argv
+
+    def ausfuehren(self, config: FahrtConfig, prompt: str) -> MotorErgebnis:
+        t0 = time.time()
+        vollprompt = self._prompt_mit_gas(config, prompt)
+        timeout = self._timeout(config, basis=150.0)
+
+        try:
+            result = subprocess.run(
+                self._argv(config, vollprompt),
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                env={**os.environ, "PYTHONIOENCODING": "utf-8"},
+            )
+            if result.returncode != 0:
+                raise RuntimeError(
+                    f"companion-for-agy exit code {result.returncode}: "
+                    f"{result.stderr[:500]}"
+                )
+            data = json.loads(result.stdout)
+            return MotorErgebnis(
+                text=data.get("response", ""),
+                input_tokens=0,
+                output_tokens=0,
+                model_id=data.get("model") or config.model_id,
+                provider=self.provider_name,
+                latenz_sekunden=time.time() - t0,
+            )
+        except subprocess.TimeoutExpired:
+            logger.error(f"AgyCompanionMotor Timeout nach {timeout}s")
+            return MotorErgebnis(
+                text="",
+                model_id=config.model_id,
+                provider=self.provider_name,
+                latenz_sekunden=time.time() - t0,
+                erfolg=False,
+                fehler=f"Timeout nach {timeout:.0f}s",
+            )
+        except Exception as e:
+            logger.error(f"AgyCompanionMotor Fehler: {e}")
+            return MotorErgebnis(
+                text="",
+                model_id=config.model_id,
+                provider=self.provider_name,
+                latenz_sekunden=time.time() - t0,
+                erfolg=False,
+                fehler=str(e),
+            )
+
+
+# ---------------------------------------------------------------------------
 # MotorBlock -- Factory
 # ---------------------------------------------------------------------------
 
@@ -640,6 +747,7 @@ class MotorBlock:
             "kimi-cli": KimiCliMotor(),
             "kimi-code": KimiCodeMotor(),
             "kimi-api": KimiApiMotor(),
+            "agy": AgyCompanionMotor(),
         }
 
     def motor_fuer(self, provider: str) -> Motor:

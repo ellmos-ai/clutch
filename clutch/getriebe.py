@@ -30,6 +30,9 @@ class Gang:
     schwaechen: list[str] = field(default_factory=list)
     max_context: int = 200000
     endpoint: Optional[str] = None  # Fuer lokale Modelle
+    efforts: list[str] = field(default_factory=list)
+    catalog_checked_at: Optional[str] = None
+    catalog_source: Optional[str] = None
 
     @property
     def ist_lokal(self) -> bool:
@@ -94,6 +97,9 @@ class Getriebe:
                 schwaechen=cfg.get("schwaechen", []),
                 max_context=cfg.get("max_context", 200000),
                 endpoint=cfg.get("endpoint"),
+                efforts=cfg.get("efforts", []),
+                catalog_checked_at=cfg.get("catalog_checked_at"),
+                catalog_source=cfg.get("catalog_source"),
             )
 
         # Provider laden
