@@ -67,12 +67,14 @@ def test_auth_token_blocks_unauthenticated_api_access():
         ).status_code == 200
 
 
-def test_index_reachable_without_token():
-    # The token gate only guards /api/* — the UI page itself stays reachable.
+def test_index_injects_clutch_token_script():
+    # The token gate guards /api/* — the UI page stays reachable and receives the injected token script
     with tempfile.TemporaryDirectory() as tmp:
         client = TestClient(_app(tmp, auth_token="s3cret"),
                             base_url="http://127.0.0.1")
-        assert client.get("/").status_code == 200
+        resp = client.get("/")
+        assert resp.status_code == 200
+        assert "<script>window.CLUTCH_TOKEN = 's3cret';</script>" in resp.text
 
 
 def test_serve_refuses_non_loopback_without_token(monkeypatch):
@@ -80,3 +82,21 @@ def test_serve_refuses_non_loopback_without_token(monkeypatch):
     from clutch import webapp
     with pytest.raises(RuntimeError, match="Auth-Token"):
         webapp.serve(host="0.0.0.0", port=8760)
+
+
+def test_serve_auto_generates_token_on_loopback(monkeypatch):
+    monkeypatch.delenv("CLUTCH_WEB_TOKEN", raising=False)
+    from clutch import webapp
+    created_apps = []
+    def dummy_create_app(**kwargs):
+        created_apps.append(kwargs)
+        return None
+
+    monkeypatch.setattr(webapp, "create_app", dummy_create_app)
+    monkeypatch.setattr("uvicorn.run", lambda app, host, port: None)
+
+    webapp.serve(host="127.0.0.1", port=8760)
+    assert len(created_apps) == 1
+    token = created_apps[0]["auth_token"]
+    assert token is not None
+    assert len(token) > 20

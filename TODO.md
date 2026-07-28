@@ -15,10 +15,7 @@ provider-neutral LLM orchestration library.
 - [x] **(mittel)** Fahrtenbuch-SQLite ohne WAL unter dem Web-Server → WAL +
   Busy-Timeout.
 - [x] **(niedrig)** credentials.json chmod-Race → atomare Anlage mit 0600.
-- [ ] **(Folge)** Optional: das Web-Token beim Loopback-Start automatisch
-  generieren und in die ausgelieferte UI injizieren, damit auch andere lokale
-  Prozesse ohne Token nicht auf `/api/*` zugreifen können (aktuell ist das
-  Loopback-Gate opt-in per `CLUTCH_WEB_TOKEN`).
+- [x] **(Folge)** Optional: das Web-Token beim Loopback-Start automatisch generieren und in die ausgelieferte UI injizieren — DONE 2026-07-28 (`secrets.token_urlsafe(32)` Auto-Generierung in `serve()`, UI-Token-Injizierung in `index()`, Fetch-Headers in `index.html` und Regressionstests).
 
 ## Current
 

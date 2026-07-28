@@ -14,6 +14,7 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1
 - **AI/LLM-Indexierung & Metadaten-Sync (2026-07-25):** `llms.txt` Header auf `Last-checked: 2026-07-25` aktualisiert; Referenzhinweis auf `llms.txt` in `README.md` und `README_de.md` ergänzt.
 
 ### Security
+- **Web-Token Auto-Generierung bei Loopback-Start (2026-07-28):** Beim Aufruf von `serve()` auf Loopback-Hosts (z. B. `127.0.0.1`) ohne gesetztes `CLUTCH_WEB_TOKEN` wird nun automatisch ein sicheres Zufalls-Token (`secrets.token_urlsafe(32)`) generiert und in die UI (`index.html`) injiziert. Dadurch ist die Web-API auch im reinen Loopback-Betrieb vor unbefugten Zugriffen anderer lokaler Prozesse geschützt.
 - **Web-API härtung (Code-Review 2026-07-04).** Die FastAPI-Web-UI war ohne
   jede Zugriffskontrolle erreichbar — inkl. Credential-CRUD (`POST/DELETE
   /api/credentials`) und Config-Schreiben (`POST /api/config`).

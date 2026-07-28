@@ -497,8 +497,12 @@ const promptListe    = document.getElementById("prompt-liste");
 // ============================================================
 
 async function apiFetch(url, optionen = {}) {
+  const headers = { "Content-Type": "application/json", ...optionen.headers };
+  if (window.CLUTCH_TOKEN) {
+    headers["Authorization"] = "Bearer " + window.CLUTCH_TOKEN;
+  }
   const antwort = await fetch(API + url, {
-    headers: { "Content-Type": "application/json", ...optionen.headers },
+    headers,
     ...optionen,
   });
   if (!antwort.ok) {
@@ -667,8 +671,13 @@ eingabeUpload.addEventListener("change", async () => {
   try {
     const formData = new FormData();
     formData.append("datei", datei);
+    const headers = {};
+    if (window.CLUTCH_TOKEN) {
+      headers["Authorization"] = "Bearer " + window.CLUTCH_TOKEN;
+    }
     const antwort = await fetch(API + "/api/upload", {
       method: "POST",
+      headers,
       body: formData,
     });
     if (!antwort.ok) throw new Error(await antwort.text());

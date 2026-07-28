@@ -143,6 +143,12 @@ def create_app(
             inhalt = html_pfad.read_text(encoding="utf-8")
         except OSError:
             inhalt = "<html><body><h1>index.html nicht gefunden</h1></body></html>"
+        if auth_token:
+            token_script = f"<script>window.CLUTCH_TOKEN = {repr(auth_token)};</script>\n"
+            if "</head>" in inhalt:
+                inhalt = inhalt.replace("</head>", f"{token_script}</head>", 1)
+            else:
+                inhalt = token_script + inhalt
         return HTMLResponse(content=inhalt)
 
     @app.post("/api/chat")
@@ -469,6 +475,8 @@ def serve(
 
     import uvicorn
 
+    import secrets
+
     loopback_hosts = {"127.0.0.1", "localhost", "::1"}
     ist_loopback = host in loopback_hosts
     token = os.environ.get("CLUTCH_WEB_TOKEN") or None
@@ -483,6 +491,10 @@ def serve(
             "die Web-API (inkl. Credential-Verwaltung) offen im Netzwerk erreichbar."
         )
 
+    # Bei Loopback-Start ohne explizites Env-Token: automatisch sicheres Token generieren.
+    if ist_loopback and not token:
+        token = secrets.token_urlsafe(32)
+
     allowed_hosts = ["localhost", "127.0.0.1", "::1"]
     if not ist_loopback:
         allowed_hosts.append(host)
@@ -492,6 +504,6 @@ def serve(
     if not ist_loopback:
         print(f"WARNUNG: gebunden an {host} — im Netzwerk erreichbar.")
     if token:
-        print("Auth-Token aktiv: /api/* erfordert 'Authorization: Bearer <token>'.")
+        print("Auth-Token aktiv: /api/* erfordert Token (in UI injiziert).")
     print("Zum Beenden: Ctrl+C")
     uvicorn.run(app, host=host, port=port)
