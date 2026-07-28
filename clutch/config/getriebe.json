@@ -1,6 +1,20 @@
 {
   "_doc": "Getriebe: Alle verfuegbaren Gaenge (Modelle) aller Provider",
   "gaenge": {
+    "claude-fable": {
+      "provider": "anthropic",
+      "model_id": "claude-fable-5",
+      "gang": 5,
+      "leistung": "max",
+      "kosten_input_1k": 0.010,
+      "kosten_output_1k": 0.050,
+      "_doc": "Anthropics leistungsfaehigstes allgemein verfuegbares Modell. Hoechster Gang fuer schwerste Reasoning- und Langzeit-Agentenaufgaben; Adaptive Thinking ist immer aktiv.",
+      "staerken": ["komplexes_reasoning", "langzeit_agenten", "wissenschaft", "mathematik", "architektur"],
+      "schwaechen": ["kosten", "latenz", "routine_ueberdimensioniert"],
+      "max_context": 1000000,
+      "catalog_checked_at": "2026-07-28",
+      "catalog_source": "https://platform.claude.com/docs/en/about-claude/models/overview"
+    },
     "claude-opus": {
       "provider": "anthropic",
       "model_id": "claude-opus-4-6",
@@ -36,25 +50,73 @@
     },
     "gemini-pro": {
       "provider": "google",
-      "model_id": "gemini-2.5-pro",
+      "model_id": "gemini-3.1-pro-preview",
       "gang": 4,
       "leistung": "hoch",
-      "kosten_input_1k": 0.00125,
-      "kosten_output_1k": 0.01,
-      "staerken": ["reasoning", "grosse_kontexte", "multimodal"],
-      "schwaechen": ["code_ausfuehrung"],
-      "max_context": 1000000
+      "kosten_input_1k": 0.002,
+      "kosten_output_1k": 0.012,
+      "_doc": "Aktueller offizieller Pro-API-Weg. Preview-Modell; Preise gelten fuer Prompts bis 200k Token, darueber gelten hoehere Raten.",
+      "staerken": ["reasoning", "grosse_kontexte", "multimodal", "agentisch", "coding"],
+      "schwaechen": ["preview_lifecycle", "hoehere_preise_ueber_200k"],
+      "max_context": 1048576,
+      "catalog_checked_at": "2026-07-28",
+      "catalog_source": "https://ai.google.dev/gemini-api/docs/models/gemini-3.1-pro-preview"
     },
     "gemini-flash": {
       "provider": "google",
-      "model_id": "gemini-2.5-flash",
+      "model_id": "gemini-3.5-flash",
       "gang": 2,
       "leistung": "mittel",
-      "kosten_input_1k": 0.00015,
-      "kosten_output_1k": 0.0006,
-      "staerken": ["speed", "kosten", "bulk"],
+      "kosten_input_1k": 0.0015,
+      "kosten_output_1k": 0.009,
+      "_doc": "Stabile offizielle Gemini-3.5-Flash-ID. Ein Modell namens gemini-3.5-pro ist im offiziellen API-Katalog nicht vorhanden.",
+      "staerken": ["speed", "agentisch", "grosse_kontexte", "bulk"],
       "schwaechen": ["tiefe_analyse"],
-      "max_context": 1000000
+      "max_context": 1048576,
+      "catalog_checked_at": "2026-07-28",
+      "catalog_source": "https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash"
+    },
+    "openai-gpt-5.6-sol": {
+      "provider": "openai",
+      "model_id": "gpt-5.6-sol",
+      "gang": 5,
+      "leistung": "max",
+      "kosten_input_1k": 0.005,
+      "kosten_output_1k": 0.030,
+      "_doc": "OpenAI-Frontiermodell fuer komplexe professionelle Arbeit. Aufruf ueber Chat Completions mit OPENAI_API_KEY.",
+      "staerken": ["komplexes_reasoning", "coding", "architektur", "agentisch", "grosse_kontexte"],
+      "schwaechen": ["kosten", "latenz"],
+      "max_context": 1050000,
+      "catalog_checked_at": "2026-07-28",
+      "catalog_source": "https://developers.openai.com/api/docs/models/gpt-5.6-sol"
+    },
+    "openai-gpt-5.6-terra": {
+      "provider": "openai",
+      "model_id": "gpt-5.6-terra",
+      "gang": 4,
+      "leistung": "hoch",
+      "kosten_input_1k": 0.0025,
+      "kosten_output_1k": 0.015,
+      "_doc": "Ausgewogenes GPT-5.6-Modell fuer Intelligenz und Kosten. Aufruf ueber Chat Completions mit OPENAI_API_KEY.",
+      "staerken": ["reasoning", "coding", "ausgewogen", "grosse_kontexte"],
+      "schwaechen": ["api_kosten"],
+      "max_context": 1050000,
+      "catalog_checked_at": "2026-07-28",
+      "catalog_source": "https://developers.openai.com/api/docs/models"
+    },
+    "openai-codex": {
+      "provider": "openai",
+      "model_id": "gpt-5.3-codex",
+      "gang": 5,
+      "leistung": "max",
+      "kosten_input_1k": 0.00175,
+      "kosten_output_1k": 0.014,
+      "_doc": "Aktuelles spezialisiertes Codex-API-Modell fuer agentische Coding-Aufgaben. Aufruf ueber Chat Completions mit OPENAI_API_KEY.",
+      "staerken": ["coding", "agentisch", "code_review", "langzeit_tasks"],
+      "schwaechen": ["spezialisiert", "api_kosten"],
+      "max_context": 400000,
+      "catalog_checked_at": "2026-07-28",
+      "catalog_source": "https://developers.openai.com/api/docs/models/gpt-5.3-codex"
     },
     "ollama-qwen3": {
       "provider": "ollama",
@@ -255,6 +317,12 @@
       "auth": "GOOGLE_API_KEY",
       "basis_url": "https://generativelanguage.googleapis.com"
     },
+    "openai": {
+      "typ": "api",
+      "auth": "OPENAI_API_KEY",
+      "_doc": "OpenAI Chat Completions fuer aktuelle GPT- und Codex-Modelle. Baut auf dem konfigurierbaren OpenAICompatibleMotor auf.",
+      "basis_url": "https://api.openai.com/v1"
+    },
     "ollama": {
       "typ": "lokal",
       "auth": null,
@@ -294,6 +362,6 @@
   "fahrer_optionen": {
     "_doc": "Welche Modelle als Fahrer (Orchestrator) fungieren koennen. claude-code = die aktuelle Claude Code Session (z.B. du selbst)",
     "standard": "claude-code",
-    "alternativen": ["claude-opus", "claude-sonnet", "gemini-pro"]
+    "alternativen": ["claude-fable", "claude-opus", "claude-sonnet", "gemini-pro", "openai-gpt-5.6-sol"]
   }
 }

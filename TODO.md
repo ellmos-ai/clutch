@@ -19,10 +19,13 @@ provider-neutral LLM orchestration library.
 
 ## Current
 
-- [ ] **M6 Web-UI: CLI- + Env-/Key-Verwaltung spiegeln** — Settings-Panel in der
+- [x] **M6 Web-UI: CLI- + Env-/Key-Verwaltung spiegeln** — Settings-Panel in der
   Web-Oberfläche, das `clutch keys` (set/list/remove, Werte nie anzeigen) und
   `clutch config` spiegelt und erkannte Env-Keys anzeigt. Endpunkte
-  `/api/credentials` (Namen + Quelle) und `/api/config`. (Plan M6-Erweiterung.)
+  `/api/credentials` (Namen + Quelle) und `/api/config`. DONE 2026-07-28:
+  gemeinsames, einklappbares Panel mit sicherem Credential-CRUD, Config-Liste,
+  Editierformular und sichtbarem Erfolgs-/Fehlerstatus; laufende API-Motoren
+  erkennen neu gespeicherte Keys ohne Serverneustart.
 - [ ] **i18n ausbauen** — App-Strings (CLI + Web-UI) auf DE/EN + Standardsprachen
   (es, zh, ja, ru) wie bei den MCP-Servern; Übersetzungen delegierbar (Sonnet/Haiku/agy,
   JSON-Locales). README in allen Sprachen.
@@ -45,35 +48,38 @@ Modelle müssen **entdeckbar**, **aktualisierbar** und **nutzeranpassbar** sein.
 
 ### Lücken im aktuellen Modellkatalog
 
-- [ ] **Codex/GPT-Provider fehlt:** Codex 5.5 und 4.5 (OpenAI) sind nicht als
-  Provider/Gang registriert. Neuer Provider-Typ `openai` oder `codex` mit
-  passenden model_ids und Kostenstruktur anlegen.
-- [ ] **Moonshot/Kimi-API-Motor (geplant, wartet auf `sk-`-Key):** Kimi ist
+- [x] **Codex/GPT-Provider:** DONE 2026-07-28. Provider `openai` mit
+  `OpenAIMotor`, `OPENAI_API_KEY` und aktuellen Gängen für `gpt-5.6-sol`,
+  `gpt-5.6-terra` sowie das spezialisierte `gpt-5.3-codex` registriert.
+  Der Motor nutzt den offiziellen Chat-Completions-Parameter
+  `max_completion_tokens`.
+- [x] **Moonshot/Kimi-API-Motor:** Kimi ist
   aktuell auf drei Wegen erreichbar — als agentische CLI (`kimi-cli`/`kimi-code`
   Motoren, erledigt) und als Rohmodell via Ollama Cloud (`ollama-kimi-k2`,
   erledigt). Sauberster Rohmodell-Weg ist `platform.moonshot.ai` /
   `api.moonshot.ai/v1` (OpenAI- UND Anthropic-kompatibel, volle Usage,
-  ~$0.95/$4 pro M Token K2.6). Sobald ein API-Key vorliegt: generischen
-  **OpenAI-kompatiblen Motor** anlegen (`base_url` konfigurierbar) — deckt
-  zugleich Codex/GPT und weitere OpenAI-kompatible Provider ab. Dann
-  Kimi-Gang `kimi-api` mit echten Kosten/Usage statt der CLI-Naeherung.
-- [ ] **Fable 5 fehlt:** Claude Fable 5 (`claude-fable-5`) als **höchsten Gang
-  (Spitzen-Niveau, oberhalb Opus 4.8)** in getriebe.json aufnehmen.
+  ~$0.95/$4 pro M Token K2.6). DONE: Der generische
+  **OpenAI-kompatible Motor** besitzt eine konfigurierbare `base_url`; Kimi-Gänge
+  laufen über den `KimiApiMotor` mit `MOONSHOT_API_KEY` und echter Usage.
+- [x] **Fable 5:** Claude Fable 5 (`claude-fable-5`) als **höchsten Gang
+  (Spitzen-Niveau)** in `getriebe.json` aufgenommen.
   **ACHTUNG — frühere Beschreibung war falsch [U 2026-07-11]:** Hier stand
   "kreativer Gang (G3-G4 Niveau)". Fable 5 ist **kein Kreativmodell**, sondern
   das Modell für die **schwersten** Aufgaben: Mathematik/Beweisführung,
   wissenschaftliche Arbeit und Beweisführung, anspruchsvolle App-/Software-Entwicklung,
   Spieleentwicklung. Rolle laut interner Modell-Strategie:
   *"Fable = der Forscher, das Gehirn"* — Gehirn/Operator/Advisor/Orchestrator.
-  Benchmark: SWE-bench Pro 80,3 % (vs. Sonnet 5: 63,2 %).
   **Kostenprofil beim Einsortieren beachten:** teuerstes Modell ($10/$50 pro MTok
-  = 5× Sonnet 5, 2× Opus 4.8) UND Extended Thinking nicht abschaltbar → auf
-  Routine-Arbeit 3-5× mehr Output-Tokens (effektiv ~10× Sonnet). Auf schweren
-  Aufgaben schrumpft der Abstand auf ~2×. Router-Regel: **höchster Gang, nur für
-  das Schwerste — niemals als Default-Worker für Masse/Mechanik.**
-- [ ] **Gemini-Modelle veraltet:** Aktuelle IDs sind `gemini-2.5-*`, real
-  verfügbar sind `gemini-3.5-flash` und `gemini-3.5-pro`. Model-IDs und
-  Kostenstruktur aktualisieren.
+  = teuerster kuratierter Anthropic-Gang) und Adaptive Thinking immer aktiv.
+  Router-Regel: **höchster Gang, nur für das Schwerste — niemals als
+  Default-Worker für Masse/Mechanik.** DONE 2026-07-28; G5, 1M Kontext und
+  offizielle Preise hinterlegt.
+- [x] **Gemini-Modelle aktualisiert:** DONE 2026-07-28. Flash nutzt die stabile
+  offizielle ID `gemini-3.5-flash`; der aktuelle Pro-API-Weg ist
+  `gemini-3.1-pro-preview`. Die ursprünglich geforderte ID
+  `gemini-3.5-pro` existiert im offiziellen Google-Katalog nicht und wurde
+  deshalb ausdrücklich nicht erfunden. Kosten und Kontextgrenzen sind
+  aktualisiert.
 - [ ] **Remote-Ollama nicht abgebildet:** Endpoint sollte konfigurierbar sein
   (lokal vs. remote, z.B. via VPN). Über `CLUTCH_REMOTE_OLLAMA` gesetzt; siehe
   `discovery.REMOTE_OLLAMA`. Grössere lokale Modelle automatisch höher einstufen.

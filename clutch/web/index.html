@@ -130,6 +130,85 @@
     #stats-box .stat-zeile { display: flex; justify-content: space-between; padding: 2px 0; }
     #stats-box .stat-wert  { color: var(--text); font-variant-numeric: tabular-nums; }
 
+    /* Settings-Panel: spiegelt clutch keys + clutch config */
+    #settings-panel {
+      border-top: 1px solid var(--border);
+      max-height: 42vh;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+    #settings-panel summary {
+      padding: 10px 12px;
+      cursor: pointer;
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 600;
+      list-style-position: inside;
+    }
+    #settings-panel[open] summary { color: var(--accent); }
+    .settings-gruppe {
+      padding: 0 12px 12px;
+      border-top: 1px solid var(--border);
+    }
+    .settings-gruppe h3 {
+      margin: 10px 0 6px;
+      color: var(--text-dim);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+    .settings-liste {
+      color: var(--text-dim);
+      font-size: 11px;
+      margin-bottom: 7px;
+    }
+    .settings-zeile {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 3px 0;
+    }
+    .settings-zeile .settings-wert {
+      overflow: hidden;
+      color: var(--text);
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .settings-form {
+      display: grid;
+      gap: 4px;
+    }
+    .settings-form input {
+      width: 100%;
+      padding: 6px 7px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg-input);
+      color: var(--text);
+      font-size: 11px;
+    }
+    .settings-form button,
+    .settings-zeile button {
+      padding: 5px 7px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--accent-dim);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 11px;
+    }
+    .settings-form button:hover,
+    .settings-zeile button:hover { background: var(--accent); }
+    #settings-status {
+      min-height: 16px;
+      padding: 0 12px 8px;
+      color: var(--text-dim);
+      font-size: 11px;
+    }
+    #settings-status.fehler { color: #ff7b72; }
+
     /* Modell-Box */
     #modell-box {
       padding: 8px 12px;
@@ -410,13 +489,28 @@
     <div class="stat-zeile"><span>Zone</span><span class="stat-wert" id="stat-zone">—</span></div>
   </div>
 
-  <div class="sidebar-section">API-Schlüssel</div>
-  <div id="keys-box">
-    <div id="keys-liste" style="font-size:12px;margin-bottom:6px;"></div>
-    <input type="text" id="key-name" placeholder="z. B. MOONSHOT_API_KEY" style="width:100%;margin-bottom:4px;">
-    <input type="password" id="key-wert" placeholder="Wert (wird nie angezeigt)" style="width:100%;margin-bottom:4px;">
-    <button id="btn-key-speichern" style="width:100%;">Schlüssel speichern</button>
-  </div>
+  <details id="settings-panel">
+    <summary>Einstellungen</summary>
+    <section class="settings-gruppe" id="keys-box">
+      <h3>API-Schlüssel &amp; Env</h3>
+      <div id="keys-liste" class="settings-liste"></div>
+      <div class="settings-form">
+        <input type="text" id="key-name" placeholder="z. B. MOONSHOT_API_KEY" autocomplete="off">
+        <input type="password" id="key-wert" placeholder="Wert (wird nie angezeigt)" autocomplete="new-password">
+        <button id="btn-key-speichern">Schlüssel speichern</button>
+      </div>
+    </section>
+    <section class="settings-gruppe" id="config-box">
+      <h3>CLI-Konfiguration</h3>
+      <div id="config-liste" class="settings-liste"></div>
+      <div class="settings-form">
+        <input type="text" id="config-key" placeholder="z. B. default_provider" autocomplete="off">
+        <input type="text" id="config-wert" placeholder="Wert" autocomplete="off">
+        <button id="btn-config-speichern">Konfiguration speichern</button>
+      </div>
+    </section>
+    <div id="settings-status" role="status" aria-live="polite"></div>
+  </details>
 </aside>
 
 <!-- ============ HAUPT-BEREICH ============ -->
@@ -857,6 +951,16 @@ const keysListe = document.getElementById("keys-liste");
 const keyName = document.getElementById("key-name");
 const keyWert = document.getElementById("key-wert");
 const btnKeySpeichern = document.getElementById("btn-key-speichern");
+const configListe = document.getElementById("config-liste");
+const configKey = document.getElementById("config-key");
+const configWert = document.getElementById("config-wert");
+const btnConfigSpeichern = document.getElementById("btn-config-speichern");
+const settingsStatus = document.getElementById("settings-status");
+
+function settingsStatusSetzen(text, fehler = false) {
+  settingsStatus.textContent = text;
+  settingsStatus.classList.toggle("fehler", fehler);
+}
 
 async function keysAktualisieren() {
   try {
@@ -876,25 +980,95 @@ async function keysAktualisieren() {
         del.addEventListener("click", async () => {
           try {
             await apiFetch("/api/credentials/" + encodeURIComponent(k.name), { method: "DELETE" });
-            keysAktualisieren();
-          } catch (e) { console.error("Key entfernen fehlgeschlagen:", e); }
+            await keysAktualisieren();
+            settingsStatusSetzen(`${k.name} wurde aus dem Store entfernt.`);
+          } catch (e) {
+            console.error("Key entfernen fehlgeschlagen:", e);
+            settingsStatusSetzen(`Entfernen fehlgeschlagen: ${e.message}`, true);
+          }
         });
         el.appendChild(del);
       }
       keysListe.appendChild(el);
     });
-  } catch (e) { console.error("Keys laden fehlgeschlagen:", e); }
+  } catch (e) {
+    console.error("Keys laden fehlgeschlagen:", e);
+    settingsStatusSetzen(`Schlüssel konnten nicht geladen werden: ${e.message}`, true);
+  }
 }
 
 btnKeySpeichern.addEventListener("click", async () => {
   const name = keyName.value.trim();
   const wert = keyWert.value;
-  if (!name || !wert) return;
+  if (!name || !wert) {
+    settingsStatusSetzen("Key-Name und Wert sind erforderlich.", true);
+    return;
+  }
   try {
     await apiFetch("/api/credentials", { method: "POST", body: JSON.stringify({ name, value: wert }) });
     keyName.value = ""; keyWert.value = "";
-    keysAktualisieren();
-  } catch (e) { console.error("Key speichern fehlgeschlagen:", e); }
+    await keysAktualisieren();
+    settingsStatusSetzen(`${name} wurde sicher gespeichert; der Wert wird nicht angezeigt.`);
+  } catch (e) {
+    console.error("Key speichern fehlgeschlagen:", e);
+    settingsStatusSetzen(`Speichern fehlgeschlagen: ${e.message}`, true);
+  }
+});
+
+async function configAktualisieren() {
+  try {
+    const daten = await apiFetch("/api/config");
+    configListe.innerHTML = "";
+    const eintraege = Object.entries(daten || {}).sort(([a], [b]) => a.localeCompare(b));
+    if (!eintraege.length) {
+      configListe.textContent = "Keine CLI-Konfiguration gesetzt.";
+      return;
+    }
+    eintraege.forEach(([key, wert]) => {
+      const el = document.createElement("div");
+      el.className = "settings-zeile";
+      el.title = "Zum Bearbeiten anklicken";
+
+      const nameEl = document.createElement("span");
+      nameEl.textContent = key;
+      const wertEl = document.createElement("span");
+      wertEl.className = "settings-wert";
+      wertEl.textContent = String(wert ?? "");
+
+      el.appendChild(nameEl);
+      el.appendChild(wertEl);
+      el.addEventListener("click", () => {
+        configKey.value = key;
+        configWert.value = String(wert ?? "");
+        configWert.focus();
+      });
+      configListe.appendChild(el);
+    });
+  } catch (e) {
+    console.error("Config laden fehlgeschlagen:", e);
+    settingsStatusSetzen(`Konfiguration konnte nicht geladen werden: ${e.message}`, true);
+  }
+}
+
+btnConfigSpeichern.addEventListener("click", async () => {
+  const key = configKey.value.trim();
+  if (!key) {
+    settingsStatusSetzen("Ein Config-Key ist erforderlich.", true);
+    return;
+  }
+  try {
+    await apiFetch("/api/config", {
+      method: "POST",
+      body: JSON.stringify({ key, value: configWert.value }),
+    });
+    configKey.value = "";
+    configWert.value = "";
+    await configAktualisieren();
+    settingsStatusSetzen(`${key} wurde in der CLI-Konfiguration gespeichert.`);
+  } catch (e) {
+    console.error("Config speichern fehlgeschlagen:", e);
+    settingsStatusSetzen(`Speichern fehlgeschlagen: ${e.message}`, true);
+  }
 });
 
 async function init() {
@@ -903,6 +1077,7 @@ async function init() {
     modelleAktualisieren(),
     statistikAktualisieren(),
     keysAktualisieren(),
+    configAktualisieren(),
   ]);
 }
 

@@ -10,6 +10,20 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1
 
 ### Added
 - **agy model registry and motor (2026-07-28):** Six models live-verified against agy 1.1.8 are registered with effort variants and catalog provenance. `AgyCompanionMotor` executes them through `companion-for-agy`, maps Clutch effort levels to supported agy efforts, and keeps agy classified as an agentic CLI provider.
+- **Aktueller Modellkatalog (2026-07-28):** Claude Fable 5 ist als höchster
+  G5-Gang registriert. Die direkten Gemini-Gänge nutzen
+  `gemini-3.5-flash` und `gemini-3.1-pro-preview`; die nicht existente ID
+  `gemini-3.5-pro` wird nicht verwendet.
+- **OpenAI-/Codex-Provider (2026-07-28):** `OpenAIMotor` erweitert den
+  konfigurierbaren `OpenAICompatibleMotor`, nutzt `OPENAI_API_KEY` und
+  `max_completion_tokens`. Registriert sind GPT-5.6 Sol, GPT-5.6 Terra und
+  GPT-5.3-Codex mit aktuellen Katalogdaten.
+- **Vollständiges Web-Settings-Panel (2026-07-28):** Das einklappbare Panel
+  spiegelt nun sowohl `clutch keys` als auch `clutch config`, zeigt erkannte
+  Env-Key-Namen samt Quelle, zeigt niemals Credential-Werte und meldet
+  Speicher-/Löschfehler sichtbar in der Oberfläche. Laufende API-Motoren lösen
+  nicht explizit injizierte Credentials pro Verfügbarkeitscheck/Aufruf neu auf,
+  sodass gespeicherte Keys ohne Serverneustart wirksam werden.
 
 ### Documentation
 - **Discoverability & Mermaid Architecture (2026-07-26):** Embedded Mermaid system architecture flowchart diagram, LLM-ready discovery badges, and GFM `> [!NOTE]` callouts for `llms.txt` machine-readable metadata in both English and German documentation. Updated `llms.txt` verification timestamp to 2026-07-26 and verified 286 passing unit tests (100% green).
@@ -56,9 +70,9 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1
 
 ### Added
 - **Web-UI: CLI-/Env-Spiegel (M6+):** Endpunkte `GET/POST /api/credentials` +
-  `DELETE /api/credentials/{name}` und `GET/POST /api/config`; Sidebar-Panel „API-Schlüssel"
-  zum Setzen/Löschen von Keys (Werte werden NIE angezeigt/zurückgegeben; nur Namen + Quelle
-  env/store). Tests in `test_m12_web_settings.py` (inkl. Wert-Leak-Schutz).
+  `DELETE /api/credentials/{name}` und `GET/POST /api/config`; die vollständige
+  Oberfläche ist im aktuellen Unreleased-Abschnitt dokumentiert. Tests in
+  `test_m12_web_settings.py` (inkl. Wert-Leak-Schutz).
 
 ### Fixed
 - **Changelog-Hygiene:** Die historische `0.3.0-rc1`-Sektion steht jetzt vor

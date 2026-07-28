@@ -11,8 +11,8 @@
 ![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![License MIT](https://img.shields.io/badge/License-MIT-green)
 ![Version 0.4.0](https://img.shields.io/badge/Version-0.4.0-orange)
-![Pytest](https://img.shields.io/badge/Pytest-295%20passed-brightgreen)
-![Providers](https://img.shields.io/badge/Providers-Anthropic%20%7C%20Gemini%20%7C%20Ollama%20%7C%20Kimi-purple)
+![Pytest](https://img.shields.io/badge/Pytest-301%20passed-brightgreen)
+![Providers](https://img.shields.io/badge/Providers-Anthropic%20%7C%20Gemini%20%7C%20OpenAI%20%7C%20Ollama%20%7C%20Kimi-purple)
 ![LLM-Ready](https://img.shields.io/badge/LLM--Ready-llms.txt-blue)
 
 **clutch** (German: *Kupplung*) uses a driving metaphor to intelligently route tasks to optimal LLM models across multiple providers. It analyzes task complexity and purpose, selects the right model and reasoning level, tracks budgets, and learns from experience. Use it as a **library**, a **CLI**, or a **local web app**.
@@ -22,7 +22,7 @@
 
 ## Features
 
-- **Provider-neutral** -- Anthropic (Claude), Google (Gemini), Ollama (local & remote), Claude Code, **agy via companion-for-agy**, and **Kimi** (Moonshot API / CLI / Ollama Cloud)
+- **Provider-neutral** -- Anthropic (Claude), Google (Gemini), OpenAI (GPT/Codex), Ollama (local & remote), Claude Code, **agy via companion-for-agy**, and **Kimi** (Moonshot API / CLI / Ollama Cloud)
 - **Auto-routing** -- analyzes task complexity *and purpose* (coding, vision, research, bulk) and picks the optimal model + reasoning level
 - **Purpose & vision aware** -- routes image/document input to vision-capable models; matches tasks to model strengths
 - **CLI + Web UI** -- `clutch route/run/chat/models/stats`, plus an optional FastAPI web chat (`clutch serve --web`)
@@ -48,6 +48,7 @@ graph TD
     Kupplung --> MotorBlock["MOTORBLOCK (Unified Provider API)"]
     MotorBlock --> Anthropic["Anthropic (Claude)"]
     MotorBlock --> Gemini["Google (Gemini)"]
+    MotorBlock --> OpenAI["OpenAI (GPT / Codex)"]
     MotorBlock --> Ollama["Ollama (Local / Remote)"]
     MotorBlock --> Agy["agy (companion-for-agy)"]
     MotorBlock --> Kimi["Kimi (Moonshot API)"]
@@ -129,6 +130,8 @@ pip install -e .
 - API keys for your desired providers (set as environment variables):
   - `ANTHROPIC_API_KEY` for Claude models
   - `GOOGLE_API_KEY` for Gemini models
+  - `OPENAI_API_KEY` for GPT and Codex models
+  - `MOONSHOT_API_KEY` for Kimi API models
   - Ollama running locally for local models
 
 ## Quick Start
@@ -233,8 +236,9 @@ more, route that step to the Mac Studio compute path.
 
 | Provider | Models | Local |
 |----------|--------|-------|
-| **Anthropic** | Claude Haiku, Sonnet, Opus | No |
-| **Google** | Gemini Flash, Pro | No |
+| **Anthropic** | Claude Fable 5, Haiku, Sonnet, Opus | No |
+| **Google** | Gemini 3.5 Flash, Gemini 3.1 Pro Preview | No |
+| **OpenAI** | GPT-5.6 Sol/Terra, GPT-5.3-Codex | No |
 | **Ollama** | Qwen, Mistral, and more (local & remote) | Yes |
 | **Claude Code** | Via subprocess (CLI session) | Yes |
 | **agy** | Live-discovered Gemini, Claude and GPT-OSS catalog via `companion-for-agy` | CLI session |

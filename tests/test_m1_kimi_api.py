@@ -10,7 +10,12 @@ import clutch.motorblock as mb
 from clutch.getriebe import Getriebe
 from clutch.gas_bremse import GasBremse
 from clutch.kupplung import FahrtConfig
-from clutch.motorblock import MotorBlock, KimiApiMotor, OpenAICompatibleMotor
+from clutch.motorblock import (
+    KimiApiMotor,
+    MotorBlock,
+    OpenAICompatibleMotor,
+    OpenAIMotor,
+)
 
 
 def _cfg(gang_name):
@@ -72,6 +77,8 @@ def test_kimi_api_motor_request_und_usage(monkeypatch):
     assert "api.moonshot.ai" in erfasst["url"]
     assert erfasst["headers"]["Authorization"] == "Bearer sk-test"
     assert erfasst["json"]["model"] == "kimi-k2.7-code"
+    assert "max_tokens" in erfasst["json"]
+    assert "max_completion_tokens" not in erfasst["json"]
     print("[OK] Kimi-API Request + Usage")
 
 
@@ -86,6 +93,52 @@ def test_openai_kompatibel_base_url_konfigurierbar():
     m = OpenAICompatibleMotor(base_url="http://localhost:1234/v1", api_key="x")
     assert m.base_url == "http://localhost:1234/v1"
     print("[OK] OpenAI-kompatibel base_url konfigurierbar")
+
+
+def test_openai_gaenge_und_factory_registriert():
+    getriebe = Getriebe()
+    codex = getriebe.gang("openai-codex")
+    sol = getriebe.gang("openai-gpt-5.6-sol")
+    terra = getriebe.gang("openai-gpt-5.6-terra")
+
+    assert codex and sol and terra
+    assert codex.provider == sol.provider == terra.provider == "openai"
+    assert codex.model_id == "gpt-5.3-codex"
+    assert sol.model_id == "gpt-5.6-sol"
+    assert terra.model_id == "gpt-5.6-terra"
+    assert isinstance(MotorBlock().motor_fuer("openai"), OpenAIMotor)
+
+
+def test_openai_motor_nutzt_max_completion_tokens(monkeypatch):
+    cfg = _cfg("openai-gpt-5.6-sol")
+    erfasst = {}
+
+    class FakeResp:
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return {
+                "choices": [{"message": {"content": "OPENAI_OK"}}],
+                "usage": {"prompt_tokens": 7, "completion_tokens": 2},
+            }
+
+    def fake_post(url, headers=None, json=None, timeout=None):
+        erfasst["url"] = url
+        erfasst["headers"] = headers
+        erfasst["json"] = json
+        return FakeResp()
+
+    monkeypatch.setitem(sys.modules, "requests", SimpleNamespace(post=fake_post))
+
+    ergebnis = OpenAIMotor(api_key="sk-test").ausfuehren(cfg, "Antworte kurz")
+
+    assert ergebnis.erfolg
+    assert ergebnis.text == "OPENAI_OK"
+    assert ergebnis.provider == "openai"
+    assert erfasst["url"] == "https://api.openai.com/v1/chat/completions"
+    assert "max_completion_tokens" in erfasst["json"]
+    assert "max_tokens" not in erfasst["json"]
 
 
 if __name__ == "__main__":

@@ -16,7 +16,13 @@ httpx = pytest.importorskip("httpx")
 
 from fastapi.testclient import TestClient
 from clutch.chat_runtime import ChatRuntime
-from clutch.motorblock import MotorErgebnis
+from clutch.motorblock import (
+    AnthropicMotor,
+    GeminiMotor,
+    KimiApiMotor,
+    MotorErgebnis,
+    OpenAIMotor,
+)
 
 
 def _handler(config, task):
@@ -81,6 +87,48 @@ def test_config_roundtrip(monkeypatch):
         assert r.status_code == 200 and r.json().get("default_provider") == "anthropic"
         assert c.post("/api/config", json={"key": ""}).status_code == 422
         print("[OK] Config-Roundtrip")
+
+
+def test_settings_panel_spiegelt_credentials_und_config(monkeypatch):
+    with tempfile.TemporaryDirectory() as tmp:
+        c = _client(tmp, monkeypatch)
+        html = c.get("/").text
+
+        assert 'id="settings-panel"' in html
+        assert 'id="keys-liste"' in html
+        assert 'id="config-liste"' in html
+        assert 'id="config-key"' in html
+        assert 'id="config-wert"' in html
+        assert 'id="btn-config-speichern"' in html
+        assert 'apiFetch("/api/credentials")' in html
+        assert 'apiFetch("/api/config")' in html
+
+
+def test_web_keys_werden_von_laufenden_motoren_erkannt(monkeypatch):
+    with tempfile.TemporaryDirectory() as tmp:
+        motor_faelle = [
+            (AnthropicMotor, "ANTHROPIC_API_KEY"),
+            (GeminiMotor, "GOOGLE_API_KEY"),
+            (KimiApiMotor, "MOONSHOT_API_KEY"),
+            (OpenAIMotor, "OPENAI_API_KEY"),
+        ]
+        for _, key_name in motor_faelle:
+            monkeypatch.delenv(key_name, raising=False)
+        c = _client(tmp, monkeypatch)
+        motoren = [
+            (motor_klasse(), key_name)
+            for motor_klasse, key_name in motor_faelle
+        ]
+        assert all(motor.ist_verfuegbar() is False for motor, _ in motoren)
+
+        for _, key_name in motoren:
+            r = c.post(
+                "/api/credentials",
+                json={"name": key_name, "value": "sk-nachgeladen"},
+            )
+            assert r.status_code == 200
+
+        assert all(motor.ist_verfuegbar() is True for motor, _ in motoren)
 
 
 if __name__ == "__main__":

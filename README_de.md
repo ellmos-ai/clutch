@@ -11,8 +11,8 @@
 ![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![Lizenz MIT](https://img.shields.io/badge/Lizenz-MIT-green)
 ![Version 0.4.0](https://img.shields.io/badge/Version-0.4.0-orange)
-![Pytest](https://img.shields.io/badge/Pytest-295%20bestanden-brightgreen)
-![Provider](https://img.shields.io/badge/Provider-Anthropic%20%7C%20Gemini%20%7C%20Ollama%20%7C%20Kimi-purple)
+![Pytest](https://img.shields.io/badge/Pytest-301%20bestanden-brightgreen)
+![Provider](https://img.shields.io/badge/Provider-Anthropic%20%7C%20Gemini%20%7C%20OpenAI%20%7C%20Ollama%20%7C%20Kimi-purple)
 ![LLM-Ready](https://img.shields.io/badge/LLM--Ready-llms.txt-blue)
 
 **clutch** (deutsch: *Kupplung*) verwendet eine Fahrmetapher, um Aufgaben intelligent an optimale LLM-Modelle verschiedener Anbieter weiterzuleiten. Das System analysiert Aufgabenkomplexität und -zweck, wählt das passende Modell und Reasoning-Level, verfolgt Budgets und lernt aus Erfahrungen. Verwendbar als **Bibliothek**, **CLI** oder **lokale Web-App**.
@@ -22,7 +22,7 @@
 
 ## Funktionen
 
-- **Provider-neutral** -- Anthropic (Claude), Google (Gemini), Ollama (lokal & remote), Claude Code, **agy via companion-for-agy** sowie **Kimi** (Moonshot API / CLI / Ollama Cloud)
+- **Provider-neutral** -- Anthropic (Claude), Google (Gemini), OpenAI (GPT/Codex), Ollama (lokal & remote), Claude Code, **agy via companion-for-agy** sowie **Kimi** (Moonshot API / CLI / Ollama Cloud)
 - **Automatisches Routing** -- analysiert Aufgabenkomplexität *und Zweck* (Coding, Vision, Recherche, Bulk) und wählt optimales Modell + Reasoning-Level
 - **Zweck- und Vision-bewusst** -- leitet Bild-/Dokumenteingaben an vision-fähige Modelle weiter; passt Aufgaben an Modellstärken an
 - **CLI + Web-UI** -- `clutch route/run/chat/models/stats`, plus optionale FastAPI-Web-Chat-Oberfläche (`clutch serve --web`)
@@ -48,6 +48,7 @@ graph TD
     Kupplung --> MotorBlock["MOTORBLOCK (Einheitliche Provider-API)"]
     MotorBlock --> Anthropic["Anthropic (Claude)"]
     MotorBlock --> Gemini["Google (Gemini)"]
+    MotorBlock --> OpenAI["OpenAI (GPT / Codex)"]
     MotorBlock --> Ollama["Ollama (Lokal / Remote)"]
     MotorBlock --> Agy["agy (companion-for-agy)"]
     MotorBlock --> Kimi["Kimi (Moonshot API)"]
@@ -129,6 +130,8 @@ pip install -e .
 - API-Keys für gewünschte Anbieter (als Umgebungsvariablen):
   - `ANTHROPIC_API_KEY` für Claude-Modelle
   - `GOOGLE_API_KEY` für Gemini-Modelle
+  - `OPENAI_API_KEY` für GPT- und Codex-Modelle
+  - `MOONSHOT_API_KEY` für Kimi-API-Modelle
   - Lokal laufendes Ollama für lokale Modelle
 
 ## Schnellstart
@@ -233,8 +236,9 @@ auf den Mac-Studio-Compute-Pfad.
 
 | Anbieter | Modelle | Lokal |
 |----------|--------|-------|
-| **Anthropic** | Claude Haiku, Sonnet, Opus | Nein |
-| **Google** | Gemini Flash, Pro | Nein |
+| **Anthropic** | Claude Fable 5, Haiku, Sonnet, Opus | Nein |
+| **Google** | Gemini 3.5 Flash, Gemini 3.1 Pro Preview | Nein |
+| **OpenAI** | GPT-5.6 Sol/Terra, GPT-5.3-Codex | Nein |
 | **Ollama** | Qwen, Mistral und weitere (lokal & remote) | Ja |
 | **Claude Code** | Via Subprocess (CLI-Session) | Ja |
 | **agy** | Live ermittelter Gemini-, Claude- und GPT-OSS-Katalog via `companion-for-agy` | CLI-Session |

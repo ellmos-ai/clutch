@@ -106,14 +106,22 @@ class AnthropicMotor(Motor):
 
     def __init__(self, api_key: Optional[str] = None):
         super().__init__()
-        self._api_key = api_key or get_api_key("ANTHROPIC_API_KEY")
+        self._api_key_override = api_key
         self._client = None
+        self._client_key = None
+
+    def _aktueller_api_key(self) -> str:
+        if self._api_key_override is not None:
+            return self._api_key_override
+        return get_api_key("ANTHROPIC_API_KEY")
 
     def _get_client(self):
-        if self._client is None:
+        api_key = self._aktueller_api_key()
+        if self._client is None or self._client_key != api_key:
             try:
                 import anthropic
-                self._client = anthropic.Anthropic(api_key=self._api_key)
+                self._client = anthropic.Anthropic(api_key=api_key)
+                self._client_key = api_key
             except ImportError:
                 raise RuntimeError(
                     "anthropic SDK nicht installiert. "
@@ -122,7 +130,7 @@ class AnthropicMotor(Motor):
         return self._client
 
     def ist_verfuegbar(self) -> bool:
-        return bool(self._api_key)
+        return bool(self._aktueller_api_key())
 
     def ausfuehren(self, config: FahrtConfig, prompt: str) -> MotorErgebnis:
         t0 = time.time()
@@ -176,14 +184,22 @@ class GeminiMotor(Motor):
 
     def __init__(self, api_key: Optional[str] = None):
         super().__init__()
-        self._api_key = api_key or get_api_key("GOOGLE_API_KEY")
+        self._api_key_override = api_key
         self._client = None
+        self._client_key = None
+
+    def _aktueller_api_key(self) -> str:
+        if self._api_key_override is not None:
+            return self._api_key_override
+        return get_api_key("GOOGLE_API_KEY")
 
     def _get_client(self):
-        if self._client is None:
+        api_key = self._aktueller_api_key()
+        if self._client is None or self._client_key != api_key:
             try:
                 from google import genai
-                self._client = genai.Client(api_key=self._api_key)
+                self._client = genai.Client(api_key=api_key)
+                self._client_key = api_key
             except ImportError:
                 raise RuntimeError(
                     "google-genai SDK nicht installiert. "
@@ -192,7 +208,7 @@ class GeminiMotor(Motor):
         return self._client
 
     def ist_verfuegbar(self) -> bool:
-        return bool(self._api_key)
+        return bool(self._aktueller_api_key())
 
     def ausfuehren(self, config: FahrtConfig, prompt: str) -> MotorErgebnis:
         t0 = time.time()
@@ -546,6 +562,7 @@ class OpenAICompatibleMotor(Motor):
     provider_name = "openai-compatible"
     base_url = "https://api.openai.com/v1"
     api_key_env = "OPENAI_API_KEY"
+    max_tokens_parameter = "max_tokens"
 
     def __init__(self, base_url: Optional[str] = None, api_key: Optional[str] = None,
                  api_key_env: Optional[str] = None):
@@ -554,10 +571,15 @@ class OpenAICompatibleMotor(Motor):
             self.base_url = base_url
         if api_key_env:
             self.api_key_env = api_key_env
-        self._api_key = api_key or get_api_key(self.api_key_env)
+        self._api_key_override = api_key
+
+    def _aktueller_api_key(self) -> str:
+        if self._api_key_override is not None:
+            return self._api_key_override
+        return get_api_key(self.api_key_env)
 
     def ist_verfuegbar(self) -> bool:
-        return bool(self._api_key)
+        return bool(self._aktueller_api_key())
 
     def ausfuehren(self, config: FahrtConfig, prompt: str) -> MotorErgebnis:
         t0 = time.time()
@@ -568,17 +590,19 @@ class OpenAICompatibleMotor(Motor):
         try:
             import requests
 
+            api_key = self._aktueller_api_key()
+            payload = {
+                "model": config.model_id,
+                "messages": [{"role": "user", "content": vollprompt}],
+                self.max_tokens_parameter: max_tok,
+            }
             response = requests.post(
                 f"{self.base_url.rstrip('/')}/chat/completions",
                 headers={
-                    "Authorization": f"Bearer {self._api_key}",
+                    "Authorization": f"Bearer {api_key}",
                     "Content-Type": "application/json",
                 },
-                json={
-                    "model": config.model_id,
-                    "max_tokens": max_tok,
-                    "messages": [{"role": "user", "content": vollprompt}],
-                },
+                json=payload,
                 timeout=timeout,
             )
             response.raise_for_status()
@@ -614,6 +638,16 @@ class KimiApiMotor(OpenAICompatibleMotor):
     provider_name = "kimi-api"
     base_url = "https://api.moonshot.ai/v1"
     api_key_env = "MOONSHOT_API_KEY"
+
+
+class OpenAIMotor(OpenAICompatibleMotor):
+    """OpenAI Chat Completions für GPT- und Codex-Modelle."""
+
+    provider_name = "openai"
+    base_url = "https://api.openai.com/v1"
+    api_key_env = "OPENAI_API_KEY"
+    # OpenAI hat max_tokens für aktuelle Reasoning-Modelle abgelöst.
+    max_tokens_parameter = "max_completion_tokens"
 
 
 # ---------------------------------------------------------------------------
@@ -747,6 +781,7 @@ class MotorBlock:
             "kimi-cli": KimiCliMotor(),
             "kimi-code": KimiCodeMotor(),
             "kimi-api": KimiApiMotor(),
+            "openai": OpenAIMotor(),
             "agy": AgyCompanionMotor(),
         }
 
