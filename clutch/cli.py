@@ -85,6 +85,7 @@ def _cmd_route(args: argparse.Namespace) -> int:
             "gang": config.gang.name,
             "provider": config.gang.provider,
             "gas": round(config.gas.wert, 3),
+            "effort": config.effort,
             "muster": config.muster,
             "zweck": score_ergebnis.zweck,
             "score": score_ergebnis.score,
@@ -99,6 +100,7 @@ def _cmd_route(args: argparse.Namespace) -> int:
             print(f"  {t('route.gang'):<9} {ergebnis['gang']} (G{ergebnis['gang_stufe']})")
             print(f"  {t('route.provider'):<9} {ergebnis['provider']}")
             print(f"  {t('route.gas'):<9} {ergebnis['gas']:.0%}")
+            print(f"  {'Effort':<9} {ergebnis['effort'] or '-'}")
             print(f"  {t('route.muster'):<9} {ergebnis['muster']}")
             print(f"  {t('route.zweck'):<9} {ergebnis['zweck']}")
             print(f"  {t('route.score'):<9} {ergebnis['score']}/100")

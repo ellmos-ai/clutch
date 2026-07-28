@@ -196,8 +196,28 @@ Die Standardkonfiguration liegt in `clutch/config/`, sodass bearbeitbare Install
 |------|---------|
 | `kupplung.json` | Globale Einstellungen (Fahrer-Standardwerte, Schwarm-Limits, Budget) |
 | `getriebe.json` | Alle Gänge + Provider-Zuordnungen |
-| `strecken.json` | Streckentyp-zu-Gang/Gas-Zuordnung |
+| `strecken.json` | Streckentyp-zu-Gang/Gas/Effort-Zuordnung |
 | `fitness_criteria.json` | Schwellenwerte der Lernengine |
+
+### Reasoning-Effort
+
+Modellwahl und Reasoning-Effort sind orthogonal: clutch entscheidet **welches
+Modell** (Gang) und hält im optionalen Feld `effort` fest, **wie tief** ein
+kompatibler Agent arbeiten soll. Aufgabenklassen in `strecken.json` können
+verwenden:
+
+- `high` für routinemäßige, klar begrenzte Arbeit
+- `xhigh` als reguläres gründliches Session-Level
+- `max-delegate` für einen transparent angekündigten, gezielten Max-Worker beim
+  härtesten Einzelschritt; dadurch entsteht kein dauerhafter Max-Modus
+
+Aufrufer können die Empfehlung für genau einen Aufruf mit
+`kontext={"effort": "high"}` überschreiben. `ultracode` ist bewusst kein
+Effort-Wert: Es beschreibt Breite (Team-/Schwarm-Fan-out), nicht tiefere
+Analyse; teure Fan-outs brauchen weiterhin eine ausdrückliche Bestätigung.
+Lange Rechenarbeit wird in beobachtbare Schritte zerlegt. Dauert ein einzelner
+Schritt voraussichtlich etwa 10--15 Minuten oder länger, gehört dieser Schritt
+auf den Mac-Studio-Compute-Pfad.
 
 ### Budget-Zonen
 

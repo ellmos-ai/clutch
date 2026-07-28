@@ -4,60 +4,70 @@
     "feldweg": {
       "gang": "claude-haiku",
       "gas": 0.3,
+      "effort": "high",
       "muster": "einzelfahrt",
       "beschreibung": "Kleine Aenderungen, Formatierung, Typos"
     },
     "landstrasse": {
       "gang": "claude-sonnet",
       "gas": 0.5,
+      "effort": "xhigh",
       "muster": "einzelfahrt",
       "beschreibung": "Standard-Feature-Entwicklung, Refactoring"
     },
     "bundesstrasse": {
       "gang": "claude-sonnet",
       "gas": 0.7,
+      "effort": "xhigh",
       "muster": "einzelfahrt",
       "beschreibung": "Fehlersuche und -behebung"
     },
     "autobahn": {
       "gang": "claude-opus",
       "gas": 0.9,
+      "effort": "xhigh",
       "muster": "einzelfahrt",
       "beschreibung": "Architektur-Entscheidungen, System-Design"
     },
     "pruefstrecke": {
       "gang": "claude-opus",
       "gas": 0.6,
+      "effort": "max-delegate",
       "muster": "einzelfahrt",
       "beschreibung": "Code-Review, Qualitaetspruefung"
     },
     "rallye": {
       "gang": "claude-haiku",
       "gas": 0.3,
+      "effort": "high",
       "muster": "schwarm",
       "beschreibung": "Massenformatierung, Bulk-Operationen"
     },
     "konvoi": {
       "gang": "claude-sonnet",
       "gas": 0.5,
+      "effort": "xhigh",
       "muster": "kolonne",
       "beschreibung": "Sequentielle Verarbeitungs-Pipeline"
     },
     "teamfahrt": {
       "gang": "claude-sonnet",
       "gas": 0.5,
+      "effort": "xhigh",
       "muster": "team",
       "beschreibung": "Feature ueber mehrere Dateien/Module"
     },
     "langstrecke": {
       "gang": "claude-opus",
       "gas": 0.9,
+      "effort": "max-delegate",
       "muster": "hybrid",
       "beschreibung": "Grosse, mehrstufige Aufgaben"
     },
     "testfahrt": {
       "gang": "claude-sonnet",
       "gas": 0.5,
+      "effort": "xhigh",
       "muster": "schwarm",
       "beschreibung": "Automatische Test-Generierung"
     }
@@ -65,6 +75,7 @@
   "standard": {
     "gang": "claude-sonnet",
     "gas": 0.5,
+    "effort": "xhigh",
     "muster": "einzelfahrt"
   },
   "erkundungsrate": 0.10,

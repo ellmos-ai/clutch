@@ -100,13 +100,16 @@ class Fahrer:
         return self.analyse.analysiere(beschreibung, kontext)
 
     def kuppeln(self, profil: StreckenProfil, zweck: Optional[str] = None,
-                vertrauenswuerdig: bool = True) -> FahrtConfig:
+                vertrauenswuerdig: bool = True,
+                effort_override: Optional[str] = None) -> FahrtConfig:
         """Kuppelt: Waehlt Gang und Gas basierend auf Strecke + Systemzustand.
 
         zweck (coding/vision/research/...) steuert das Zweck-Routing (M2):
         Gaenge werden nach passenden staerken-Tags ausgewaehlt.
         vertrauenswuerdig=False (z.B. Web/API) schliesst agentische CLI-Motoren
         mit Auto-Approve aus.
+        effort_override setzt optional high/xhigh/max-delegate fuer genau
+        diesen Aufruf; max-delegate bleibt ein transparenter Delegationshinweis.
         """
 
         # Bordcomputer checken
@@ -119,6 +122,7 @@ class Fahrer:
             gesperrte_modelle=system_status.gesperrte_modelle,
             zweck=zweck,
             vertrauenswuerdig=vertrauenswuerdig,
+            effort_override=effort_override,
         )
 
         # Gesperrtes Modell Fallback
@@ -132,6 +136,7 @@ class Fahrer:
                     muster=config.muster,
                     ist_erkundung=config.ist_erkundung,
                     entscheidungs_grund=config.entscheidungs_grund + " | fallback",
+                    effort=config.effort,
                 )
 
         if self._logge_alles:
@@ -167,9 +172,15 @@ class Fahrer:
         hat_bild = bool(kontext and kontext.get("hat_bild"))
         zweck = self.scorer.erkenne_zweck(beschreibung, hat_bild=hat_bild)
         vertrauenswuerdig = bool(kontext.get("vertrauenswuerdig", True)) if kontext else True
+        effort_override = kontext.get("effort") if kontext else None
 
         # 2. Kuppeln (zweck-bewusst)
-        config = self.kuppeln(profil, zweck=zweck, vertrauenswuerdig=vertrauenswuerdig)
+        config = self.kuppeln(
+            profil,
+            zweck=zweck,
+            vertrauenswuerdig=vertrauenswuerdig,
+            effort_override=effort_override,
+        )
 
         # 3. Fahren + messen
         fahrt_id = self.tacho.start(profil.typ.value, config)

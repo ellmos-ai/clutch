@@ -198,8 +198,26 @@ folder to `Fahrer` if you want project-specific overrides.
 |------|---------|
 | `kupplung.json` | Global settings (driver defaults, swarm limits, budget) |
 | `getriebe.json` | All gears + provider mappings |
-| `strecken.json` | Road type to gear/throttle mapping |
+| `strecken.json` | Road type to gear/throttle/effort mapping |
 | `fitness_criteria.json` | Learning engine thresholds |
+
+### Reasoning Effort
+
+Model choice and reasoning effort are orthogonal: clutch decides **which
+model** (gear) and records **how deeply** a compatible agent should work in the
+optional `effort` field. Road classes in `strecken.json` can use:
+
+- `high` for routine, bounded work
+- `xhigh` as the normal thorough session level
+- `max-delegate` for a transparent, targeted max worker on the hardest single
+  step; it does not enable a persistent max mode
+
+Callers may override the recommendation for one invocation with
+`kontext={"effort": "high"}`. `ultracode` is intentionally not an effort
+value: it describes breadth (team/swarm fan-out), not deeper reasoning, and
+expensive fan-out still needs explicit confirmation. Split long compute into
+observable steps; when one step is expected to take about 10--15 minutes or
+more, route that step to the Mac Studio compute path.
 
 ### Budget Zones
 

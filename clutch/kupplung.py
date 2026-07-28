@@ -30,6 +30,7 @@ from clutch.gas_bremse import GasBremse, GasStellung
 # Agentische CLI-Motoren fuehren Tools mit Auto-Approve (--yolo) auf dem Host aus.
 # Aus untrusted Quellen (Web/API) duerfen sie NICHT automatisch gewaehlt werden.
 AGENTIC_CLI_PROVIDERS = {"claude-code", "kimi-cli", "kimi-code"}
+ERLAUBTE_EFFORTS = {"high", "xhigh", "max-delegate"}
 
 
 @dataclass
@@ -40,6 +41,7 @@ class FahrtConfig:
     muster: str                   # "einzelfahrt" | "kolonne" | "team" | "schwarm" | "hybrid"
     ist_erkundung: bool = False   # Epsilon-Greedy Exploration?
     entscheidungs_grund: str = ""
+    effort: Optional[str] = None  # Orthogonal zur Modellwahl; max nur als gezielter Delegate
 
     @property
     def model_id(self) -> str:
@@ -58,6 +60,7 @@ class FahrtConfig:
             "gas_strategie": self.gas.prompt_strategie,
             "token_multiplikator": self.gas.token_multiplikator,
             "muster": self.muster,
+            "effort": self.effort,
             "ist_erkundung": self.ist_erkundung,
             "grund": self.entscheidungs_grund,
         }
@@ -97,6 +100,7 @@ class Kupplung:
         gesperrte_modelle: Optional[list[str]] = None,
         zweck: Optional[str] = None,
         vertrauenswuerdig: bool = True,
+        effort_override: Optional[str] = None,
     ) -> FahrtConfig:
         """Bestimmt die optimale FahrtConfig fuer ein StreckenProfil.
 
@@ -112,6 +116,13 @@ class Kupplung:
             basis = self._strecken_config["strecken"][strecken_key].copy()
         else:
             basis = self._standard.copy()
+
+        # Effort ist eine eigene Routing-Dimension neben Modell/Gang und Gas.
+        # "max-delegate" ist bewusst nur ein Delegationshinweis, kein
+        # persistenter Session-Modus.
+        effort = self._effort_waehlen(
+            effort_override if effort_override is not None else basis.get("effort")
+        )
 
         # 2. Gang waehlen
         gang_name = basis.get("gang", "claude-sonnet")
@@ -230,6 +241,7 @@ class Kupplung:
             muster=muster,
             ist_erkundung=ist_erkundung,
             entscheidungs_grund=grund,
+            effort=effort,
         )
 
     def override(self, strecken_typ: str, config: dict) -> None:
@@ -240,6 +252,24 @@ class Kupplung:
         self._erkundungsrate = max(0.0, min(1.0, rate))
 
     # --- Private ---
+
+    @staticmethod
+    def _effort_waehlen(effort: Optional[str]) -> Optional[str]:
+        """Validiert den optionalen Effort-Hinweis.
+
+        Die Werte sind absichtlich semantisch: ``max-delegate`` fordert einen
+        transparent angekündigten, gezielten Max-Worker für den härtesten
+        Einzelschritt an. Es schaltet keinen dauerhaften Max-Modus ein.
+        """
+        if effort is None:
+            return None
+        if not isinstance(effort, str):
+            raise ValueError("effort muss ein String oder null sein")
+        normalisiert = effort.strip().lower()
+        if normalisiert not in ERLAUBTE_EFFORTS:
+            erlaubt = ", ".join(sorted(ERLAUBTE_EFFORTS))
+            raise ValueError(f"ungueltiger effort '{effort}'; erlaubt: {erlaubt}")
+        return normalisiert
 
     def _zweck_gang(self, zweck: str, aktuell: Gang, limit: int,
                     gesperrte: list[str]) -> Optional[Gang]:
