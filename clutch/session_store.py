@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 import sqlite3
 from contextlib import contextmanager
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
@@ -257,6 +257,20 @@ class SessionStore:
                 (session_id,),
             ).fetchall()
         return [_row_zu_message(r) for r in rows]
+
+    def message(self, message_id: str) -> Optional[ChatMessage]:
+        """Gibt genau eine Nachricht per stabiler ID zurück.
+
+        Die Methode ist absichtlich enger als eine Volltextsuche. Sichere
+        Evidence-Adapter können damit einen bereits bekannten lokalen Datensatz
+        auflösen, ohne Suchtreffer oder Rohtext in einen Index zu projizieren.
+        """
+        with self._conn() as conn:
+            row = conn.execute(
+                "SELECT * FROM chat_messages WHERE id = ?",
+                (message_id,),
+            ).fetchone()
+        return _row_zu_message(row) if row else None
 
 
 # ---------------------------------------------------------------------------
