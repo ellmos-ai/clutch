@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 import sqlite3
 from contextlib import contextmanager
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
@@ -87,6 +87,12 @@ CREATE INDEX IF NOT EXISTS idx_messages_session_id
 
 CREATE INDEX IF NOT EXISTS idx_sessions_updated_at
     ON chat_sessions(updated_at DESC);
+
+CREATE TABLE IF NOT EXISTS evidence_locators (
+    locator_id   TEXT PRIMARY KEY,
+    message_id   TEXT NOT NULL REFERENCES chat_messages(id) ON DELETE CASCADE,
+    content_hash TEXT NOT NULL
+);
 """
 
 
@@ -257,6 +263,60 @@ class SessionStore:
                 (session_id,),
             ).fetchall()
         return [_row_zu_message(r) for r in rows]
+
+    def message(self, message_id: str) -> Optional[ChatMessage]:
+        """Gibt genau eine Nachricht per stabiler ID zurück.
+
+        Die Methode ist absichtlich enger als eine Volltextsuche. Sichere
+        Evidence-Adapter können damit einen bereits bekannten lokalen Datensatz
+        auflösen, ohne Suchtreffer oder Rohtext in einen Index zu projizieren.
+        """
+        with self._conn() as conn:
+            row = conn.execute(
+                "SELECT * FROM chat_messages WHERE id = ?",
+                (message_id,),
+            ).fetchone()
+        return _row_zu_message(row) if row else None
+
+    def bind_evidence_locator(
+        self,
+        locator_id: str,
+        message_id: str,
+        content_hash: str,
+    ) -> None:
+        """Bindet eine opaque Locator-ID lokal an eine Nachricht.
+
+        Die Abbildung bleibt ausschließlich in der Clutch-Datenbank. Eine
+        bestehende, abweichende Bindung wird nicht überschrieben.
+        """
+        with self._conn() as conn:
+            conn.execute(
+                """INSERT INTO evidence_locators (locator_id, message_id, content_hash)
+                   VALUES (?, ?, ?)
+                   ON CONFLICT(locator_id) DO NOTHING""",
+                (locator_id, message_id, content_hash),
+            )
+            row = conn.execute(
+                """SELECT message_id, content_hash FROM evidence_locators
+                   WHERE locator_id = ?""",
+                (locator_id,),
+            ).fetchone()
+        if row is None or row["message_id"] != message_id or row["content_hash"] != content_hash:
+            raise ValueError("conflicting evidence locator binding")
+
+    def evidence_message(self, locator_id: str) -> tuple[ChatMessage, str] | None:
+        """Löst eine opaque Locator-ID nur innerhalb des lokalen Stores auf."""
+        with self._conn() as conn:
+            row = conn.execute(
+                """SELECT m.*, e.content_hash AS locator_content_hash
+                   FROM evidence_locators e
+                   JOIN chat_messages m ON m.id = e.message_id
+                   WHERE e.locator_id = ?""",
+                (locator_id,),
+            ).fetchone()
+        if row is None:
+            return None
+        return _row_zu_message(row), row["locator_content_hash"]
 
 
 # ---------------------------------------------------------------------------
