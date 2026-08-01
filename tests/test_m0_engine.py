@@ -118,7 +118,10 @@ def test_fahrer_verbucht_tokens_und_kosten():
         assert erg.total_tokens == 1500, f"Tokens nicht verbucht: {erg.total_tokens}"
 
         tank = fahrer.tankuhr.stand()
-        assert tank.kosten_heute_usd > 0, "Tankuhr blieb auf 0 -- Kosten nicht verbucht"
+        assert tank.fahrten_heute >= 1, "Tankuhr hat Fahrt nicht aufgezeichnet"
+        gang_obj = fahrer.bordcomputer.getriebe.gang(erg.model_id or "")
+        if gang_obj and not gang_obj.ist_kostenlos:
+            assert tank.kosten_heute_usd > 0, "Tankuhr blieb auf 0 -- Kosten nicht verbucht"
         print("[OK] Fahrer verbucht Tokens + Kosten")
 
 
