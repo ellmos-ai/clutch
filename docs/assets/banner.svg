@@ -1,0 +1,421 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <!-- Glow Filters -->
+    <filter id="cyanGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <filter id="strongGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="8" result="blur1" />
+      <feGaussianBlur stdDeviation="3" result="blur2" />
+      <feMerge>
+        <feMergeNode in="blur1" />
+        <feMergeNode in="blur2" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <filter id="redlineGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <!-- Gradients -->
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#030611" />
+      <stop offset="65%" stop-color="#081226" />
+      <stop offset="100%" stop-color="#0f2242" />
+    </linearGradient>
+
+    <radialGradient id="horizonGlow" cx="50%" cy="100%" r="65%">
+      <stop offset="0%" stop-color="#00f2fe" stop-opacity="0.4" />
+      <stop offset="35%" stop-color="#0066ff" stop-opacity="0.18" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+
+    <linearGradient id="roadGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0c182d" />
+      <stop offset="35%" stop-color="#080e1a" />
+      <stop offset="100%" stop-color="#04060b" />
+    </linearGradient>
+
+    <linearGradient id="projBeamGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#00f2fe" stop-opacity="0.38" />
+      <stop offset="60%" stop-color="#00f2fe" stop-opacity="0.08" />
+      <stop offset="100%" stop-color="#00f2fe" stop-opacity="0.0" />
+    </linearGradient>
+
+    <linearGradient id="hudBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f2fe" stop-opacity="0.07" />
+      <stop offset="50%" stop-color="#0088ff" stop-opacity="0.03" />
+      <stop offset="100%" stop-color="#0044cc" stop-opacity="0.08" />
+    </linearGradient>
+
+    <linearGradient id="dashGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1a2334" />
+      <stop offset="20%" stop-color="#111724" />
+      <stop offset="100%" stop-color="#06090f" />
+    </linearGradient>
+
+    <linearGradient id="pillarLeft" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#050810" />
+      <stop offset="65%" stop-color="#141d2e" />
+      <stop offset="88%" stop-color="#24314a" />
+      <stop offset="100%" stop-color="#0a0f1a" />
+    </linearGradient>
+
+    <linearGradient id="pillarRight" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0a0f1a" />
+      <stop offset="12%" stop-color="#24314a" />
+      <stop offset="35%" stop-color="#141d2e" />
+      <stop offset="100%" stop-color="#050810" />
+    </linearGradient>
+
+    <linearGradient id="wheelGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#283448" />
+      <stop offset="40%" stop-color="#151b28" />
+      <stop offset="100%" stop-color="#080b12" />
+    </linearGradient>
+
+    <linearGradient id="glassSheen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.07" />
+      <stop offset="30%" stop-color="#00f2fe" stop-opacity="0.02" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.0" />
+    </linearGradient>
+
+    <linearGradient id="badgeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00f2fe" stop-opacity="0.2" />
+      <stop offset="50%" stop-color="#0066ff" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#00f2fe" stop-opacity="0.2" />
+    </linearGradient>
+
+    <!-- Patterns -->
+    <pattern id="hudGrid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M 24 0 L 0 0 0 24" fill="none" stroke="#00f2fe" stroke-width="0.5" stroke-opacity="0.1" />
+    </pattern>
+
+    <pattern id="carbonMesh" width="6" height="6" patternUnits="userSpaceOnUse">
+      <rect width="6" height="6" fill="#0b0f17" />
+      <polygon points="0,0 3,0 0,3" fill="#151d2c" />
+      <polygon points="3,3 6,3 3,6" fill="#151d2c" />
+      <polygon points="3,3 6,3 6,0" fill="#070a10" />
+      <polygon points="0,3 3,3 0,6" fill="#070a10" />
+    </pattern>
+  </defs>
+
+  <style>
+    text {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+    
+    @keyframes roadMotion {
+      0% { stroke-dashoffset: 0; }
+      100% { stroke-dashoffset: -160; }
+    }
+    .lane-dash {
+      stroke-dasharray: 40, 40;
+      animation: roadMotion 0.65s linear infinite;
+    }
+
+    @keyframes holoPulse {
+      0%, 100% { opacity: 0.92; filter: drop-shadow(0 0 8px rgba(0, 242, 254, 0.45)); }
+      50% { opacity: 1; filter: drop-shadow(0 0 16px rgba(0, 242, 254, 0.85)); }
+    }
+    .holo-container {
+      animation: holoPulse 3.2s ease-in-out infinite;
+    }
+
+    @keyframes scanLineAnim {
+      0% { transform: translateY(0px); opacity: 0; }
+      15% { opacity: 0.7; }
+      85% { opacity: 0.7; }
+      100% { transform: translateY(220px); opacity: 0; }
+    }
+    .hud-scanline {
+      animation: scanLineAnim 3.5s linear infinite;
+    }
+
+    @keyframes beamShimmer {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.55; }
+    }
+    .proj-beam {
+      animation: beamShimmer 2.5s ease-in-out infinite;
+    }
+
+    @keyframes rpmVibe {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(1.2deg); }
+      75% { transform: rotate(-0.8deg); }
+    }
+    .rpm-needle-group {
+      transform-origin: 460px 515px;
+      animation: rpmVibe 0.15s ease-in-out infinite;
+    }
+
+    @keyframes gearPulse {
+      0%, 100% { fill: #00f2fe; filter: drop-shadow(0 0 6px #00f2fe); }
+      50% { fill: #ffffff; filter: drop-shadow(0 0 16px #00f2fe); }
+    }
+    .gear-num {
+      animation: gearPulse 1.8s ease-in-out infinite;
+    }
+
+    @keyframes speedGlow {
+      0%, 100% { opacity: 0.88; }
+      50% { opacity: 1; }
+    }
+    .speed-val {
+      animation: speedGlow 2s ease-in-out infinite;
+    }
+  </style>
+
+  <!-- 1. SKY & HORIZON BACKGROUND -->
+  <rect x="0" y="0" width="1200" height="230" fill="url(#skyGrad)" />
+  <rect x="0" y="50" width="1200" height="180" fill="url(#horizonGlow)" />
+
+  <!-- Cyber Mountain & City Skyline Outline -->
+  <path d="M 0,230 L 70,205 L 140,218 L 220,195 L 290,225 L 380,185 L 450,210 L 530,190 L 600,220 L 670,190 L 750,215 L 820,180 L 910,220 L 980,195 L 1060,215 L 1130,200 L 1200,230 Z" fill="#091428" opacity="0.8" />
+  <path d="M 0,230 L 110,215 L 180,225 L 320,198 L 410,222 L 560,205 L 600,220 L 640,205 L 790,222 L 880,198 L 1020,225 L 1090,215 L 1200,230 Z" fill="#0d1f3b" opacity="0.6" />
+
+  <!-- Digital Grid on Sky Horizon -->
+  <g opacity="0.15">
+    <line x1="0" y1="210" x2="1200" y2="210" stroke="#00f2fe" stroke-width="1" />
+    <line x1="0" y1="220" x2="1200" y2="220" stroke="#00f2fe" stroke-width="1" />
+    <line x1="0" y1="226" x2="1200" y2="226" stroke="#00f2fe" stroke-width="1" />
+  </g>
+
+  <!-- 2. ROAD SURFACE (PERSPECTIVE FROM VANISHING POINT 600, 220) -->
+  <polygon points="600,220 0,460 0,630 1200,630 1200,460" fill="url(#roadGrad)" />
+
+  <!-- Perspective Grid & Speed Lines -->
+  <g opacity="0.25">
+    <!-- Perspective radial lines -->
+    <line x1="600" y1="220" x2="-200" y2="630" stroke="#00f2fe" stroke-width="1" />
+    <line x1="600" y1="220" x2="100" y2="630" stroke="#00f2fe" stroke-width="1.5" />
+    <line x1="600" y1="220" x2="350" y2="630" stroke="#00f2fe" stroke-width="1.5" />
+    <line x1="600" y1="220" x2="850" y2="630" stroke="#00f2fe" stroke-width="1.5" />
+    <line x1="600" y1="220" x2="1100" y2="630" stroke="#00f2fe" stroke-width="1.5" />
+    <line x1="600" y1="220" x2="1400" y2="630" stroke="#00f2fe" stroke-width="1" />
+  </g>
+
+  <!-- Glowing Highway Barriers / Edge Neon Strips -->
+  <!-- Left Neon Edge -->
+  <line x1="600" y1="220" x2="-50" y2="520" stroke="#00f2fe" stroke-width="4" filter="url(#cyanGlow)" />
+  <line x1="600" y1="220" x2="-50" y2="520" stroke="#ffffff" stroke-width="1.5" />
+  
+  <!-- Right Neon Edge -->
+  <line x1="600" y1="220" x2="1250" y2="520" stroke="#00f2fe" stroke-width="4" filter="url(#cyanGlow)" />
+  <line x1="600" y1="220" x2="1250" y2="520" stroke="#ffffff" stroke-width="1.5" />
+
+  <!-- Animated Lane Center Dashes (Moving towards viewer) -->
+  <line x1="600" y1="220" x2="600" y2="520" stroke="#00f2fe" stroke-width="3.5" class="lane-dash" filter="url(#cyanGlow)" />
+  <line x1="600" y1="220" x2="360" y2="520" stroke="#00f2fe" stroke-width="2.5" opacity="0.7" class="lane-dash" />
+  <line x1="600" y1="220" x2="840" y2="520" stroke="#00f2fe" stroke-width="2.5" opacity="0.7" class="lane-dash" />
+
+  <!-- 3. WINDSHIELD HUD HOLOGRAM PROJECTION -->
+  <!-- Projector Light Rays (Emanating from dash up to windshield HUD) -->
+  <polygon points="600,430 330,70 870,70" fill="url(#projBeamGrad)" class="proj-beam" />
+
+  <!-- Holographic HUD Box (Center windshield floating screen) -->
+  <g class="holo-container" transform="translate(330, 55)">
+    <!-- Outer Hologram Backdrop Card -->
+    <rect x="0" y="0" width="540" height="230" rx="12" fill="url(#hudBgGrad)" stroke="#00f2fe" stroke-width="1.5" stroke-opacity="0.8" />
+    <rect x="0" y="0" width="540" height="230" rx="12" fill="url(#hudGrid)" />
+
+    <!-- Corner Reticles / Brackets -->
+    <!-- Top-Left Corner -->
+    <path d="M -4,20 L -4,-4 L 20,-4" fill="none" stroke="#00f2fe" stroke-width="3" filter="url(#cyanGlow)" />
+    <!-- Top-Right Corner -->
+    <path d="M 520,-4 L 544,-4 L 544,20" fill="none" stroke="#00f2fe" stroke-width="3" filter="url(#cyanGlow)" />
+    <!-- Bottom-Left Corner -->
+    <path d="M -4,210 L -4,234 L 20,234" fill="none" stroke="#00f2fe" stroke-width="3" filter="url(#cyanGlow)" />
+    <!-- Bottom-Right Corner -->
+    <path d="M 520,234 L 544,234 L 544,210" fill="none" stroke="#00f2fe" stroke-width="3" filter="url(#cyanGlow)" />
+
+    <!-- Scanning Line Animation inside HUD -->
+    <g clip-path="url(#hudClip)">
+      <line x1="0" y1="0" x2="540" y2="0" stroke="#00f2fe" stroke-width="2" class="hud-scanline" filter="url(#cyanGlow)" opacity="0.8" />
+    </g>
+
+    <!-- HUD Header Bar -->
+    <rect x="15" y="12" width="510" height="30" rx="4" fill="url(#badgeGrad)" stroke="#00f2fe" stroke-opacity="0.4" />
+    <text x="30" y="32" fill="#00f2fe" font-size="12" font-weight="800" letter-spacing="2" filter="url(#cyanGlow)">CLUTCH // LLM AUTO-ROUTER HUD</text>
+    
+    <!-- Status Indicator Pills -->
+    <rect x="365" y="18" width="70" height="18" rx="9" fill="#00f2fe" fill-opacity="0.2" stroke="#00f2fe" stroke-opacity="0.6" />
+    <circle cx="376" cy="27" r="3.5" fill="#00f2fe" filter="url(#cyanGlow)" />
+    <text x="385" y="30.5" fill="#ffffff" font-size="9" font-weight="700" letter-spacing="0.5">ACTIVE</text>
+
+    <rect x="442" y="18" width="73" height="18" rx="9" fill="#00ffaa" fill-opacity="0.2" stroke="#00ffaa" stroke-opacity="0.6" />
+    <circle cx="452" cy="27" r="3.5" fill="#00ffaa" />
+    <text x="461" y="30.5" fill="#ffffff" font-size="9" font-weight="700" letter-spacing="0.5">G5 AUTO</text>
+
+    <!-- Main Holographic Model Callout Box -->
+    <rect x="15" y="52" width="510" height="100" rx="8" fill="#000c1a" fill-opacity="0.55" stroke="#00f2fe" stroke-opacity="0.5" />
+    
+    <text x="32" y="73" fill="#88ccff" font-size="11" font-weight="700" letter-spacing="1.5">ROUTED LLM MODEL (GEAR 5 - AUTOBAHN CLASS)</text>
+    
+    <!-- Hologram Model Name -->
+    <text x="30" y="115" fill="#00f2fe" font-size="34" font-weight="900" letter-spacing="2.5" filter="url(#strongGlow)">GEMINI-3.1-PRO</text>
+    
+    <!-- Model Attributes / Tier Tag -->
+    <rect x="365" y="85" width="145" height="24" rx="4" fill="#0066ff" fill-opacity="0.3" stroke="#00f2fe" stroke-width="1" />
+    <text x="437" y="101" fill="#ffffff" font-size="10" font-weight="800" text-anchor="middle" letter-spacing="1">G5 FLAGSHIP TIER</text>
+
+    <text x="32" y="138" fill="#66aaff" font-size="10.5" font-weight="600" letter-spacing="0.8">PURPOSE: ARCHITECTURE &amp; DEEP REASONING | FAILOVER: READY</text>
+
+    <!-- Telemetry Cards (Bottom of HUD) -->
+    <!-- Card 1: Throttle -->
+    <rect x="15" y="160" width="160" height="56" rx="6" fill="#031024" fill-opacity="0.7" stroke="#00f2fe" stroke-opacity="0.3" />
+    <text x="25" y="178" fill="#77b5fe" font-size="9.5" font-weight="700" letter-spacing="1">REASONING THROTTLE</text>
+    <text x="25" y="202" fill="#ffffff" font-size="18" font-weight="800">90% <tspan font-size="11" fill="#00f2fe" font-weight="700">(X-HIGH)</tspan></text>
+
+    <!-- Card 2: Latency -->
+    <rect x="190" y="160" width="160" height="56" rx="6" fill="#031024" fill-opacity="0.7" stroke="#00f2fe" stroke-opacity="0.3" />
+    <text x="200" y="178" fill="#77b5fe" font-size="9.5" font-weight="700" letter-spacing="1">ROUTE LATENCY</text>
+    <text x="200" y="202" fill="#00ffaa" font-size="18" font-weight="800">138 <tspan font-size="11" fill="#00ffaa" font-weight="700">MS</tspan></text>
+
+    <!-- Card 3: Fuel Gauge / Budget -->
+    <rect x="365" y="160" width="160" height="56" rx="6" fill="#031024" fill-opacity="0.7" stroke="#00f2fe" stroke-opacity="0.3" />
+    <text x="375" y="178" fill="#77b5fe" font-size="9.5" font-weight="700" letter-spacing="1">TANKUHR BUDGET</text>
+    <text x="375" y="202" fill="#00f2fe" font-size="18" font-weight="800">ZONE 1 <tspan font-size="11" fill="#00ffaa" font-weight="700">(GREEN)</tspan></text>
+  </g>
+
+  <!-- 4. WINDSHIELD REFLECTIONS & GLASS SHEEN -->
+  <polygon points="0,0 450,0 200,630 0,630" fill="url(#glassSheen)" />
+  <polygon points="850,0 1200,0 1200,630 1000,630" fill="url(#glassSheen)" />
+  
+  <!-- Windshield Top Tint Bar -->
+  <rect x="0" y="0" width="1200" height="45" fill="#02050d" opacity="0.65" />
+  <line x1="0" y1="45" x2="1200" y2="45" stroke="#00f2fe" stroke-width="1" opacity="0.3" />
+
+  <!-- 5. COCKPIT INTERIOR (DASHBOARD, INSTRUMENT CLUSTER, STEERING WHEEL) -->
+
+  <!-- Upper Dashboard Structure -->
+  <!-- Base cowl slope -->
+  <path d="M -50,450 Q 600,370 1250,450 L 1250,630 L -50,630 Z" fill="url(#dashGrad)" />
+  <path d="M -50,450 Q 600,370 1250,450 L 1250,630 L -50,630 Z" fill="url(#carbonMesh)" opacity="0.75" />
+
+  <!-- Ambient Neon Lighting Strip along Dashboard Edge -->
+  <path d="M -50,450 Q 600,370 1250,450" fill="none" stroke="#00f2fe" stroke-width="3.5" filter="url(#cyanGlow)" />
+  <path d="M -50,450 Q 600,370 1250,450" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.9" />
+
+  <!-- Projector Lens on Dashboard (Center) -->
+  <ellipse cx="600" cy="432" rx="42" ry="10" fill="#081426" stroke="#00f2fe" stroke-width="1.5" />
+  <ellipse cx="600" cy="432" rx="26" ry="6" fill="#00f2fe" filter="url(#cyanGlow)" opacity="0.8" />
+
+  <!-- INSTRUMENT BINNACLE HOOD (Curved shroud around driver display) -->
+  <path d="M 270,630 L 330,410 Q 600,380 870,410 L 930,630 Z" fill="#0a0f19" stroke="#1c283d" stroke-width="2" />
+  <path d="M 330,410 Q 600,380 870,410" fill="none" stroke="#00f2fe" stroke-width="2" filter="url(#cyanGlow)" opacity="0.7" />
+
+  <!-- DIGITAL COCKPIT INSTRUMENT DISPLAY PANEL -->
+  <path d="M 315,630 L 350,430 Q 600,405 850,430 L 885,630 Z" fill="#04070d" />
+  <path d="M 350,430 Q 600,405 850,430" fill="none" stroke="#00f2fe" stroke-width="1" stroke-dasharray="4,4" opacity="0.4" />
+
+  <!-- LEFT GAUGE: TACHOMETER (RPM METER) -->
+  <g transform="translate(430, 505)">
+    <!-- Dial Background Arc -->
+    <path d="M -65,30 A 72,72 0 1,1 65,30" fill="none" stroke="#121d30" stroke-width="12" stroke-linecap="round" />
+    <!-- Active RPM Arc (0 to 6800 RPM) -->
+    <path d="M -65,30 A 72,72 0 1,1 50,-35" fill="none" stroke="#00f2fe" stroke-width="12" stroke-linecap="round" filter="url(#cyanGlow)" />
+    <!-- Redline Arc (6500 to 8000 RPM) -->
+    <path d="M 45,-42 A 72,72 0 0,1 65,30" fill="none" stroke="#ff2a5f" stroke-width="12" stroke-linecap="round" filter="url(#redlineGlow)" />
+
+    <!-- Ticks & Numbers -->
+    <text x="-58" y="45" fill="#88b5ee" font-size="10" font-weight="700">0</text>
+    <text x="-75" y="10" fill="#88b5ee" font-size="10" font-weight="700">2</text>
+    <text x="-52" y="-35" fill="#88b5ee" font-size="10" font-weight="700">4</text>
+    <text x="0" y="-62" fill="#88b5ee" font-size="10" font-weight="700">6</text>
+    <text x="52" y="-35" fill="#ff2a5f" font-size="10" font-weight="800">8</text>
+
+    <!-- Center Label -->
+    <text x="0" y="-10" fill="#6699cc" font-size="9" font-weight="700" text-anchor="middle" letter-spacing="1">RPM x1000</text>
+    <text x="0" y="15" fill="#ffffff" font-size="20" font-weight="900" text-anchor="middle">6.8</text>
+
+    <!-- Vibrating RPM Needle -->
+    <g class="rpm-needle-group" transform="rotate(115, 0, 0)">
+      <line x1="0" y1="0" x2="0" y2="-68" stroke="#ff2a5f" stroke-width="3" stroke-linecap="round" filter="url(#redlineGlow)" />
+      <circle cx="0" cy="0" r="7" fill="#1b2434" stroke="#ff2a5f" stroke-width="2" />
+    </g>
+  </g>
+
+  <!-- CENTER GAUGE: GEAR DISPLAY (KUPPLUNG / GANG ANZEIGE) -->
+  <g transform="translate(600, 495)">
+    <!-- Hexagonal Outer Frame -->
+    <polygon points="0,-52 45,-26 45,26 0,52 -45,26 -45,-26" fill="#071324" stroke="#00f2fe" stroke-width="2.5" filter="url(#cyanGlow)" />
+    <polygon points="0,-46 40,-23 40,23 0,46 -40,23 -40,-23" fill="#030914" stroke="#00f2fe" stroke-width="1" stroke-opacity="0.5" />
+
+    <!-- Gear Text -->
+    <text x="0" y="14" fill="#00f2fe" font-size="44" font-weight="900" text-anchor="middle" class="gear-num" letter-spacing="-1">G5</text>
+    
+    <!-- Sub-label -->
+    <rect x="-42" y="32" width="84" height="15" rx="3" fill="#00f2fe" fill-opacity="0.2" />
+    <text x="0" y="43" fill="#ffffff" font-size="8.5" font-weight="800" text-anchor="middle" letter-spacing="0.8">AUTOBAHN</text>
+
+    <!-- Clutch / Gear Shift Status Line -->
+    <text x="0" y="-58" fill="#00ffaa" font-size="9" font-weight="800" text-anchor="middle" letter-spacing="1.2">▲ SHIFT COMPLETE</text>
+
+    <!-- Gear Ladder (G1 to G5) -->
+    <g transform="translate(0, 68)">
+      <text x="-60" y="0" fill="#446688" font-size="9" font-weight="700">G1</text>
+      <text x="-30" y="0" fill="#446688" font-size="9" font-weight="700">G2</text>
+      <text x="0" y="0" fill="#446688" font-size="9" font-weight="700">G3</text>
+      <text x="30" y="0" fill="#446688" font-size="9" font-weight="700">G4</text>
+      <text x="60" y="0" fill="#00f2fe" font-size="10" font-weight="900" filter="url(#cyanGlow)">[G5]</text>
+    </g>
+  </g>
+
+  <!-- RIGHT GAUGE: SPEEDOMETER / TOKENOMETER -->
+  <g transform="translate(770, 505)">
+    <!-- Dial Background Arc -->
+    <path d="M -65,30 A 72,72 0 1,1 65,30" fill="none" stroke="#121d30" stroke-width="12" stroke-linecap="round" />
+    <!-- Active Speed Arc -->
+    <path d="M -65,30 A 72,72 0 1,1 35,-52" fill="none" stroke="#00f2fe" stroke-width="12" stroke-linecap="round" filter="url(#cyanGlow)" />
+
+    <!-- Ticks & Numbers -->
+    <text x="-65" y="45" fill="#88b5ee" font-size="9" font-weight="700">0</text>
+    <text x="-75" y="10" fill="#88b5ee" font-size="9" font-weight="700">100</text>
+    <text x="-52" y="-35" fill="#88b5ee" font-size="9" font-weight="700">200</text>
+    <text x="0" y="-62" fill="#88b5ee" font-size="9" font-weight="700">300</text>
+    <text x="52" y="-35" fill="#88b5ee" font-size="9" font-weight="700">400</text>
+
+    <!-- Center Label & Digital Value -->
+    <text x="0" y="-10" fill="#6699cc" font-size="9" font-weight="700" text-anchor="middle" letter-spacing="1">TOKENS / SEC</text>
+    <text x="0" y="15" fill="#00f2fe" font-size="22" font-weight="900" text-anchor="middle" class="speed-val" filter="url(#cyanGlow)">342</text>
+    <text x="0" y="32" fill="#88aacc" font-size="9" font-weight="700" text-anchor="middle">185 KM/H</text>
+
+    <!-- Needle -->
+    <g transform="rotate(72, 0, 0)">
+      <line x1="0" y1="0" x2="0" y2="-68" stroke="#00f2fe" stroke-width="3" stroke-linecap="round" filter="url(#cyanGlow)" />
+      <circle cx="0" cy="0" r="7" fill="#1b2434" stroke="#00f2fe" stroke-width="2" />
+    </g>
+  </g>
+
+  <!-- STEERING WHEEL TOP RIM (Foreground Arch at bottom center) -->
+  <path d="M 280,630 C 340,550 460,510 600,510 C 740,510 860,550 920,630 Z" fill="none" stroke="url(#wheelGrad)" stroke-width="36" stroke-linecap="round" />
+  <path d="M 280,630 C 340,550 460,510 600,510 C 740,510 860,550 920,630 Z" fill="none" stroke="#0d131f" stroke-width="22" stroke-linecap="round" />
+  
+  <!-- Steering Wheel Center Top Stripe (12 o'clock marker) -->
+  <path d="M 590,500 L 610,500" stroke="#00f2fe" stroke-width="8" stroke-linecap="round" filter="url(#cyanGlow)" />
+
+  <!-- 6. A-PILLARS & ROOF FRAME (OUTER COCKPIT BOUNDARIES) -->
+  <!-- Left A-Pillar -->
+  <polygon points="0,0 170,0 270,440 0,550" fill="url(#pillarLeft)" />
+  <line x1="170" y1="0" x2="270" y2="440" stroke="#334466" stroke-width="2" opacity="0.6" />
+
+  <!-- Right A-Pillar -->
+  <polygon points="1200,0 1030,0 930,440 1200,550" fill="url(#pillarRight)" />
+  <line x1="1030" y1="0" x2="930" y2="440" stroke="#334466" stroke-width="2" opacity="0.6" />
+
+  <!-- Top Roof Edge Bar -->
+  <polygon points="150,0 1050,0 1010,32 190,32" fill="#070a12" />
+  <line x1="190" y1="32" x2="1010" y2="32" stroke="#1c283e" stroke-width="2" />
+</svg>
