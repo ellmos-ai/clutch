@@ -40,24 +40,24 @@ Das gesamte System folgt einer **Auto-/Fahrmetapher**:
 
 ```mermaid
 graph TD
-    User([Benutzer / API / CLI / Web UI]) --> Fahrer["FAHRER (Orchestrierung)"]
-    Fahrer --> Strecke["STRECKE (Aufgaben- & Zweckanalyse)"]
-    Fahrer --> Getriebe["GETRIEBE (Modell-Register G1-G5 & Ollama)"]
-    Fahrer --> GasBremse["GAS/BREMSE (Denktiefe / Reasoning 0-100%)"]
-    Fahrer --> Kupplung["KUPPLUNG (Modellwechsel / Failover)"]
-    Kupplung --> MotorBlock["MOTORBLOCK (Einheitliche Provider-API)"]
+    User([User / API / CLI / Web UI]) --> Fahrer["FAHRER (Orchestrator)"]
+    Fahrer --> Strecke["STRECKE (Task Analysis & Purpose)"]
+    Fahrer --> Getriebe["GETRIEBE (Model Registry G1-G5 & Ollama)"]
+    Fahrer --> GasBremse["GAS/BREMSE (Reasoning Level 0-100%)"]
+    Fahrer --> Kupplung["KUPPLUNG (Model Switching / Failover)"]
+    Kupplung --> MotorBlock["MOTORBLOCK (Unified Provider API)"]
     MotorBlock --> Anthropic["Anthropic (Claude)"]
     MotorBlock --> Gemini["Google (Gemini)"]
     MotorBlock --> OpenAI["OpenAI (GPT / Codex)"]
-    MotorBlock --> Ollama["Ollama (Lokal / Remote)"]
+    MotorBlock --> Ollama["Ollama (Local / Remote)"]
     MotorBlock --> Agy["agy (companion-for-agy)"]
     MotorBlock --> Kimi["Kimi (Moonshot API)"]
-    MotorBlock --> Bordcomputer["BORDCOMPUTER (Gesundheit & Circuit Breaker)"]
-    Bordcomputer --> Tankuhr["TANKUHR (Budget 4-Zonen)"]
-    Bordcomputer --> Tacho["TACHO (Latenz & Metriken)"]
-    Tacho --> Fahrtenbuch[("FAHRTENBUCH (SQLite-Protokoll)")]
-    Fahrtenbuch --> Fahrschule["FAHRSCHULE (Auto-Lern-Engine)"]
-    Fahrschule -. Fitness-Feedback .-> Getriebe
+    MotorBlock --> Bordcomputer["BORDCOMPUTER (Health & Circuit Breaker)"]
+    Bordcomputer --> Tankuhr["TANKUHR (Budget 4-Zone)"]
+    Bordcomputer --> Tacho["TACHO (Latency & Metrics)"]
+    Tacho --> Fahrtenbuch[("FAHRTENBUCH (SQLite Trip Log)")]
+    Fahrtenbuch --> Fahrschule["FAHRSCHULE (Auto-Learning Engine)"]
+    Fahrschule -. Fitness Feedback .-> Getriebe
 ```
 
 ```
@@ -139,16 +139,16 @@ pip install -e .
 ```python
 from clutch import Fahrer
 
-# Fahrer erstellen (nutzt alle konfigurierten Anbieter)
+# Create a driver (uses all configured providers)
 fahrer = Fahrer()
 
-# Aufgabe beschreiben -- der Fahrer übernimmt alles
+# Describe your task -- the driver handles everything
 result = fahrer.fahren(
     "Fix the authentication bug in the login module",
     handler=my_handler,
 )
 
-# Gewählte Konfiguration einsehen
+# Inspect what was chosen
 print(result.config.gang.name)       # "claude-sonnet"
 print(result.config.gang.provider)   # "anthropic"
 print(result.config.gas.wert)        # 0.7
@@ -158,7 +158,7 @@ status = fahrer.status()
 print(status["tankuhr"]["zone"])     # "green"
 print(status["getriebe"])            # "Getriebe[haiku(G1), flash(G2), ...]"
 
-# Aus vergangenen Läufen lernen
+# Learn from past runs
 fahrer.trainieren()
 ```
 
@@ -167,16 +167,16 @@ fahrer.trainieren()
 Nach `pip install -e .` ist der Befehl `clutch` verfügbar:
 
 ```bash
-clutch route "Fix the auth bug"      # Routing-Entscheidung anzeigen (Dry-Run, kein LLM-Aufruf)
-clutch "Explain quantum computing"    # Einmalig: Route + Ausführung, Antwort ausgeben
-clutch run "..." --json               # Maschinenlesbarer Output (für andere Agenten)
-clutch chat                           # Interaktive REPL
-clutch models [--json]                # Alle Gänge (Modelle) auflisten
-clutch stats                          # Nutzungs- / Budget- / Gesundheits-Dashboard
-clutch config <key> [value]           # CLI-Einstellungen lesen/setzen
-clutch keys set MOONSHOT_API_KEY      # API-Key speichern (verdeckte Eingabe; Werte nie angezeigt)
-clutch keys list                      # Gespeicherte Key-Namen auflisten (keine Werte)
-clutch serve --web                    # Web-UI starten (benötigt: pip install clutch[web])
+clutch route "Fix the auth bug"      # show the routing decision (dry-run, no LLM call)
+clutch "Explain quantum computing"    # one-shot: route + execute, print the answer
+clutch run "..." --json               # machine-readable output (for other agents)
+clutch chat                           # interactive REPL
+clutch models [--json]                # list all gears (models)
+clutch stats                          # usage / budget / health dashboard
+clutch config <key> [value]           # read/set CLI settings
+clutch keys set MOONSHOT_API_KEY      # store an API key (hidden input; values never shown)
+clutch keys list                      # list stored key names (not values)
+clutch serve --web                    # start the web UI (needs: pip install clutch[web])
 ```
 
 Drei Nutzungsmodi: **Konsole** (Menschen), **Web-UI** (Menschen, grafisch) und **CLI/API**
@@ -259,21 +259,21 @@ clutch/
 +-- clutch/
 |   +-- __init__.py
 |   +-- fahrer.py          # Orchestrator
-|   +-- strecke.py         # Aufgabenanalyse
-|   +-- getriebe.py        # Modell-Registry
-|   +-- kupplung.py        # Modell-Wechsel
-|   +-- motorblock.py      # Einheitliche API-Schicht
-|   +-- gas_bremse.py      # Reasoning-Level
-|   +-- fahrtenbuch.py     # SQLite-Metriken
-|   +-- bordcomputer.py    # Gesundheitsmonitor
-|   +-- tankuhr.py         # Budget-Tracking
-|   +-- tacho.py           # Metriken
-|   +-- fahrschule.py      # Lernengine
+|   +-- strecke.py         # Task analysis
+|   +-- getriebe.py        # Model registry
+|   +-- kupplung.py        # Model switching
+|   +-- motorblock.py      # Unified API layer
+|   +-- gas_bremse.py      # Reasoning level
+|   +-- fahrtenbuch.py     # SQLite metrics
+|   +-- bordcomputer.py    # Health monitor
+|   +-- tankuhr.py         # Budget tracking
+|   +-- tacho.py           # Metrics
+|   +-- fahrschule.py      # Learning engine
 |   +-- patterns/
-|       +-- kolonne.py     # Ketten-Muster
-|       +-- team.py        # Parallel-Muster
-|       +-- schwarm.py     # Schwarm-Muster
-|       +-- hybrid.py      # Hybrid-Muster
+|       +-- kolonne.py     # Chain pattern
+|       +-- team.py        # Parallel pattern
+|       +-- schwarm.py     # Swarm pattern
+|       +-- hybrid.py      # Hybrid pattern
 |   +-- config/
 |       +-- kupplung.json
 |       +-- getriebe.json
@@ -284,7 +284,7 @@ clutch/
 |   +-- test_learning.py
 |   +-- test_patterns.py
 |   +-- test_route.py
-+-- data/                  # Laufzeitdaten (nicht versioniert)
++-- data/                  # Runtime data (not tracked)
 ```
 
 ## Tests
@@ -308,7 +308,9 @@ MIT-Lizenz. Siehe [LICENSE](LICENSE) für Details.
 
 ---
 
-## Glossar: Code-Begriffe
+## Deutsch
+
+### Glossar: Code-Begriffe
 
 | Deutsch (Code) | Englisch | Beschreibung |
 |----------------|----------|--------------|

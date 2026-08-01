@@ -26,6 +26,9 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1
   sodass gespeicherte Keys ohne Serverneustart wirksam werden.
 
 ### Documentation
+- **README language parity (2026-08-01):** Synchronized `README_de.md` with
+  the canonical English structure and restored byte-identical code and Mermaid
+  blocks across the maintained EN/DE pair.
 - **Discoverability & Mermaid Architecture (2026-07-26):** Embedded Mermaid system architecture flowchart diagram, LLM-ready discovery badges, and GFM `> [!NOTE]` callouts for `llms.txt` machine-readable metadata in both English and German documentation. Updated `llms.txt` verification timestamp to 2026-07-26 and verified 286 passing unit tests (100% green).
 - **Discoverability & Marketing Refresh (2026-07-25):** `llms.txt` Last-checked Datum auf `2026-07-25` und 286 passing unit tests verifiziert. Visual Shields.io Badges (Pytest 286 passed, Multi-Provider, LLM-Ready `llms.txt`), KI/LLM-Integrationshinweise und Mermaid Systemarchitektur- & Datenfluss-Diagramm in `README.md` und `README_de.md` integriert.
 - **AI/LLM-Indexierung & Metadaten-Sync (2026-07-25):** `llms.txt` Header auf `Last-checked: 2026-07-25` aktualisiert; Referenzhinweis auf `llms.txt` in `README.md` und `README_de.md` ergänzt.
