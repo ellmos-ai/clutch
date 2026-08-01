@@ -418,4 +418,10 @@
   <!-- Top Roof Edge Bar -->
   <polygon points="150,0 1050,0 1010,32 190,32" fill="#070a12" />
   <line x1="190" y1="32" x2="1010" y2="32" stroke="#1c283e" stroke-width="2" />
+
+  <!-- 7. BRAND LOGO HEADER ("clutch") -->
+  <g transform="translate(600, 32)">
+    <text x="0" y="0" fill="#00f2fe" font-size="32" font-weight="900" text-anchor="middle" letter-spacing="12" filter="url(#strongGlow)">clutch</text>
+    <text x="0" y="0" fill="#ffffff" font-size="32" font-weight="900" text-anchor="middle" letter-spacing="12">clutch</text>
+  </g>
 </svg>
