@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
->>>>>>> 8b40931 (feat(banner): add repository header banner and update README)
-
 <p align="center">
   <img src="docs/assets/banner.svg" alt="clutch banner" width="100%">
 </p>
