@@ -11,8 +11,10 @@
 ![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![License MIT](https://img.shields.io/badge/License-MIT-green)
 ![Version 0.4.0](https://img.shields.io/badge/Version-0.4.0-orange)
-![Pytest](https://img.shields.io/badge/Pytest-301%20passed-brightgreen)
+![Pytest](https://img.shields.io/badge/Pytest-306%20passed-brightgreen)
 ![Providers](https://img.shields.io/badge/Providers-Anthropic%20%7C%20Gemini%20%7C%20OpenAI%20%7C%20Ollama%20%7C%20Kimi-purple)
+![Ecosystem: ellmos-ai](https://img.shields.io/badge/Ecosystem-ellmos--ai-blue)
+![Umbrella: open-bricks](https://img.shields.io/badge/Umbrella-open--bricks-purple)
 ![LLM-Ready](https://img.shields.io/badge/LLM--Ready-llms.txt-blue)
 
 **clutch** (German: *Kupplung*) uses a driving metaphor to intelligently route tasks to optimal LLM models across multiple providers. It analyzes task complexity and purpose, selects the right model and reasoning level, tracks budgets, and learns from experience. Use it as a **library**, a **CLI**, or a **local web app**.

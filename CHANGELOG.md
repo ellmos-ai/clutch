@@ -8,6 +8,9 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1
 
 ## [Unreleased]
 
+### Maintenance & Discoverability
+- **Discoverability & Marketing Audit (2026-08-04):** Synchronized `llms.txt` verification timestamp (2026-08-04) and pytest status (306 passed). Added `ellmos-ai` ecosystem and `open-bricks` umbrella badges to `README.md` and `README_de.md`. Verified 306/306 Pytest unit tests (100% green).
+
 ### Added
 - **agy model registry and motor (2026-07-28):** Six models live-verified against agy 1.1.8 are registered with effort variants and catalog provenance. `AgyCompanionMotor` executes them through `companion-for-agy`, maps Clutch effort levels to supported agy efforts, and keeps agy classified as an agentic CLI provider.
 - **Aktueller Modellkatalog (2026-07-28):** Claude Fable 5 ist als höchster
