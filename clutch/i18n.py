@@ -44,6 +44,16 @@ def verfuegbare_sprachen() -> list[str]:
     return list(LANGS)
 
 
+def normalisiere_sprache(lang: Optional[str]) -> str:
+    """Normalisiert Sprachcodes auf die bekannten Locale-Dateien.
+
+    Browser senden häufig ``de-DE`` oder ``en_US``. Für die Locale-Auswahl
+    genügt der Basisschlüssel; unbekannte Werte fallen auf Englisch zurück.
+    """
+    wert = (lang or "").strip().lower().replace("_", "-").split("-", 1)[0]
+    return wert if wert in LANGS else DEFAULT_LANG
+
+
 def set_lang(lang: str) -> None:
     """Setzt die aktuelle Sprache (Modul-State)."""
     global _current_lang
@@ -78,6 +88,21 @@ def _lade_locale(lang: str) -> dict[str, str]:
         return {}
 
 
+def get_locale(lang: Optional[str] = None) -> dict[str, str]:
+    """Gibt ein vollständiges, unabhängiges Locale-Wörterbuch zurück.
+
+    Fehlende Schlüssel einer ergänzten Sprache werden aus Englisch ergänzt.
+    Das Ergebnis ist eine Kopie und kann vom Aufrufer gefahrlos serialisiert
+    oder verändern werden, ohne den internen Cache zu beeinflussen.
+    """
+    aufgeloeste_sprache = normalisiere_sprache(lang if lang is not None else get_lang())
+    englisch = dict(_lade_locale(DEFAULT_LANG))
+    if aufgeloeste_sprache == DEFAULT_LANG:
+        return englisch
+    englisch.update(_lade_locale(aufgeloeste_sprache))
+    return englisch
+
+
 def t(msg_key: str, lang: Optional[str] = None, **kwargs: object) -> str:
     """Gibt den übersetzten String für *msg_key* zurück.
 
@@ -92,16 +117,8 @@ def t(msg_key: str, lang: Optional[str] = None, **kwargs: object) -> str:
     Hinweis: Der erste Parameter heißt *msg_key* (nicht *key*), damit
     Aufrufer `key=...` als Platzhalter-Argument übergeben können.
     """
-    aufgeloeste_sprache = lang if lang is not None else get_lang()
-
-    # Versuche gewählte Sprache
-    locale = _lade_locale(aufgeloeste_sprache)
+    locale = get_locale(lang)
     wert = locale.get(msg_key)
-
-    # Fallback: Englisch
-    if wert is None and aufgeloeste_sprache != DEFAULT_LANG:
-        en_locale = _lade_locale(DEFAULT_LANG)
-        wert = en_locale.get(msg_key)
 
     # Letzter Fallback: msg_key selbst
     if wert is None:

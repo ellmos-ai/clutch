@@ -24,6 +24,7 @@ logger = logging.getLogger("clutch.discovery")
 
 # Optionaler Remote-Ollama-Host, konfigurierbar via Umgebungsvariable.
 REMOTE_OLLAMA = os.environ.get("CLUTCH_REMOTE_OLLAMA", "")
+LOCAL_OLLAMA = "http://localhost:11434"
 
 
 # ---------------------------------------------------------------------------
@@ -64,11 +65,53 @@ def _leistung_aus_gang(gang: int) -> str:
     return mapping.get(gang, "basis")
 
 
+def konfigurierte_ollama_hosts(include_local: bool = True) -> list[str]:
+    """Liefert die aktuell konfigurierten Ollama-Basis-URLs.
+
+    Der Remote-Wert wird bei jedem Aufruf aus der Umgebung gelesen. Dadurch
+    funktionieren Laufzeitänderungen von ``CLUTCH_REMOTE_OLLAMA`` ebenso wie
+    Tests, die die Umgebung nach dem Modulimport setzen. Mehrere Endpunkte
+    dürfen mit Komma oder Semikolon getrennt angegeben werden.
+    """
+    hosts: list[str] = [LOCAL_OLLAMA] if include_local else []
+    # Die Umgebung ist absichtlich die Laufzeitquelle; der öffentliche
+    # REMOTE_OLLAMA-Wert bleibt als Import-Kompatibilität erhalten.
+    remote = os.environ.get("CLUTCH_REMOTE_OLLAMA", "").strip()
+    for value in re.split(r"[,;]", remote):
+        value = value.strip().rstrip("/")
+        if value and value not in hosts:
+            hosts.append(value)
+    return hosts
+
+
+def _ollama_endpoint(base_url: str) -> tuple[str, str]:
+    """Normalisiert einen Ollama-Basis-URL und erzeugt den ``/api/tags``-URL."""
+    basis = (base_url or LOCAL_OLLAMA).strip().rstrip("/")
+    if basis.lower().endswith("/api"):
+        basis = basis[:-4].rstrip("/")
+    return basis, f"{basis}/api/tags"
+
+
+def _modell_groesse(name: str, details: dict) -> str:
+    """Ermittelt eine Parametergrößen-Angabe mit Name-Fallback.
+
+    Ollama liefert ``details.parameter_size`` nicht bei jedem älteren Modell.
+    In diesem Fall wird eine explizite ``7b``-/``32B``-Angabe aus dem Namen
+    verwendet; Versionsnummern wie ``3.2`` werden dadurch nicht fälschlich als
+    Parametergröße interpretiert.
+    """
+    groesse = str(details.get("parameter_size") or "").strip()
+    if groesse:
+        return groesse
+    match = re.search(r"(?<![a-z])([0-9]+(?:\.[0-9]+)?)\s*[bB](?:illion)?", name)
+    return match.group(1) + "B" if match else ""
+
+
 # ---------------------------------------------------------------------------
 # Ollama-Discovery
 # ---------------------------------------------------------------------------
 
-def discover_ollama(base_url: str) -> list[Gang]:
+def discover_ollama(base_url: str, timeout: float = 5.0) -> list[Gang]:
     """Entdeckt alle lokal auf einem Ollama-Server laufenden Modelle.
 
     Ruft GET {base_url}/api/tags auf, parst models[].name und
@@ -82,23 +125,39 @@ def discover_ollama(base_url: str) -> list[Gang]:
     """
     try:
         import requests  # lazy import -- kein hard-dependency auf Modulebene
-        url = f"{base_url.rstrip('/')}/api/tags"
-        resp = requests.get(url, timeout=5)
+        basis, url = _ollama_endpoint(base_url)
+        resp = requests.get(url, timeout=timeout)
         resp.raise_for_status()
         daten = resp.json()
     except Exception as exc:
         logger.warning("Ollama-Discovery fehlgeschlagen (%s): %s", base_url, exc)
         return []
 
+    if not isinstance(daten, dict):
+        logger.warning("Ollama-Discovery lieferte kein JSON-Objekt (%s)", base_url)
+        return []
+
     gaenge: list[Gang] = []
     for modell in daten.get("models", []):
-        name = modell.get("name", "")
+        if not isinstance(modell, dict):
+            continue
+        name = str(modell.get("name", "")).strip()
         if not name:
             continue
 
         details = modell.get("details") or {}
-        groesse_str = details.get("parameter_size", "")
+        if not isinstance(details, dict):
+            details = {}
+        groesse_str = _modell_groesse(name, details)
         stufe = gang_level_aus_groesse(groesse_str)
+        quantization = (
+            details.get("quantization_level")
+            or details.get("quantization")
+            or details.get("quantization_version")
+        )
+        staerken = ["unbewertet", "lokal"]
+        if quantization:
+            staerken.append(f"quantisiert:{str(quantization).lower()}")
 
         gang = Gang(
             name=name,
@@ -108,9 +167,11 @@ def discover_ollama(base_url: str) -> list[Gang]:
             leistung=_leistung_aus_gang(stufe),
             kosten_input_1k=0.0,
             kosten_output_1k=0.0,
-            staerken=["unbewertet", "lokal"],
+            staerken=staerken,
             schwaechen=[],
-            endpoint=base_url,
+            endpoint=basis,
+            catalog_source="ollama",
+            quantization=str(quantization) if quantization else None,
         )
         gaenge.append(gang)
 
@@ -268,6 +329,7 @@ class ModellDiscovery:
         getriebe: Getriebe,
         ollama_hosts: Optional[list[str]] = None,
         custom_pfad: Optional[Path] = None,
+        ollama_timeout: Optional[float] = None,
     ) -> dict:
         """Entdeckt Modelle und registriert neue Gänge im Getriebe.
 
@@ -284,13 +346,21 @@ class ModellDiscovery:
             "uebersprungen" (bereits vorhandene Namen).
         """
         if ollama_hosts is None:
-            ollama_hosts = ["http://localhost:11434"]
+            ollama_hosts = konfigurierte_ollama_hosts()
+        else:
+            # Preserve caller ordering while avoiding duplicate requests.
+            ollama_hosts = list(dict.fromkeys(
+                host.strip().rstrip("/") for host in ollama_hosts if host and host.strip()
+            ))
 
         kandidaten: list[Gang] = []
 
         # Ollama-Hosts abfragen
         for host in ollama_hosts:
-            kandidaten.extend(discover_ollama(host))
+            if ollama_timeout is None:
+                kandidaten.extend(discover_ollama(host))
+            else:
+                kandidaten.extend(discover_ollama(host, timeout=ollama_timeout))
 
         # Benutzerdefinierte Modelle laden
         if custom_pfad is not None:
@@ -301,6 +371,7 @@ class ModellDiscovery:
         jetzt = datetime.datetime.now().isoformat()
 
         for gang in kandidaten:
+            gang.catalog_checked_at = jetzt
             if getriebe.gang(gang.name) is not None:
                 # Bereits vorhanden -- Zeitstempel aktualisieren, aber nicht überschreiben
                 if gang.name in self.metadaten:

@@ -28,7 +28,8 @@ provider-neutral LLM orchestration library.
   erkennen neu gespeicherte Keys ohne Serverneustart.
 - [ ] **i18n ausbauen** — App-Strings (CLI + Web-UI) auf DE/EN + Standardsprachen
   (es, zh, ja, ru) wie bei den MCP-Servern; Übersetzungen delegierbar (Sonnet/Haiku/agy,
-  JSON-Locales). README in allen Sprachen.
+  JSON-Locales). README in allen Sprachen. DONE 2026-08-11: gemeinsamer
+  Locale-Bootstrap für die Web-UI, lokalisierte Statusmeldungen und CLI-Ausgaben.
 - [ ] Keep German code identifiers as the stable domain language, but make all
   contributor-facing explanations bilingual or English-first.
 - [x] Review `demo.py`, `live_test.py`, and `claude_code_test.py` as manual
@@ -80,19 +81,23 @@ Modelle müssen **entdeckbar**, **aktualisierbar** und **nutzeranpassbar** sein.
   `gemini-3.5-pro` existiert im offiziellen Google-Katalog nicht und wurde
   deshalb ausdrücklich nicht erfunden. Kosten und Kontextgrenzen sind
   aktualisiert.
-- [ ] **Remote-Ollama nicht abgebildet:** Endpoint sollte konfigurierbar sein
+- [x] **Remote-Ollama nicht abgebildet:** Endpoint sollte konfigurierbar sein
   (lokal vs. remote, z.B. via VPN). Über `CLUTCH_REMOTE_OLLAMA` gesetzt; siehe
   `discovery.REMOTE_OLLAMA`. Grössere lokale Modelle automatisch höher einstufen.
+  DONE 2026-08-11: Laufzeit-Hostliste, normalisierte `/api/tags`-Abfrage und
+  Endpoint-Weitergabe an den Gang.
 - [ ] **Advisor-Pairing-Konzept fehlt:** Keine Möglichkeit, ein Modell als
   Reviewer/Advisor einem anderen Modell zuzuordnen. Mindestens als
   Metadaten-Feld in FahrtConfig (`reviewer_gang: Optional[Gang]`).
 
 ### Auto-Discovery: Neue Modelle erkennen
 
-- [ ] **Ollama-Discovery:** `GET /api/tags` am konfigurierten Ollama-Endpoint
+- [x] **Ollama-Discovery:** `GET /api/tags` am konfigurierten Ollama-Endpoint
   abfragen → alle lokal installierten Modelle automatisch als Gänge
   registrieren (Name, Parameter-Größe, Quantisierung → Gang-Niveau ableiten).
   Sollte sowohl localhost als auch Remote-Endpoints (Mac Studio) unterstützen.
+  DONE 2026-08-11: CLI `models` und Web `/api/models` lösen die Discovery
+  on-demand aus; Name-Fallback, Parametergröße und Quantisierung werden geführt.
 - [ ] **Provider-API-Discovery:** Anthropic und OpenAI bieten `/v1/models`
   Endpoints. Verfügbare Modelle periodisch oder on-demand abfragen und
   mit getriebe.json abgleichen. Neue Modelle als "unbewertet" markieren,

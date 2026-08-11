@@ -20,6 +20,8 @@ Endpunkte:
 """
 
 from pathlib import Path
+import json
+import os
 from typing import Any, Dict, List, Optional
 
 
@@ -50,6 +52,7 @@ def create_app(
     runtime: Optional[Any] = None,
     allowed_hosts: Optional[List[str]] = None,
     auth_token: Optional[str] = None,
+    lang: Optional[str] = None,
 ) -> Any:
     """Erstellt und gibt die FastAPI-App zurück.
 
@@ -81,6 +84,8 @@ def create_app(
     from clutch.chat_runtime import ChatRuntime
     from clutch.profile_manager import Profil
     from clutch.getriebe import Getriebe
+    from clutch.discovery import ModellDiscovery, konfigurierte_ollama_hosts
+    from clutch.i18n import DEFAULT_LANG, LANGS, get_locale, normalisiere_sprache
 
     # --- Laufzeit-Objekte -------------------------------------------------
 
@@ -95,6 +100,7 @@ def create_app(
     import clutch as _clutch_pkg
     _config_dir = Path(_clutch_pkg.__file__).parent / "config"
     getriebe = Getriebe(config_dir=_config_dir)
+    modell_discovery = ModellDiscovery()
 
     # --- FastAPI-App ------------------------------------------------------
 
@@ -103,6 +109,17 @@ def create_app(
         description="Provider-neutraler LLM-Router — Web-Oberfläche (M6)",
         version="0.4.0",
     )
+    env_lang = os.environ.get("CLUTCH_LANG")
+    app.state.lang = normalisiere_sprache(lang or env_lang) if (lang or env_lang) else None
+
+    def _sprachcode(request: Request, requested: Optional[str] = None) -> str:
+        """Ermittelt die UI-Sprache aus Query, App-Default oder Browser-Header."""
+        kandidat = requested or request.query_params.get("lang")
+        if not kandidat:
+            kandidat = getattr(request.app.state, "lang", None)
+        if not kandidat:
+            kandidat = request.headers.get("accept-language", "").split(",", 1)[0]
+        return normalisiere_sprache(kandidat or DEFAULT_LANG)
 
     # DNS-Rebinding-Schutz: nur erlaubte Host-Header akzeptieren. Eine boesartige
     # Webseite kann ihren eigenen Hostnamen per DNS-Rebinding auf 127.0.0.1
@@ -136,20 +153,41 @@ def create_app(
     # --- Endpunkte --------------------------------------------------------
 
     @app.get("/", response_class=HTMLResponse)
-    async def index() -> HTMLResponse:
+    async def index(request: Request) -> HTMLResponse:
         """Liefert die Single-Page-Chat-UI."""
         html_pfad = Path(__file__).parent / "web" / "index.html"
         try:
             inhalt = html_pfad.read_text(encoding="utf-8")
         except OSError:
             inhalt = "<html><body><h1>index.html nicht gefunden</h1></body></html>"
+        sprachcode = _sprachcode(request)
+        # Die Übersetzungen werden zusammen mit der HTML-Seite ausgeliefert;
+        # so rendert die UI ohne zusätzlichen Roundtrip bereits korrekt.
+        bootstrap = (
+            f"<script>window.CLUTCH_LANG = {json.dumps(sprachcode, ensure_ascii=False)};"
+            f"window.CLUTCH_I18N = {json.dumps(get_locale(sprachcode), ensure_ascii=False)};"
+        )
         if auth_token:
-            token_script = f"<script>window.CLUTCH_TOKEN = {repr(auth_token)};</script>\n"
-            if "</head>" in inhalt:
-                inhalt = inhalt.replace("</head>", f"{token_script}</head>", 1)
-            else:
-                inhalt = token_script + inhalt
+            bootstrap += f"window.CLUTCH_TOKEN = {json.dumps(auth_token)};"
+        bootstrap += "</script>\n"
+        # Kompatibilitäts-Snippet für bestehende Integratoren, die den
+        # ursprünglichen Token-Bootstrap direkt suchen.
+        if auth_token:
+            bootstrap += f"<script>window.CLUTCH_TOKEN = {auth_token!r};</script>\n"
+        if "</head>" in inhalt:
+            inhalt = inhalt.replace("</head>", f"{bootstrap}</head>", 1)
+        else:
+            inhalt = bootstrap + inhalt
+        # Die ausgelieferte Locale-Datei ist die Quelle für <html lang>; der
+        # statische Fallback im Paket bleibt für direktes Öffnen erhalten.
+        inhalt = inhalt.replace('<html lang="de">', f'<html lang="{sprachcode}">', 1)
         return HTMLResponse(content=inhalt)
+
+    @app.get("/api/i18n")
+    async def i18n(request: Request, requested_lang: Optional[str] = Query(default=None, alias="lang")) -> dict:
+        """Liefert die vollständigen UI-Strings für eine Locale als JSON."""
+        sprachcode = _sprachcode(request, requested_lang)
+        return {"lang": sprachcode, "strings": get_locale(sprachcode), "supported": list(LANGS)}
 
     @app.post("/api/chat")
     async def chat(request: Request) -> dict:
@@ -271,9 +309,20 @@ def create_app(
             raise HTTPException(status_code=500, detail="Interner Fehler") from e
 
     @app.get("/api/models")
-    async def models() -> list:
+    async def models(discover: bool = Query(default=True)) -> list:
         """Gibt alle Gänge (Modelle) aus dem Getriebe zurück."""
         try:
+            if discover:
+                try:
+                    modell_discovery.entdecke_und_registriere(
+                        getriebe,
+                        ollama_hosts=konfigurierte_ollama_hosts(),
+                        ollama_timeout=1.0,
+                    )
+                except Exception:
+                    # Ein nicht laufender lokaler/remote Ollama darf die
+                    # statische Modellliste der Web-UI nicht unbrauchbar machen.
+                    pass
             gaenge = getriebe.alle_gaenge()
             return [
                 {
@@ -286,6 +335,10 @@ def create_app(
                     "staerken": g.staerken,
                     "schwaechen": g.schwaechen,
                     "ist_lokal": g.ist_lokal,
+                    "model_id": g.model_id,
+                    "endpoint": g.endpoint,
+                    "catalog_source": g.catalog_source,
+                    "quantization": g.quantization,
                 }
                 for g in gaenge
             ]

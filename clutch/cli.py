@@ -100,7 +100,7 @@ def _cmd_route(args: argparse.Namespace) -> int:
             print(f"  {t('route.gang'):<9} {ergebnis['gang']} (G{ergebnis['gang_stufe']})")
             print(f"  {t('route.provider'):<9} {ergebnis['provider']}")
             print(f"  {t('route.gas'):<9} {ergebnis['gas']:.0%}")
-            print(f"  {'Effort':<9} {ergebnis['effort'] or '-'}")
+            print(f"  {t('route.effort'):<9} {ergebnis['effort'] or '-'}")
             print(f"  {t('route.muster'):<9} {ergebnis['muster']}")
             print(f"  {t('route.zweck'):<9} {ergebnis['zweck']}")
             print(f"  {t('route.score'):<9} {ergebnis['score']}/100")
@@ -121,6 +121,23 @@ def _cmd_models(args: argparse.Namespace) -> int:
         import clutch as _clutch_pkg
         config_dir = _Path(_clutch_pkg.__file__).parent / "config"
         getriebe = Getriebe(config_dir=config_dir)
+        # Discovery ist on-demand und nicht persistent: statische Katalogdaten
+        # bleiben die Quelle der Wahrheit, neue Ollama-Gänge gelten für diesen
+        # Aufruf und die Web-Anfrage. Ein kurzer Timeout hält die CLI offline
+        # gut benutzbar, während Remote-Endpunkte weiterhin unterstützt werden.
+        from clutch.discovery import ModellDiscovery, konfigurierte_ollama_hosts
+        import os as _os
+        try:
+            discovery_timeout = float(_os.environ.get("CLUTCH_DISCOVERY_TIMEOUT", "1.0"))
+        except ValueError:
+            discovery_timeout = 1.0
+        discovery_timeout = min(max(discovery_timeout, 0.1), 30.0)
+        if not getattr(args, "no_discovery", False):
+            ModellDiscovery().entdecke_und_registriere(
+                getriebe,
+                ollama_hosts=konfigurierte_ollama_hosts(),
+                ollama_timeout=discovery_timeout,
+            )
         gaenge = getriebe.alle_gaenge()
 
         if args.json:
@@ -133,6 +150,10 @@ def _cmd_models(args: argparse.Namespace) -> int:
                     "kosten_input_1k_usd": g.kosten_input_1k,
                     "kosten_output_1k_usd": g.kosten_output_1k,
                     "staerken": g.staerken,
+                    "model_id": g.model_id,
+                    "endpoint": g.endpoint,
+                    "catalog_source": g.catalog_source,
+                    "quantization": g.quantization,
                 }
                 for g in gaenge
             ]
@@ -221,7 +242,7 @@ def _cmd_stats(args: argparse.Namespace) -> int:
 
             print()
             print(t("stats.tankuhr") + ":")
-            print(f"  {t('stats.zone'):<20} {tank.get('zone', 'unbekannt')}")
+            print(f"  {t('stats.zone'):<20} {tank.get('zone', t('stats.unknown'))}")
             kosten = tank.get("kosten_heute_usd", 0.0)
             print(f"  {t('stats.kosten_heute'):<20} ${kosten:.4f} USD")
             verbrauch = tank.get("verbrauch_pct", 0.0)
@@ -453,6 +474,11 @@ def _build_subparser(subparsers: argparse._SubParsersAction) -> None:  # noqa: S
         help="Alle Gänge (Modelle) listen",
     )
     p_models.add_argument("--json", action="store_true", help="JSON-Ausgabe")
+    p_models.add_argument(
+        "--no-discovery",
+        action="store_true",
+        help="Ollama-Discovery für diesen Aufruf deaktivieren",
+    )
     p_models.add_argument("--db", metavar="PFAD", default=None)
 
     # --- config ---
@@ -532,6 +558,19 @@ def _build_subparser(subparsers: argparse._SubParsersAction) -> None:  # noqa: S
     p_keys.add_argument("--json", action="store_true", help="JSON-Ausgabe")
     p_keys.add_argument("--db", metavar="PFAD", default=None)
 
+    # Das globale --lang darf aus ergonomischen Gründen auch hinter dem
+    # Subcommand stehen (z.B. `clutch models --lang de`). SUPPRESS verhindert,
+    # dass ein fehlender Subcommand-Wert einen vorher gesetzten globalen Wert
+    # überschreibt.
+    for subparser in (p_route, p_models, p_config, p_stats, p_run, p_chat, p_serve, p_keys):
+        subparser.add_argument(
+            "--lang",
+            metavar="CODE",
+            choices=LANGS,
+            default=argparse.SUPPRESS,
+            help=f"Ausgabesprache ({', '.join(LANGS)})",
+        )
+
 
 def _build_top_parser() -> argparse.ArgumentParser:
     """Parser für direkte Aufrufe (Hilfe + globale Flags)."""
@@ -576,6 +615,13 @@ def main(argv: list[str] | None = None) -> int:
     """Entry-Point. Gibt Exit-Code zurück (0 = Erfolg)."""
     if argv is None:
         argv = sys.argv[1:]
+
+    # Bereits vor argparse setzen, damit auch `--lang de --help` und die
+    # Parser-Hilfetexte in der gewünschten Sprache erscheinen.
+    for _i, _tok in enumerate(argv[:-1]):
+        if _tok == "--lang":
+            set_lang(argv[_i + 1])
+            break
 
     # Wenn das erste nicht-Flag-Argument ein bekannter Subcommand ist,
     # normal parsen. Sonst: als positionales Prompt behandeln.

@@ -33,6 +33,7 @@ class Gang:
     efforts: list[str] = field(default_factory=list)
     catalog_checked_at: Optional[str] = None
     catalog_source: Optional[str] = None
+    quantization: Optional[str] = None
 
     @property
     def ist_lokal(self) -> bool:
@@ -100,6 +101,7 @@ class Getriebe:
                 efforts=cfg.get("efforts", []),
                 catalog_checked_at=cfg.get("catalog_checked_at"),
                 catalog_source=cfg.get("catalog_source"),
+                quantization=cfg.get("quantization"),
             )
 
         # Provider laden
