@@ -11,7 +11,7 @@
 ![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![Lizenz MIT](https://img.shields.io/badge/Lizenz-MIT-green)
 ![Version 0.4.0](https://img.shields.io/badge/Version-0.4.0-orange)
-![Pytest](https://img.shields.io/badge/Pytest-306%20bestanden-brightgreen)
+![Pytest](https://img.shields.io/badge/Pytest-310%20bestanden-brightgreen)
 ![Provider](https://img.shields.io/badge/Provider-Anthropic%20%7C%20Gemini%20%7C%20OpenAI%20%7C%20Ollama%20%7C%20Kimi-purple)
 ![Ökosystem: ellmos-ai](https://img.shields.io/badge/%C3%96kosystem-ellmos--ai-blue)
 ![Dachorganisation: open-bricks](https://img.shields.io/badge/Dachorganisation-open--bricks-purple)
