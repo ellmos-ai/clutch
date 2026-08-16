@@ -12,6 +12,33 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1
 - **Discoverability & Marketing Audit (2026-08-04):** Synchronized `llms.txt` verification timestamp (2026-08-04) and pytest status (306 passed). Added `ellmos-ai` ecosystem and `open-bricks` umbrella badges to `README.md` and `README_de.md`. Verified 306/306 Pytest unit tests (100% green).
 
 ### Added
+- **Gemini 3.7 Flash als bevorzugter Flash-Gang (2026-08-13).** Neuer Gang
+  `gemini-3.7-flash` (Provider `google`, Modell-ID `gemini-3.7-flash`, G2,
+  1.048.576 Token Kontext, `efforts` low/medium/high). Anlass: Laut Nutzer ist
+  die 3.7er-Generation stabiler und besser als die vorige [U 2026-08-13];
+  Modell-ID, Kontextfenster und Denkstufen sind gegen die Google-Doku
+  verifiziert (`catalog_source`, geprüft am 2026-08-13).
+  - **Bevorzugung über die Katalogreihenfolge:** Der Eintrag steht bewusst *vor*
+    `gemini-flash` (3.5). Bei gleicher Stufe gewinnt der zuerst eingetragene
+    Gang, daher laufen Up- und Downshift in die Flash-Stufe jetzt auf 3.7.
+    `gemini-flash` (3.5) wurde **nicht** entfernt und bleibt als Fallback
+    erreichbar. Die Reihenfolge-Abhängigkeit ist im `_doc` des Gangs vermerkt
+    und durch Tests abgesichert.
+  - **Keine Umgewichtung:** Stufe (G2) und `staerken` sind identisch zu
+    `gemini-flash`, damit sich Budget-Downshift und Zweck-Auswahl unbeteiligter
+    Modelle (z.B. `ollama-mistral`, `claude-sonnet`) nicht verschieben; ein
+    Regressionstest hält das fest.
+  - **Nur auf dem Google-Weg:** Eine Live-Probe der installierten agy-CLI
+    (invalid-model-probe, 2026-08-13) listet weiterhin nur bis
+    `gemini-3.6-flash`. Ein `agy-gemini-3.7-flash`-Gang wäre dort nicht
+    ausführbar und wurde deshalb bewusst **nicht** angelegt; die agy-Familie
+    bleibt unverändert.
+  - **Denkstufen:** `efforts` dokumentiert die `thinking_level`-Stufen des
+    Modells. Der `GeminiMotor` reicht sie noch nicht an die API durch — die
+    Reasoning-Tiefe steuert clutch weiterhin über das Gaspedal.
+  - **Preise:** Eingetragen ist der Einführungspreis (0,75/3,75 USD je 1M
+    Token), der damit unter dem 3.5-Flash-Eintrag liegt. Ab 2027-01-01 gilt laut
+    Google 1,50/7,50 — dann in `getriebe.json` nachziehen.
 - **agy model registry and motor (2026-07-28):** Six models live-verified against agy 1.1.8 are registered with effort variants and catalog provenance. `AgyCompanionMotor` executes them through `companion-for-agy`, maps Clutch effort levels to supported agy efforts, and keeps agy classified as an agentic CLI provider.
 - **Aktueller Modellkatalog (2026-07-28):** Claude Fable 5 ist als höchster
   G5-Gang registriert. Die direkten Gemini-Gänge nutzen
