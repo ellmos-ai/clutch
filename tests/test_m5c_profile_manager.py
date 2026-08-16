@@ -7,7 +7,6 @@ damit keine echte clutch.db berührt wird.
 from __future__ import annotations
 
 import sys
-import tempfile
 import time
 from pathlib import Path
 

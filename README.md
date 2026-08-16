@@ -8,14 +8,15 @@
 
 > Provider-neutral LLM orchestration engine with auto-learning
 
-![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue)
-![License MIT](https://img.shields.io/badge/License-MIT-green)
-![Version 0.4.0](https://img.shields.io/badge/Version-0.4.0-orange)
-![Pytest](https://img.shields.io/badge/Pytest-310%20passed-brightgreen)
-![Providers](https://img.shields.io/badge/Providers-Anthropic%20%7C%20Gemini%20%7C%20OpenAI%20%7C%20Ollama%20%7C%20Kimi-purple)
-![Ecosystem: ellmos-ai](https://img.shields.io/badge/Ecosystem-ellmos--ai-blue)
-![Umbrella: open-bricks](https://img.shields.io/badge/Umbrella-open--bricks-purple)
-![LLM-Ready](https://img.shields.io/badge/LLM--Ready-llms.txt-blue)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Version 0.4.0](https://img.shields.io/badge/Version-0.4.0-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
+[![Pytest](https://img.shields.io/badge/Pytest-314%20passed-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
+[![Providers](https://img.shields.io/badge/Providers-Anthropic%20%7C%20Gemini%20%7C%20OpenAI%20%7C%20Ollama%20%7C%20Kimi-purple.svg)](https://github.com/ellmos-ai/clutch)
+[![Security: Local-First](https://img.shields.io/badge/Security-Local--First-green.svg)](SECURITY.md)
+[![Ecosystem: ellmos-ai](https://img.shields.io/badge/Ecosystem-ellmos--ai-blue.svg)](https://github.com/ellmos-ai)
+[![Umbrella: open-bricks](https://img.shields.io/badge/Umbrella-open--bricks-purple.svg)](https://github.com/open-bricks)
+[![Discovery: llms.txt](https://img.shields.io/badge/Discovery-llms.txt-blue.svg)](llms.txt)
 
 **clutch** (German: *Kupplung*) uses a driving metaphor to intelligently route tasks to optimal LLM models across multiple providers. It analyzes task complexity and purpose, selects the right model and reasoning level, tracks budgets, and learns from experience. Use it as a **library**, a **CLI**, or a **local web app**.
 
@@ -372,6 +373,22 @@ print(ergebnis.config.gang.name)    # "claude-sonnet"
 print(ergebnis.config.gas.wert)     # 0.7
 print(fahrer.status()["tankuhr"])   # Budget-Stand
 ```
+
+## Ecosystem & Sibling Tools
+
+Part of the [ellmos-ai](https://github.com/ellmos-ai) multi-agent infrastructure and the overarching [open-bricks](https://github.com/open-bricks) open-source software ecosystem:
+
+| Tool | Organization | Description |
+|------|--------------|-------------|
+| [coma](https://github.com/ellmos-ai/coma) | ellmos-ai | Single-binary multi-agent orchestrator & execution coordinator |
+| [swarm-ai](https://github.com/ellmos-ai/swarm-ai) | ellmos-ai | Swarm intelligence and autonomous agent consensus engine |
+| [system-explorer](https://github.com/ellmos-ai/system-explorer) | ellmos-ai | Local system discovery and hardware resource monitor |
+| [policy-registry](https://github.com/ellmos-ai/policy-registry) | ellmos-ai | Unified agent permission and policy management engine |
+| [sqlite-transit-sync](https://github.com/ellmos-ai/sqlite-transit-sync) | ellmos-ai | Multi-agent state synchronization via SQLite WAL journals |
+| [workflowhooker](https://github.com/ellmos-ai/workflowhooker) | ellmos-ai | Event hooks and agent workflow automation triggers |
+| [memoryhooker](https://github.com/ellmos-ai/memoryhooker) | ellmos-ai | Transparent SQLite/FTS5 working memory capture for agents |
+| [DevCenter](https://github.com/dev-bricks/DevCenter) | dev-bricks | Developer control plane, repository dashboard & environment manager |
+| [CodeBox](https://github.com/dev-bricks/CodeBox) | dev-bricks | Polyglot code snippet manager & developer workbench |
 
 ---
 

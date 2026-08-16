@@ -106,7 +106,6 @@ class Tankuhr:
         return "red"
 
     def _cleanup(self):
-        import datetime
         now = time.time()
         month_start = self._monatsanfang(now)
         self._kosten_log = [(t, c, p) for t, c, p in self._kosten_log if t >= month_start]

@@ -6,7 +6,6 @@ from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-import clutch.motorblock as mb
 from clutch.getriebe import Getriebe
 from clutch.gas_bremse import GasBremse
 from clutch.kupplung import FahrtConfig

@@ -289,7 +289,7 @@ class TestImportPromptboard:
         Gleicher Name → neuer Eintrag mit eigener ID.
         """
         # Vorhandener Eintrag
-        bestehend = lib.upsert(PromptItem(
+        lib.upsert(PromptItem(
             id="", typ="prompt", name="Duplikat-Test", content="Original"
         ))
         items = [

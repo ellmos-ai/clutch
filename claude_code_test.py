@@ -13,13 +13,12 @@ Nutzung:
 """
 
 import sys
-import json
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from clutch.fahrer import Fahrer, FahrtConfig, FahrtErgebnis
-from clutch.strecke import StreckenAnalyse, StreckenTyp
+from clutch.fahrer import Fahrer, FahrtConfig
+from clutch.strecke import StreckenAnalyse
 from clutch.getriebe import Getriebe
 
 

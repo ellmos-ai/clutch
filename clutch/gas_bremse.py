@@ -10,7 +10,6 @@ Er beeinflusst Prompt-Strategie, Token-Budget und Timeout.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass

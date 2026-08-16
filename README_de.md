@@ -8,14 +8,15 @@
 
 > Provider-neutrale LLM-Orchestrierungsengine mit automatischem Lernen
 
-![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue)
-![Lizenz MIT](https://img.shields.io/badge/Lizenz-MIT-green)
-![Version 0.4.0](https://img.shields.io/badge/Version-0.4.0-orange)
-![Pytest](https://img.shields.io/badge/Pytest-310%20bestanden-brightgreen)
-![Provider](https://img.shields.io/badge/Provider-Anthropic%20%7C%20Gemini%20%7C%20OpenAI%20%7C%20Ollama%20%7C%20Kimi-purple)
-![Ökosystem: ellmos-ai](https://img.shields.io/badge/%C3%96kosystem-ellmos--ai-blue)
-![Dachorganisation: open-bricks](https://img.shields.io/badge/Dachorganisation-open--bricks-purple)
-![LLM-Ready](https://img.shields.io/badge/LLM--Ready-llms.txt-blue)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![Lizenz: MIT](https://img.shields.io/badge/Lizenz-MIT-green.svg)](LICENSE)
+[![Version 0.4.0](https://img.shields.io/badge/Version-0.4.0-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
+[![Pytest](https://img.shields.io/badge/Pytest-314%20bestanden-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
+[![Provider](https://img.shields.io/badge/Provider-Anthropic%20%7C%20Gemini%20%7C%20OpenAI%20%7C%20Ollama%20%7C%20Kimi-purple.svg)](https://github.com/ellmos-ai/clutch)
+[![Sicherheit: Local-First](https://img.shields.io/badge/Sicherheit-Local--First-green.svg)](SECURITY.md)
+[![Ökosystem: ellmos-ai](https://img.shields.io/badge/%C3%96kosystem-ellmos--ai-blue.svg)](https://github.com/ellmos-ai)
+[![Dachorganisation: open-bricks](https://img.shields.io/badge/Dachorganisation-open--bricks-purple.svg)](https://github.com/open-bricks)
+[![Discovery: llms.txt](https://img.shields.io/badge/Discovery-llms.txt-blue.svg)](llms.txt)
 
 **clutch** (deutsch: *Kupplung*) verwendet eine Fahrmetapher, um Aufgaben intelligent an optimale LLM-Modelle verschiedener Anbieter weiterzuleiten. Das System analysiert Aufgabenkomplexität und -zweck, wählt das passende Modell und Reasoning-Level, verfolgt Budgets und lernt aus Erfahrungen. Verwendbar als **Bibliothek**, **CLI** oder **lokale Web-App**.
 
@@ -370,6 +371,22 @@ print(ergebnis.config.gang.name)    # "claude-sonnet"
 print(ergebnis.config.gas.wert)     # 0.7
 print(fahrer.status()["tankuhr"])   # Budget-Stand
 ```
+
+## Verwandte Tools & Ökosystem
+
+Teil der [ellmos-ai](https://github.com/ellmos-ai) Multi-Agenten-Infrastruktur und des übergreifenden [open-bricks](https://github.com/open-bricks) Open-Source-Software-Ökosystems:
+
+| Tool | Organisation | Beschreibung |
+|------|--------------|--------------|
+| [coma](https://github.com/ellmos-ai/coma) | ellmos-ai | Single-Binary Multi-Agenten-Orchestrator und Ausführungskoordinator |
+| [swarm-ai](https://github.com/ellmos-ai/swarm-ai) | ellmos-ai | Schwarmintelligenz- und Konsens-Engine für autonome Agenten |
+| [system-explorer](https://github.com/ellmos-ai/system-explorer) | ellmos-ai | Lokale System- und Hardware-Ressourcen-Erkennung für Agenten |
+| [policy-registry](https://github.com/ellmos-ai/policy-registry) | ellmos-ai | Einheitliche Berechtigungs- und Policy-Engine für Agentensysteme |
+| [sqlite-transit-sync](https://github.com/ellmos-ai/sqlite-transit-sync) | ellmos-ai | Multi-Agenten-Zustandssynchronisation über SQLite-WAL-Journale |
+| [workflowhooker](https://github.com/ellmos-ai/workflowhooker) | ellmos-ai | Event-Hooks und Agenten-Workflow-Automatisierungstrigger |
+| [memoryhooker](https://github.com/ellmos-ai/memoryhooker) | ellmos-ai | Transparente SQLite/FTS5-Arbeitsgedächtnis-Erfassung für Agenten |
+| [DevCenter](https://github.com/dev-bricks/DevCenter) | dev-bricks | Entwickler-Kontrollzentrum, Repository-Dashboard und Umgebungsmanager |
+| [CodeBox](https://github.com/dev-bricks/CodeBox) | dev-bricks | Mehrsprachiger Code-Snippet-Manager und Entwickler-Workbench |
 
 ---
 

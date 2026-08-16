@@ -5,13 +5,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from clutch.getriebe import Getriebe, Gang
+from clutch.getriebe import Getriebe
 from clutch.gas_bremse import GasBremse
 from clutch.kupplung import FahrtConfig
-from clutch.patterns.kolonne import Kolonne, KolonnenSchritt, KolonnenErgebnis
-from clutch.patterns.team import TeamFahrt, TeamMitglied, TeamErgebnis
-from clutch.patterns.schwarm import Schwarm, SchwarmAufgabe, SchwarmErgebnis
-from clutch.patterns.hybrid import HybridFahrt, HybridErgebnis
+from clutch.patterns.kolonne import Kolonne, KolonnenSchritt
+from clutch.patterns.team import TeamFahrt, TeamMitglied
+from clutch.patterns.schwarm import Schwarm, SchwarmAufgabe
+from clutch.patterns.hybrid import HybridFahrt
 
 
 def _make_config(gang_name: str = "claude-haiku", gas: float = 0.3) -> FahrtConfig:

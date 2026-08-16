@@ -7,7 +7,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from clutch.scorer import Scorer, get_scorer
-from clutch.partner import Partner, PartnerRegistry, zone_nummer, DELEGATION_ZONEN
+from clutch.partner import Partner, PartnerRegistry, zone_nummer
 from clutch.fahrer import Fahrer
 from clutch.motorblock import MotorErgebnis
 

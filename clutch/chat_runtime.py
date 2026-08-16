@@ -14,7 +14,7 @@ hier auf clutch-Routing reduziert und ohne BACH-spezifische Tools.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Callable, Optional
 
 from clutch.fahrer import Fahrer
 from clutch.motorblock import MotorBlock

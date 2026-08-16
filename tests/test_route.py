@@ -148,7 +148,7 @@ def test_etappen_schaetzung():
     profil = a.analysiere("Fix the login bug and update the tests and refactor the handler")
     assert profil.etappen >= 3, f"Expected >= 3, got {profil.etappen}"
 
-    print(f"[OK] Etappen-Schaetzung")
+    print("[OK] Etappen-Schaetzung")
 
 
 def test_etappen_kontext_override():

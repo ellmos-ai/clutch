@@ -36,7 +36,7 @@ class C:
 def test_ollama(fahrer: Fahrer):
     """Live-Test mit lokalem Ollama."""
     print(f"\n{C.BOLD}{'=' * 50}")
-    print(f"  OLLAMA LIVE-TEST")
+    print("  OLLAMA LIVE-TEST")
     print(f"{'=' * 50}{C.RESET}")
 
     # Pruefen ob Ollama laeuft
@@ -48,7 +48,7 @@ def test_ollama(fahrer: Fahrer):
         print(f"  Ollama laeuft. Modelle: {', '.join(modelle)}")
     except (URLError, ConnectionError, OSError) as e:
         print(f"  {C.ROT}Ollama nicht erreichbar: {e}{C.RESET}")
-        print(f"  Starte Ollama mit: ollama serve")
+        print("  Starte Ollama mit: ollama serve")
         return False
 
     # Finde ein verfuegbares Modell
@@ -138,7 +138,7 @@ def test_claude(fahrer: Fahrer):
     import os
 
     print(f"\n{C.BOLD}{'=' * 50}")
-    print(f"  CLAUDE API LIVE-TEST")
+    print("  CLAUDE API LIVE-TEST")
     print(f"{'=' * 50}{C.RESET}")
 
     api_key = os.environ.get("ANTHROPIC_API_KEY")
@@ -221,7 +221,7 @@ def main():
 
     # Zusammenfassung
     print(f"\n{C.BOLD}{'=' * 50}")
-    print(f"  ZUSAMMENFASSUNG")
+    print("  ZUSAMMENFASSUNG")
     print(f"{'=' * 50}{C.RESET}")
     for name, ok in ergebnisse.items():
         symbol = f"{C.GRUEN}✓{C.RESET}" if ok else f"{C.ROT}✗{C.RESET}"

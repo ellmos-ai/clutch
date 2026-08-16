@@ -13,7 +13,6 @@ from clutch.kupplung import Kupplung, FahrtConfig
 from clutch.fahrtenbuch import Fahrtenbuch, FahrtEintrag
 from clutch.bordcomputer import Bordcomputer
 from clutch.tankuhr import Tankuhr
-from clutch.tacho import Tacho
 from clutch.fahrer import Fahrer
 from clutch.patterns.kolonne import Kolonne, KolonnenSchritt
 from clutch.patterns.team import TeamFahrt, TeamMitglied
@@ -327,7 +326,7 @@ def test_fahrer_integration():
     assert "getriebe" in status
     assert status["bordcomputer"]["gesund"]
 
-    print(f"[OK] Fahrer Integration")
+    print("[OK] Fahrer Integration")
     print(f"     Fahrt 1: {ergebnis.output}")
     print(f"     Fahrt 2: {ergebnis2.output}")
 

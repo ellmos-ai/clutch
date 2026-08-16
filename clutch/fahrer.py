@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import Any, Callable, Optional
 
 from clutch.strecke import StreckenAnalyse, StreckenProfil
-from clutch.getriebe import Getriebe, Gang
+from clutch.getriebe import Getriebe
 from clutch.kupplung import Kupplung, FahrtConfig
 from clutch.fahrtenbuch import Fahrtenbuch
 from clutch.bordcomputer import Bordcomputer
@@ -129,7 +129,6 @@ class Fahrer:
         if config.gang.name in system_status.gesperrte_modelle:
             runter = self.getriebe.naechster_gang_runter(config.gang.name)
             if runter:
-                from clutch.gas_bremse import GasBremse
                 config = FahrtConfig(
                     gang=runter,
                     gas=config.gas,

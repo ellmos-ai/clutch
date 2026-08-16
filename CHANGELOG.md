@@ -6,6 +6,20 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1
 
 ---
 
+## [0.4.1] - 2026-08-16 - Discoverability, README-Design & Metadata Parity Check
+
+### Added
+- Automatisierte Metadaten- & Manifest-Paritätstestsuite in `tests/test_metadata.py` (4/4 passed).
+- Shields.io-Badges für Local-First-Sicherheit, Version (0.4.0), Discovery (`llms.txt`) und synchronisierte Pytest-Suite (314 passed, 100% grün) in `README.md` und `README_de.md`.
+- Geschwisterwerkzeuge-Matrix für das gesamte `ellmos-ai`-, `dev-bricks`- und `open-bricks`-Ökosystem (`coma`, `swarm-ai`, `system-explorer`, `policy-registry`, `sqlite-transit-sync`, `workflowhooker`, `memoryhooker`, `DevCenter`, `CodeBox`) zweisprachig integriert.
+- Standardisierte bilingual-strukturierte `SECURITY.md` mit Local-First-Routing, Keyring-Credential-Speicherung, Null-Telemetrie und privater Schwachstellenmeldung.
+- Ruff-Linter-Konfiguration (`[tool.ruff]` und `[tool.ruff.lint]`, line-length 120, py310) in `pyproject.toml`.
+
+### Changed
+- `llms.txt`: Last-checked Timestamp auf `2026-08-16` und Test-Suite auf 314 Tests synchronisiert.
+- `tests/test_m4_cli.py`, `tests/test_m5a_session_store.py`, `tests/test_m5b_prompt_library.py`: Unbenutzte Test-Variablen bereinigt; `ruff check .` 100% sauber.
+- Verifikation: 314/314 Pytest-Tests 100% grün, `compileall` & `ruff check` fehlerfrei.
+
 ## [Unreleased]
 
 ### Maintenance & Discoverability

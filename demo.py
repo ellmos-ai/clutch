@@ -104,7 +104,7 @@ def vordefinierte_szenarien(fahrer: Fahrer):
     ]
 
     print(f"\n{C.BOLD}{'=' * 60}")
-    print(f"  KUPPLUNG v0.3 -- Routing-Demo")
+    print("  KUPPLUNG v0.3 -- Routing-Demo")
     print(f"  {len(szenarien)} Szenarien, {len(fahrer.getriebe)} Gaenge")
     print(f"{'=' * 60}{C.RESET}")
 
@@ -114,7 +114,7 @@ def vordefinierte_szenarien(fahrer: Fahrer):
     # Status
     status = fahrer.status()
     print(f"\n{C.BOLD}{'═' * 60}")
-    print(f"  ARMATURENBRETT")
+    print("  ARMATURENBRETT")
     print(f"{'═' * 60}{C.RESET}")
     print(f"  Bordcomputer: {'Gesund' if status['bordcomputer']['gesund'] else 'Problem'}")
     print(f"  Tankuhr:      {zone_farbe(status['tankuhr']['zone'])}")
@@ -124,11 +124,11 @@ def vordefinierte_szenarien(fahrer: Fahrer):
 def interaktiver_modus(fahrer: Fahrer):
     """User gibt Tasks ein, sieht Routing-Entscheidung."""
     print(f"\n{C.BOLD}{'=' * 60}")
-    print(f"  KUPPLUNG v0.3 -- Interaktiver Modus")
+    print("  KUPPLUNG v0.3 -- Interaktiver Modus")
     print(f"  Getriebe: {fahrer.getriebe}")
     print(f"{'=' * 60}{C.RESET}")
-    print(f"  Beschreibe einen Task und sieh wie er geroutet wird.")
-    print(f"  Eingabe 'q' zum Beenden, 's' fuer Status.\n")
+    print("  Beschreibe einen Task und sieh wie er geroutet wird.")
+    print("  Eingabe 'q' zum Beenden, 's' fuer Status.\n")
 
     while True:
         try:
@@ -157,7 +157,7 @@ def zeige_motoren():
     status = block.verfuegbare_motoren()
 
     print(f"\n{C.BOLD}{'=' * 60}")
-    print(f"  MOTORBLOCK -- Verfuegbare Motoren")
+    print("  MOTORBLOCK -- Verfuegbare Motoren")
     print(f"{'=' * 60}{C.RESET}")
 
     for provider, verfuegbar in status.items():
@@ -180,7 +180,7 @@ def live_modus(fahrer: Fahrer, prompt: str = None):
     block = MotorBlock()
 
     print(f"\n{C.BOLD}{'=' * 60}")
-    print(f"  KUPPLUNG v0.3 -- Live-Modus (echte LLM-Calls)")
+    print("  KUPPLUNG v0.3 -- Live-Modus (echte LLM-Calls)")
     print(f"{'=' * 60}{C.RESET}")
 
     # Motoren-Status
@@ -190,7 +190,7 @@ def live_modus(fahrer: Fahrer, prompt: str = None):
 
     if not verfuegbar:
         print(f"\n  {C.ROT}Kein Motor verfuegbar!{C.RESET}")
-        print(f"  Setze ANTHROPIC_API_KEY oder GOOGLE_API_KEY als Umgebungsvariable.")
+        print("  Setze ANTHROPIC_API_KEY oder GOOGLE_API_KEY als Umgebungsvariable.")
         return
 
     if prompt:
@@ -239,8 +239,8 @@ def hybrid_demo(fahrer: Fahrer):
     from clutch.gas_bremse import GasBremse
 
     print(f"\n{C.BOLD}{'=' * 60}")
-    print(f"  HYBRID-FAHRT Demo")
-    print(f"  Kolonne -> Team -> Kolonne")
+    print("  HYBRID-FAHRT Demo")
+    print("  Kolonne -> Team -> Kolonne")
     print(f"{'=' * 60}{C.RESET}")
 
     # Einen einfachen Gang erstellen fuer die Demo

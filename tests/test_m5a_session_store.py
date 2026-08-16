@@ -4,13 +4,12 @@ Strategie: Alles in-memory via temporärem Verzeichnis. Kein Netzwerk, kein LLM.
 """
 
 import sys
-import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import pytest
-from clutch.session_store import SessionStore, ChatSession, ChatMessage
+from clutch.session_store import SessionStore, ChatSession
 
 
 # ---------------------------------------------------------------------------
@@ -65,8 +64,8 @@ class TestSessionCRUD:
 class TestMessages:
     def test_message_anhängen_und_verlauf(self, store):
         s = store.neue_session()
-        m1 = store.add_message(s.id, "user", "Hallo!")
-        m2 = store.add_message(s.id, "assistant", "Ich bin bereit.")
+        store.add_message(s.id, "user", "Hallo!")
+        store.add_message(s.id, "assistant", "Ich bin bereit.")
 
         verlauf = store.verlauf(s.id)
         assert len(verlauf) == 2
@@ -86,7 +85,7 @@ class TestMessages:
     def test_attachments_roundtrip(self, store):
         s = store.neue_session()
         dateien = ["bild.png", "dokument.pdf", "notiz.txt"]
-        m = store.add_message(
+        store.add_message(
             s.id, "user", "Dateien angehängt",
             attachments=dateien, tokens=42, model="claude-sonnet-4-6", latenz=1.23
         )
@@ -125,8 +124,8 @@ class TestMessages:
 class TestSessionsListe:
     def test_sessions_neueste_zuerst(self, store):
         s1 = store.neue_session(titel="Erste")
-        s2 = store.neue_session(titel="Zweite")
-        s3 = store.neue_session(titel="Dritte")
+        store.neue_session(titel="Zweite")
+        store.neue_session(titel="Dritte")
         # Message anhängen aktualisiert updated_at von s1 → schiebt s1 nach vorn
         store.add_message(s1.id, "user", "Ping")
 

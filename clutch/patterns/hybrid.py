@@ -10,9 +10,8 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import Any, Callable, Optional
+from typing import Any
 
-from clutch.kupplung import FahrtConfig
 from clutch.patterns.kolonne import Kolonne, KolonnenSchritt
 from clutch.patterns.team import TeamFahrt, TeamMitglied
 

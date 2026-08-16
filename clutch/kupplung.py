@@ -19,11 +19,11 @@ from __future__ import annotations
 
 import json
 import random
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
-from clutch.strecke import StreckenProfil, StreckenTyp, Tempo
+from clutch.strecke import StreckenProfil, Tempo
 from clutch.getriebe import Getriebe, Gang
 from clutch.gas_bremse import GasBremse, GasStellung
 

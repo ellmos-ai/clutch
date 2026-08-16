@@ -9,13 +9,11 @@ Strategie: Kein Netzwerk, kein LLM. Alle Tests laufen offline.
 
 import sys
 import json
-import os
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-import pytest
-from clutch.cli import main, _lade_config, _speichere_config, _config_pfad
+from clutch.cli import main
 
 
 # ---------------------------------------------------------------------------
@@ -171,8 +169,6 @@ class TestRunProviderUnavailable:
         from clutch import motorblock as mb
 
         # Alle Motoren als unavailable patchen
-        original_init = mb.MotorBlock.__init__
-
         class MockBlock(mb.MotorBlock):
             def verfuegbare_motoren(self):
                 return {name: False for name in super().verfuegbare_motoren()}
