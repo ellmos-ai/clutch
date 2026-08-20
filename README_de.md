@@ -241,12 +241,24 @@ auf den Mac-Studio-Compute-Pfad.
 |----------|--------|-------|
 | **Anthropic** | Claude Fable 5, Haiku, Sonnet, Opus | Nein |
 | **Google** | Gemini 3.5 Flash, Gemini 3.1 Pro Preview | Nein |
-| **OpenAI** | GPT-5.6 Sol/Terra, GPT-5.3-Codex | Nein |
+| **OpenAI** | GPT-5.6 Luna/Terra/Sol via Responses API, GPT-5.3-Codex | Nein |
 | **Ollama** | Qwen, Mistral und weitere (lokal & remote) | Ja |
 | **Claude Code** | Via Subprocess (CLI-Session) | Ja |
 | **agy** | Live ermittelter Gemini-, Claude- und GPT-OSS-Katalog via `companion-for-agy` | CLI-Session |
 | **Kimi (Moonshot)** | `kimi-k2.7-code`, `kimi-k2.6` via OpenAI-kompatibler API; `kimi-cli`/`kimi-code` CLI; Ollama Cloud | API / CLI |
 | **OpenAI-kompatibel** | Jeder `/v1/chat/completions`-Endpunkt (set `base_url`) | Nein |
+
+### GPT-5.6-Kosten und empirisches Routing
+
+Die GPT-5.6-Preise sind versioniert im Modellkatalog hinterlegt und werden gemeinsam von Laufzeit-Telemetrie, Tankuhr, CLI-/API-JSON und Statistik verwendet. Der Rechner unterscheidet beobachtete, angenommene und unbekannte Usage; fehlende Provider-Usage bleibt ungemessen (`cost_usd=null`) und wird nicht als Nullkosten ausgegeben. Cached Input, Cache-Schreibvorgänge, die Langkontext-Multiplikatoren oberhalb von 272.000 Input-Tokens, Standard/Fast, Tool-Gebühren und Reasoning-Tokens werden nachvollziehbar berücksichtigt.
+
+```bash
+clutch cost --model gpt-5.6-terra --input 100000 --cached-input 20000 --output 10000 --json
+```
+
+Alle drei GPT-5.6-Modelle unterstützen `none`, `low`, `medium`, `high`, `xhigh` und `max`. Ein höherer Effort erlaubt mehr Reasoning, garantiert aber weder monoton mehr sichtbare Tokens noch universell bessere Ergebnisse. Das Routing verwendet deshalb je Aufgabenklasse Qualitäts-/Latenz-Gates und erwartete Kosten pro erfolgreicher Aufgabe auf einer Pareto-Frontier. Ohne genügend gelabelte Beobachtungen meldet es einen rollenbasierten Cold-Start, statt Werte zu erfinden.
+
+Siehe [GPT-5.6-Kosten und Routing](docs/GPT56_COST_ROUTING_de.md), die [Beispieleingabe](docs/gpt56_cost_example.json) und die generierte [Preisgrafik](docs/gpt56_price_facts.svg).
 
 ## Ausführungsmuster
 

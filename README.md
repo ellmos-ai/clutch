@@ -241,12 +241,24 @@ more, route that step to the Mac Studio compute path.
 |----------|--------|-------|
 | **Anthropic** | Claude Fable 5, Haiku, Sonnet, Opus | No |
 | **Google** | Gemini 3.5 Flash, Gemini 3.1 Pro Preview | No |
-| **OpenAI** | GPT-5.6 Sol/Terra, GPT-5.3-Codex | No |
+| **OpenAI** | GPT-5.6 Luna/Terra/Sol via Responses API, GPT-5.3-Codex | No |
 | **Ollama** | Qwen, Mistral, and more (local & remote) | Yes |
 | **Claude Code** | Via subprocess (CLI session) | Yes |
 | **agy** | Live-discovered Gemini, Claude and GPT-OSS catalog via `companion-for-agy` | CLI session |
 | **Kimi (Moonshot)** | `kimi-k2.7-code`, `kimi-k2.6` via OpenAI-compatible API; `kimi-cli`/`kimi-code` CLI; Ollama Cloud | API / CLI |
 | **OpenAI-compatible** | Any `/v1/chat/completions` endpoint (set `base_url`) | No |
+
+### GPT-5.6 cost and empirical routing
+
+GPT-5.6 pricing is versioned in the model catalog and shared by runtime telemetry, Tankuhr, CLI/API JSON, and stats. The calculator distinguishes observed, assumed, and unknown usage; missing provider usage is unmetered (`cost_usd=null`), not zero. It accounts for cached input, cache writes, the >272k long-context multipliers, Standard/Fast service, tool fees, and reasoning tokens exactly once.
+
+```bash
+clutch cost --model gpt-5.6-terra --input 100000 --cached-input 20000 --output 10000 --json
+```
+
+All three GPT-5.6 models expose efforts `none`, `low`, `medium`, `high`, `xhigh`, and `max`. Higher effort allows more reasoning but does not guarantee monotonically more visible tokens or universally better outcomes. Routing therefore applies per-task quality/latency gates and expected cost per successful task on a Pareto frontier; without enough labelled observations it reports a role-based cold start rather than fabricating scores.
+
+See [GPT-5.6 cost and routing](docs/GPT56_COST_ROUTING.md), the [example input](docs/gpt56_cost_example.json), and the generated [price-facts chart](docs/gpt56_price_facts.svg).
 
 ## Execution Patterns
 

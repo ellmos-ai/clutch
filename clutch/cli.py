@@ -154,6 +154,10 @@ def _cmd_models(args: argparse.Namespace) -> int:
                     "endpoint": g.endpoint,
                     "catalog_source": g.catalog_source,
                     "quantization": g.quantization,
+                    "efforts": g.efforts,
+                    "reasoning_modes": g.reasoning_modes,
+                    "pricing": g.pricing.to_dict() if g.pricing else None,
+                    "pricing_stale": g.pricing.is_stale() if g.pricing else None,
                 }
                 for g in gaenge
             ]
@@ -266,6 +270,50 @@ def _cmd_stats(args: argparse.Namespace) -> int:
         return 1
 
 
+def _cmd_cost(args: argparse.Namespace) -> int:
+    """Deterministischer Kostenrechner aus derselben SSOT wie Laufzeit/Stats."""
+    try:
+        from clutch.getriebe import Getriebe
+        from clutch.pricing import UsageRecord, cost_for_gang
+
+        getriebe = Getriebe()
+        gang = getriebe.gang(args.model)
+        if gang is None:
+            gang = next((g for g in getriebe.alle_gaenge() if g.model_id == args.model), None)
+        if gang is None:
+            raise ValueError(f"unbekanntes Modell: {args.model}")
+        if gang.pricing is None:
+            raise ValueError(f"Modell hat keinen versionierten Tarif: {args.model}")
+
+        unknown = args.data_status == "unknown"
+        usage = UsageRecord(
+            input_tokens=None if unknown else args.input_tokens,
+            cached_input_tokens=None if unknown else args.cached_input_tokens,
+            cache_write_tokens=None if unknown else args.cache_write_tokens,
+            output_tokens=None if unknown else args.output_tokens,
+            reasoning_tokens=None if unknown else args.reasoning_tokens,
+            tool_fees_usd=args.tool_fees_usd,
+            service_tier=args.service_tier,
+            data_status=args.data_status,
+        )
+        ergebnis = cost_for_gang(gang, usage).to_dict()
+        ergebnis.update({"model_id": gang.model_id, "gang": gang.name})
+        if args.json:
+            _drucke_json(ergebnis)
+        elif not ergebnis["known"]:
+            print(f"{gang.model_id}: Usage unbekannt/ungemessen; keine Kostenschätzung")
+        else:
+            print(f"{gang.model_id}: ${ergebnis['total_usd']:.8f} USD ({args.data_status})")
+            print(
+                f"Tarif {ergebnis['pricing_version']} · geprüft {ergebnis['pricing_checked_at']} · "
+                f"stale={ergebnis['pricing_stale']}"
+            )
+        return 0
+    except Exception as e:
+        print(f"Kostenberechnung fehlgeschlagen: {e}", file=sys.stderr)
+        return 1
+
+
 def _one_shot(prompt: str, db_path: Optional[str], als_json: bool) -> int:
     """Routet und führt einen Prompt aus (one-shot)."""
     try:
@@ -315,6 +363,10 @@ def _one_shot(prompt: str, db_path: Optional[str], als_json: bool) -> int:
                 "provider": ergebnis.config.provider if ergebnis.config else None,
                 "latenz_sekunden": round(ergebnis.latenz_sekunden, 3),
                 "total_tokens": ergebnis.total_tokens,
+                "cost_usd": ergebnis.cost_usd,
+                "usage_status": ergebnis.usage_status,
+                "requested_effort": ergebnis.requested_effort,
+                "effective_effort": ergebnis.effective_effort,
                 "warnungen": ergebnis.warnungen,
             })
         else:
@@ -453,7 +505,7 @@ def _cmd_chat(args: argparse.Namespace) -> int:
 # Argparse-Setup
 # ---------------------------------------------------------------------------
 
-_SUBCOMMANDS = {"route", "models", "config", "stats", "run", "chat", "serve", "keys"}
+_SUBCOMMANDS = {"route", "models", "cost", "config", "stats", "run", "chat", "serve", "keys"}
 
 
 def _build_subparser(subparsers: argparse._SubParsersAction) -> None:  # noqa: SLF001
@@ -480,6 +532,32 @@ def _build_subparser(subparsers: argparse._SubParsersAction) -> None:  # noqa: S
         help="Ollama-Discovery für diesen Aufruf deaktivieren",
     )
     p_models.add_argument("--db", metavar="PFAD", default=None)
+
+    # --- cost ---
+    p_cost = subparsers.add_parser(
+        "cost",
+        help="Kosten aus versioniertem Tarif und Token-Usage berechnen",
+    )
+    p_cost.add_argument("--model", required=True, help="Gangname oder API-Modell-ID")
+    p_cost.add_argument("--input", dest="input_tokens", type=int, default=0)
+    p_cost.add_argument("--cached-input", dest="cached_input_tokens", type=int, default=0)
+    p_cost.add_argument("--cache-write", dest="cache_write_tokens", type=int, default=0)
+    p_cost.add_argument("--output", dest="output_tokens", type=int, default=0)
+    p_cost.add_argument("--reasoning", dest="reasoning_tokens", type=int, default=0)
+    p_cost.add_argument("--tool-fees-usd", type=float, default=0.0)
+    p_cost.add_argument(
+        "--service-tier",
+        choices=["default", "standard", "auto", "fast", "priority"],
+        default="default",
+    )
+    p_cost.add_argument(
+        "--data-status",
+        choices=["assumed", "observed", "unknown"],
+        default="assumed",
+        help="CLI-Eingaben sind standardmäßig Annahmen",
+    )
+    p_cost.add_argument("--json", action="store_true", help="JSON-Ausgabe")
+    p_cost.add_argument("--db", metavar="PFAD", default=None)
 
     # --- config ---
     p_config = subparsers.add_parser(
@@ -562,7 +640,7 @@ def _build_subparser(subparsers: argparse._SubParsersAction) -> None:  # noqa: S
     # Subcommand stehen (z.B. `clutch models --lang de`). SUPPRESS verhindert,
     # dass ein fehlender Subcommand-Wert einen vorher gesetzten globalen Wert
     # überschreibt.
-    for subparser in (p_route, p_models, p_config, p_stats, p_run, p_chat, p_serve, p_keys):
+    for subparser in (p_route, p_models, p_cost, p_config, p_stats, p_run, p_chat, p_serve, p_keys):
         subparser.add_argument(
             "--lang",
             metavar="CODE",
@@ -583,6 +661,7 @@ def _build_top_parser() -> argparse.ArgumentParser:
             "Beispiele:\n"
             "  clutch route \"Fix den Bug in auth.py\"\n"
             "  clutch models --json\n"
+            "  clutch cost --model gpt-5.6-terra --input 100000 --output 10000 --json\n"
             "  clutch run \"Erkläre Quantenmechanik\"\n"
             "  clutch \"Erkläre Quantenmechanik\"\n"
             "  clutch stats\n"
@@ -691,6 +770,8 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_route(args)
     elif sub == "models":
         return _cmd_models(args)
+    elif sub == "cost":
+        return _cmd_cost(args)
     elif sub == "config":
         return _cmd_config(args)
     elif sub == "stats":

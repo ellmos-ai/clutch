@@ -30,7 +30,8 @@ from clutch.gas_bremse import GasBremse, GasStellung
 # Agentische CLI-Motoren fuehren Tools mit Auto-Approve (--yolo) auf dem Host aus.
 # Aus untrusted Quellen (Web/API) duerfen sie NICHT automatisch gewaehlt werden.
 AGENTIC_CLI_PROVIDERS = {"claude-code", "kimi-cli", "kimi-code", "agy"}
-ERLAUBTE_EFFORTS = {"high", "xhigh", "max-delegate"}
+OPENAI_EFFORTS = {"none", "low", "medium", "high", "xhigh", "max"}
+ERLAUBTE_EFFORTS = OPENAI_EFFORTS | {"max-delegate"}
 
 
 @dataclass
@@ -42,6 +43,12 @@ class FahrtConfig:
     ist_erkundung: bool = False   # Epsilon-Greedy Exploration?
     entscheidungs_grund: str = ""
     effort: Optional[str] = None  # Orthogonal zur Modellwahl; max nur als gezielter Delegate
+    effective_effort: Optional[str] = None
+    reasoning_mode: str = "standard"
+    service_tier: str = "default"
+    is_delegate: bool = False
+    task_class: Optional[str] = None
+    eval_case: Optional[str] = None
 
     @property
     def model_id(self) -> str:
@@ -60,7 +67,14 @@ class FahrtConfig:
             "gas_strategie": self.gas.prompt_strategie,
             "token_multiplikator": self.gas.token_multiplikator,
             "muster": self.muster,
+            "requested_effort": self.effort,
             "effort": self.effort,
+            "effective_effort": self.effective_effort,
+            "reasoning_mode": self.reasoning_mode,
+            "service_tier": self.service_tier,
+            "is_delegate": self.is_delegate,
+            "task_class": self.task_class,
+            "eval_case": self.eval_case,
             "ist_erkundung": self.ist_erkundung,
             "grund": self.entscheidungs_grund,
         }
@@ -257,9 +271,9 @@ class Kupplung:
     def _effort_waehlen(effort: Optional[str]) -> Optional[str]:
         """Validiert den optionalen Effort-Hinweis.
 
-        Die Werte sind absichtlich semantisch: ``max-delegate`` fordert einen
-        transparent angekündigten, gezielten Max-Worker für den härtesten
-        Einzelschritt an. Es schaltet keinen dauerhaften Max-Modus ein.
+        Die sechs OpenAI-Werte werden unverändert transportiert.
+        ``max-delegate`` bleibt ein Orchestrierungshinweis und darf erst im
+        tatsächlich als Delegate markierten Aufruf zu API-``max`` werden.
         """
         if effort is None:
             return None

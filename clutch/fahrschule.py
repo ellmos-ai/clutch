@@ -14,6 +14,7 @@ from typing import Optional
 
 from clutch.fahrtenbuch import Fahrtenbuch, FahrtStatistik
 from clutch.kupplung import Kupplung
+from clutch.evaluation import EmpiricalRouter, EvalObservation, RoutingDecision, load_eval_profiles
 
 
 @dataclass
@@ -115,7 +116,11 @@ class Fahrschule:
         self.max_alter_tage = config.get("decay_max_alter_tage", 30)
 
     def trainieren(self) -> dict:
-        """Fuehrt einen Trainingszyklus durch."""
+        """Führt einen Trainingszyklus nur aus extern gelabelten Evals durch.
+
+        Reiner API-Erfolg, Tokenmenge oder Latenz gelten nicht als Beleg für
+        Aufgabenerfolg. Ungelabelte Telemetrie darf daher keine Policy ändern.
+        """
         total = self.buch.gesamte_fahrten()
         ergebnis = {
             "phase": "sammeln" if total < self.min_fahrten else "optimieren",
@@ -131,17 +136,63 @@ class Fahrschule:
             )
             return ergebnis
 
-        # Alle Streckentypen evaluieren
-        strecken_config = self.kupplung._strecken_config.get("strecken", {})
-        for strecken_typ in strecken_config:
-            update = self._strecke_evaluieren(strecken_typ)
-            if update:
-                ergebnis["updates"].append(update)
+        profiles = load_eval_profiles().get("profiles", {})
+        for task_class in profiles:
+            decision = self.empirisch_routen(task_class)
+            if decision.status != "measured":
+                continue
+            gang = next(
+                (g for g in self.kupplung.getriebe.alle_gaenge() if g.model_id == decision.model_id),
+                None,
+            )
+            if gang is None:
+                continue
+            self.kupplung.override(task_class, {
+                "gang": gang.name,
+                "effort": decision.effort,
+            })
+            ergebnis["updates"].append({
+                "task_class": task_class,
+                "neuer_gang": gang.name,
+                "model_id": decision.model_id,
+                "effort": decision.effort,
+                "status": decision.status,
+                "grund": decision.reason,
+            })
 
         self._erkundung_decay()
         ergebnis["erkundungsrate"] = self.erkundungsrate
 
         return ergebnis
+
+    def empirisch_routen(self, task_class: str) -> RoutingDecision:
+        """Ermittelt die Route einer Aufgabenklasse aus gelabelten DB-Läufen."""
+        profiles = load_eval_profiles().get("profiles", {})
+        if task_class not in profiles:
+            raise ValueError(f"unbekannte Eval-Aufgabenklasse: {task_class}")
+        profile = profiles[task_class]
+        rows = self.buch.eval_daten(task_class, self.max_alter_tage)
+        observations = [
+            EvalObservation(
+                task_class=task_class,
+                eval_case=row["eval_case"] or "unbekannt",
+                model_id=row["model_id"],
+                effort=row["effective_effort"] or row["requested_effort"] or "medium",
+                quality_score=float(row["quality_score"]),
+                passed=bool(row["eval_pass"]),
+                cost_usd=float(row["cost_usd"]),
+                latency_seconds=float(row["latenz_sekunden"]),
+            )
+            for row in rows
+        ]
+        router = EmpiricalRouter(min_samples=int(profile["min_samples_per_candidate"]))
+        return router.evaluate(
+            task_class,
+            observations,
+            min_quality=float(profile["min_quality"]),
+            min_pass_rate=float(profile["min_pass_rate"]),
+            max_latency_seconds=float(profile["max_latency_seconds"]),
+        )
 
     def _strecke_evaluieren(self, strecken_typ: str) -> Optional[dict]:
         alle_stats = self.buch.alle_statistiken(strecken_typ, self.max_alter_tage)

@@ -15,6 +15,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
+from clutch.pricing import PricingSpec, UsageRecord, cost_for_gang
+
 
 @dataclass
 class Gang:
@@ -31,9 +33,11 @@ class Gang:
     max_context: int = 200000
     endpoint: Optional[str] = None  # Fuer lokale Modelle
     efforts: list[str] = field(default_factory=list)
+    reasoning_modes: list[str] = field(default_factory=list)
     catalog_checked_at: Optional[str] = None
     catalog_source: Optional[str] = None
     quantization: Optional[str] = None
+    pricing: Optional[PricingSpec] = None
 
     @property
     def ist_lokal(self) -> bool:
@@ -47,8 +51,18 @@ class Gang:
         """Schaetzt Kosten fuer eine gegebene Token-Menge."""
         inp = int(tokens * input_anteil)
         out = tokens - inp
-        return (inp / 1000 * self.kosten_input_1k
-                + out / 1000 * self.kosten_output_1k)
+        ergebnis = cost_for_gang(
+            self,
+            UsageRecord(
+                input_tokens=inp,
+                cached_input_tokens=0,
+                cache_write_tokens=0,
+                output_tokens=out,
+                reasoning_tokens=0,
+                data_status="assumed",
+            ),
+        )
+        return float(ergebnis.total_usd or 0.0)
 
 
 @dataclass
@@ -86,22 +100,31 @@ class Getriebe:
 
         # Gaenge laden
         for name, cfg in data.get("gaenge", {}).items():
+            pricing = PricingSpec.from_dict(cfg["pricing"]) if cfg.get("pricing") else None
             self._gaenge[name] = Gang(
                 name=name,
                 provider=cfg.get("provider", "unknown"),
                 model_id=cfg.get("model_id", name),
                 gang=cfg.get("gang", 1),
                 leistung=cfg.get("leistung", "basis"),
-                kosten_input_1k=cfg.get("kosten_input_1k", 0),
-                kosten_output_1k=cfg.get("kosten_output_1k", 0),
+                kosten_input_1k=cfg.get(
+                    "kosten_input_1k",
+                    pricing.input_per_million / 1000 if pricing else 0,
+                ),
+                kosten_output_1k=cfg.get(
+                    "kosten_output_1k",
+                    pricing.output_per_million / 1000 if pricing else 0,
+                ),
                 staerken=cfg.get("staerken", []),
                 schwaechen=cfg.get("schwaechen", []),
                 max_context=cfg.get("max_context", 200000),
                 endpoint=cfg.get("endpoint"),
                 efforts=cfg.get("efforts", []),
+                reasoning_modes=cfg.get("reasoning_modes", []),
                 catalog_checked_at=cfg.get("catalog_checked_at"),
                 catalog_source=cfg.get("catalog_source"),
                 quantization=cfg.get("quantization"),
+                pricing=pricing,
             )
 
         # Provider laden

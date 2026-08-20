@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0.0",
+  "data_status": "evaluation-plan-not-measurement",
+  "checked_at": "2026-08-20",
+  "catalog_source": "https://developers.openai.com/api/docs/models",
+  "notes": "Die Matrix definiert reproduzierbare Fälle und Kandidaten, aber keine vorgetäuschten Modellwerte. Ergebnisse benötigen beobachtete Usage und externe Qualitätslabels.",
+  "candidate_grid": [
+    {"model_id": "gpt-5.6-luna", "efforts": ["none", "low", "medium", "high", "xhigh", "max"]},
+    {"model_id": "gpt-5.6-terra", "efforts": ["none", "low", "medium", "high", "xhigh", "max"]},
+    {"model_id": "gpt-5.6-sol", "efforts": ["none", "low", "medium", "high", "xhigh", "max"]}
+  ],
+  "profiles": {
+    "coding_patch": {
+      "min_quality": 0.85,
+      "min_pass_rate": 0.80,
+      "max_latency_seconds": 120,
+      "min_samples_per_candidate": 5,
+      "cases": [
+        {"id": "coding_unit_fix", "pass_criteria": "Referenztests grün; kein Regressionstest rot"},
+        {"id": "coding_refactor", "pass_criteria": "Verhalten unverändert; Lint und Referenztests grün"}
+      ]
+    },
+    "research_synthesis": {
+      "min_quality": 0.90,
+      "min_pass_rate": 0.85,
+      "max_latency_seconds": 180,
+      "min_samples_per_candidate": 5,
+      "cases": [
+        {"id": "research_citation", "pass_criteria": "Jede Tatsachenbehauptung durch die vorgegebene Primärquelle gedeckt"},
+        {"id": "research_limits", "pass_criteria": "Unsicherheit und fehlende Evidenz ausdrücklich ausgewiesen"}
+      ]
+    },
+    "bulk_transformation": {
+      "min_quality": 0.80,
+      "min_pass_rate": 0.90,
+      "max_latency_seconds": 45,
+      "min_samples_per_candidate": 5,
+      "cases": [
+        {"id": "bulk_schema", "pass_criteria": "Alle Fixtures schema-valide; keine ausgelassene Zeile"},
+        {"id": "bulk_locale", "pass_criteria": "Struktur, Unicode und Reihenfolge bleiben erhalten"}
+      ]
+    }
+  }
+}

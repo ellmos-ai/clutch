@@ -17,7 +17,7 @@ from __future__ import annotations
 import json
 import logging
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any, Callable, Optional
 
@@ -30,6 +30,7 @@ from clutch.tankuhr import Tankuhr
 from clutch.tacho import Tacho
 from clutch.fahrschule import Fahrschule
 from clutch.scorer import get_scorer
+from clutch.pricing import UsageRecord, cost_for_gang
 
 logger = logging.getLogger("clutch")
 
@@ -43,6 +44,10 @@ class FahrtErgebnis:
     config: Optional[FahrtConfig] = None
     latenz_sekunden: float = 0.0
     total_tokens: int = 0
+    cost_usd: Optional[float] = None
+    usage_status: str = "unknown"
+    requested_effort: Optional[str] = None
+    effective_effort: Optional[str] = None
     warnungen: list[str] = None
 
     def __post_init__(self):
@@ -83,7 +88,7 @@ class Fahrer:
         self.kupplungs_mechanik = Kupplung(self.getriebe, config_dir=config_dir)
         self.buch = Fahrtenbuch(db_path=db_path)
         self.bordcomputer = Bordcomputer(self.buch, config_dir=config_dir)
-        self.tankuhr = Tankuhr(config_dir=config_dir)
+        self.tankuhr = Tankuhr(config_dir=config_dir, buch=self.buch)
         self.tacho = Tacho(self.buch)
         self.fahrschule = Fahrschule(self.buch, self.kupplungs_mechanik, config_dir=config_dir)
         self.scorer = get_scorer()
@@ -129,13 +134,10 @@ class Fahrer:
         if config.gang.name in system_status.gesperrte_modelle:
             runter = self.getriebe.naechster_gang_runter(config.gang.name)
             if runter:
-                config = FahrtConfig(
+                config = replace(
+                    config,
                     gang=runter,
-                    gas=config.gas,
-                    muster=config.muster,
-                    ist_erkundung=config.ist_erkundung,
                     entscheidungs_grund=config.entscheidungs_grund + " | fallback",
-                    effort=config.effort,
                 )
 
         if self._logge_alles:
@@ -180,13 +182,40 @@ class Fahrer:
             vertrauenswuerdig=vertrauenswuerdig,
             effort_override=effort_override,
         )
+        config.task_class = (
+            str(kontext.get("task_class")) if kontext and kontext.get("task_class")
+            else profil.typ.value
+        )
+        config.eval_case = str(kontext.get("eval_case")) if kontext and kontext.get("eval_case") else None
+        config.reasoning_mode = str(kontext.get("reasoning_mode", "standard")) if kontext else "standard"
+        config.service_tier = str(kontext.get("service_tier", "default")) if kontext else "default"
+        config.is_delegate = bool(kontext.get("is_delegate", False)) if kontext else False
+        if kontext and kontext.get("task_class") and kontext.get("empirical_routing", True):
+            try:
+                decision = self.fahrschule.empirisch_routen(config.task_class)
+                gang = next(
+                    (g for g in self.getriebe.alle_gaenge() if g.model_id == decision.model_id),
+                    None,
+                )
+                if gang is not None:
+                    config = replace(
+                        config,
+                        gang=gang,
+                        effort=decision.effort,
+                        entscheidungs_grund=(
+                            config.entscheidungs_grund
+                            + f" | empirical:{decision.status}:{decision.reason}"
+                        ),
+                    )
+            except ValueError as error:
+                logger.info(f"Kein Eval-Profil für {config.task_class}: {error}")
 
         # 3. Fahren + messen
         fahrt_id = self.tacho.start(profil.typ.value, config)
 
         try:
             output = handler(config, beschreibung)
-            erfolg = True
+            erfolg = bool(getattr(output, "erfolg", True))
         except Exception as e:
             output = None
             erfolg = False
@@ -210,6 +239,10 @@ class Fahrer:
             config=config,
             latenz_sekunden=time.time() - start,
             total_tokens=eintrag.total_tokens if eintrag else 0,
+            cost_usd=eintrag.cost_usd if eintrag else None,
+            usage_status=eintrag.usage_status if eintrag else "unknown",
+            requested_effort=eintrag.requested_effort if eintrag else config.effort,
+            effective_effort=eintrag.effective_effort if eintrag else config.effective_effort,
             warnungen=warnungen,
         )
 
@@ -225,7 +258,7 @@ class Fahrer:
 
         try:
             output = handler(config)
-            erfolg = True
+            erfolg = bool(getattr(output, "erfolg", True))
         except Exception as e:
             output = None
             erfolg = False
@@ -242,6 +275,10 @@ class Fahrer:
             config=config,
             latenz_sekunden=time.time() - start,
             total_tokens=eintrag.total_tokens if eintrag else 0,
+            cost_usd=eintrag.cost_usd if eintrag else None,
+            usage_status=eintrag.usage_status if eintrag else "unknown",
+            requested_effort=eintrag.requested_effort if eintrag else config.effort,
+            effective_effort=eintrag.effective_effort if eintrag else config.effective_effort,
             warnungen=warnungen,
         )
 
@@ -258,16 +295,68 @@ class Fahrer:
             return
         in_tok = int(in_tok or 0)
         out_tok = int(out_tok or 0)
-        self.tacho.update(fahrt_id, total_tokens=in_tok + out_tok)
+        cached = int(getattr(output, "cached_input_tokens", 0) or 0)
+        cache_write = int(getattr(output, "cache_write_tokens", 0) or 0)
+        reasoning = int(getattr(output, "reasoning_tokens", 0) or 0)
+        tool_fees = float(getattr(output, "tool_fees_usd", 0.0) or 0.0)
+        usage_status = getattr(output, "usage_status", "unknown") or "unknown"
+        cost_usd = getattr(output, "cost_usd", None)
+        price_version = getattr(output, "price_version", None)
+        service_tier = getattr(output, "service_tier", None) or config.service_tier
+        effective_effort = getattr(output, "effective_effort", None) or config.effective_effort
+        model_id = getattr(output, "model_id", None) or config.model_id
+
         if config and getattr(config, "gang", None):
             try:
-                self.tankuhr.tanken(config.gang, in_tok, out_tok)
+                if cost_usd is None and usage_status != "unknown":
+                    breakdown = cost_for_gang(
+                        config.gang,
+                        UsageRecord(
+                            input_tokens=in_tok,
+                            cached_input_tokens=cached,
+                            cache_write_tokens=cache_write,
+                            output_tokens=out_tok,
+                            reasoning_tokens=reasoning,
+                            tool_fees_usd=tool_fees,
+                            service_tier=service_tier,
+                            data_status=usage_status,
+                        ),
+                    )
+                    cost_usd = breakdown.total_usd
+                    price_version = breakdown.pricing_version
             except Exception as e:  # Budget-Buchung darf die Fahrt nie kippen
-                logger.warning(f"Tankuhr-Buchung fehlgeschlagen: {e}")
+                logger.warning(f"Kostenberechnung fehlgeschlagen: {e}")
+                cost_usd = None
+                usage_status = "unknown"
+        self.tacho.update(
+            fahrt_id,
+            total_tokens=in_tok + out_tok,
+            thinking_tokens=reasoning,
+            model_id=model_id,
+            requested_effort=config.effort,
+            effective_effort=effective_effort,
+            mode=config.reasoning_mode,
+            service_tier=service_tier,
+            task_class=config.task_class,
+            eval_case=config.eval_case,
+            input_tokens=in_tok,
+            cached_input_tokens=cached,
+            cache_write_tokens=cache_write,
+            output_tokens=out_tok,
+            reasoning_tokens=reasoning,
+            tool_fees_usd=tool_fees,
+            usage_status=usage_status,
+            price_version=price_version,
+            cost_usd=cost_usd,
+        )
 
     def trainieren(self) -> dict:
         """Fahrschule: Lernt aus bisherigen Fahrten."""
         return self.fahrschule.trainieren()
+
+    def empirisch_routen(self, task_class: str) -> dict:
+        """Gibt die gelabelte GPT-5.6-Evalentscheidung nachvollziehbar zurück."""
+        return self.fahrschule.empirisch_routen(task_class).to_dict()
 
     def status(self) -> dict:
         """Aktueller System-Status (Armaturenbrett)."""
@@ -286,17 +375,27 @@ class Fahrer:
                 "kosten_heute_usd": tank.kosten_heute_usd,
                 "verbrauch_pct": tank.tages_verbrauch_pct,
                 "nachricht": tank.zone_nachricht,
+                "unmetered_fahrten_heute": tank.unmetered_fahrten_heute,
             },
             "tacho": kpis,
             "getriebe": str(self.getriebe),
         }
 
-    def feedback(self, fahrt_id: str, bewertung: str, notiz: str = "") -> None:
+    def feedback(
+        self,
+        fahrt_id: str,
+        bewertung: str,
+        notiz: str = "",
+        quality_score: Optional[float] = None,
+        passed: Optional[bool] = None,
+    ) -> None:
         """User-Feedback zu einer Fahrt.
 
         bewertung: "gut" | "schlecht" | "overkill" | "zu_langsam"
         """
         logger.info(f"Feedback fuer {fahrt_id}: {bewertung} -- {notiz}")
+        if quality_score is not None and passed is not None:
+            self.buch.eval_label_setzen(fahrt_id, quality_score, passed)
 
     def _load_config(self, config_dir: Path) -> dict:
         path = config_dir / "kupplung.json"

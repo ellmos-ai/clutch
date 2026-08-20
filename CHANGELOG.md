@@ -22,6 +22,27 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1
 
 ## [Unreleased]
 
+### GPT-5.6 cost and empirical routing (2026-08-20)
+
+- GPT-5.6 Luna, Terra und Sol mit sechs Effort-Stufen, aktuellen
+  Input-/Cached-Input-/Output-Preisen, Quellen, Preisversion und
+  Frische-Signal katalogisiert.
+- OpenAI-Motor auf die Responses API umgestellt; angeforderter und effektiver
+  Effort werden getrennt protokolliert. `max-delegate` bleibt ein
+  Orchestrierungshinweis und gelangt nie als API-Wert nach außen.
+- Zentrale Kostenberechnung für Cached Input, Cache-Schreibvorgänge,
+  Langkontext oberhalb von 272.000 Input-Tokens, Standard/Fast, Tool-Gebühren
+  und einmalig berechnete Reasoning-Tokens ergänzt. Fehlende Usage bleibt
+  ausdrücklich unbekannt und ungemessen.
+- SQLite-Telemetrie, Tankuhr, CLI-/Web-JSON und Statistik auf dieselbe
+  Kostenquelle verdrahtet; bestehende Datenbanken werden additiv migriert.
+- Empirisches Aufgabenklassen-Routing mit externen Qualitätslabels,
+  erwarteten Kosten pro Erfolg einschließlich Retry/Fallback, Qualitäts- und
+  Latenz-Gates, Pareto-Frontier sowie belegfreiem Cold-Start ergänzt.
+- Zweisprachige Dokumentation, versionierte Eval-Profile, Kostenrechner und
+  deterministisch generierte Preisgrafik ergänzt. Verifikation: 335 Pytests,
+  Ruff, Compileall und Diff-Check grün.
+
 ### Maintenance & Discoverability
 - **Discoverability & Marketing Audit (2026-08-04):** Synchronized `llms.txt` verification timestamp (2026-08-04) and pytest status (306 passed). Added `ellmos-ai` ecosystem and `open-bricks` umbrella badges to `README.md` and `README_de.md`. Verified 306/306 Pytest unit tests (100% green).
 

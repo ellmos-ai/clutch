@@ -1,0 +1,18 @@
+{
+  "data_status": "assumed",
+  "model_id": "gpt-5.6-terra",
+  "requested_effort": "high",
+  "reasoning_mode": "standard",
+  "service_tier": "default",
+  "task_class": "coding_patch",
+  "eval_case": "coding_unit_fix",
+  "usage": {
+    "input_tokens": 100000,
+    "cached_input_tokens": 20000,
+    "cache_write_tokens": 5000,
+    "output_tokens": 10000,
+    "reasoning_tokens": 6000,
+    "tool_fees_usd": 0.0
+  },
+  "note": "Reasoning-Tokens sind eine Teilmenge der Output-Tokens und werden nicht zusätzlich berechnet. Dieses Beispiel enthält Annahmen, keine Messung."
+}

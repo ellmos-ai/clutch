@@ -26,6 +26,7 @@ from typing import Optional
 from clutch.kupplung import FahrtConfig
 from clutch.gas_bremse import GasBremse
 from clutch.credentials import get_api_key
+from clutch.pricing import UsageRecord, cost_for_gang
 
 logger = logging.getLogger("clutch.motorblock")
 
@@ -45,6 +46,18 @@ class MotorErgebnis:
     latenz_sekunden: float = 0.0
     erfolg: bool = True
     fehler: Optional[str] = None
+    cached_input_tokens: int = 0
+    cache_write_tokens: int = 0
+    reasoning_tokens: int = 0
+    usage_status: str = "unknown"
+    requested_effort: Optional[str] = None
+    effective_effort: Optional[str] = None
+    reasoning_mode: str = "standard"
+    service_tier: str = "default"
+    tool_fees_usd: float = 0.0
+    price_version: Optional[str] = None
+    cost_usd: Optional[float] = None
+    cost_breakdown: Optional[dict] = None
 
     @property
     def total_tokens(self) -> int:
@@ -641,13 +654,134 @@ class KimiApiMotor(OpenAICompatibleMotor):
 
 
 class OpenAIMotor(OpenAICompatibleMotor):
-    """OpenAI Chat Completions für GPT- und Codex-Modelle."""
+    """OpenAI Responses API mit überprüfbarem Effort- und Usage-Transport."""
 
     provider_name = "openai"
     base_url = "https://api.openai.com/v1"
     api_key_env = "OPENAI_API_KEY"
-    # OpenAI hat max_tokens für aktuelle Reasoning-Modelle abgelöst.
-    max_tokens_parameter = "max_completion_tokens"
+
+    @staticmethod
+    def _effective_effort(config: FahrtConfig) -> Optional[str]:
+        supported = list(getattr(config.gang, "efforts", []) or [])
+        requested = config.effort
+        if requested == "max-delegate":
+            if not config.is_delegate:
+                raise ValueError(
+                    "max-delegate ist nur Orchestrierung; API-max erfordert is_delegate=True"
+                )
+            requested = "max"
+        if requested is None and supported:
+            requested = "medium"
+        if requested is not None and requested not in supported:
+            raise ValueError(
+                f"effort '{requested}' wird von {config.model_id} nicht unterstützt"
+            )
+        return requested
+
+    @staticmethod
+    def _api_service_tier(service_tier: str) -> str:
+        aliases = {"standard": "default", "fast": "priority"}
+        return aliases.get(service_tier, service_tier)
+
+    def _build_payload(self, config: FahrtConfig, prompt: str) -> dict:
+        """Erzeugt den exakt an OpenAI gesendeten Payload (separat testbar)."""
+        effective = self._effective_effort(config)
+        config.effective_effort = effective
+        payload = {
+            "model": config.model_id,
+            "input": prompt,
+            "max_output_tokens": self._max_tokens(config),
+            "service_tier": self._api_service_tier(config.service_tier),
+        }
+        if effective is not None:
+            payload["reasoning"] = {"effort": effective}
+        return payload
+
+    @staticmethod
+    def _response_text(data: dict) -> str:
+        if isinstance(data.get("output_text"), str):
+            return data["output_text"]
+        teile = []
+        for item in data.get("output", []):
+            for content in item.get("content", []):
+                if content.get("type") in {"output_text", "text"} and content.get("text"):
+                    teile.append(content["text"])
+        return "".join(teile)
+
+    def ausfuehren(self, config: FahrtConfig, prompt: str) -> MotorErgebnis:
+        t0 = time.time()
+        try:
+            import requests
+
+            payload = self._build_payload(config, self._prompt_mit_gas(config, prompt))
+            response = requests.post(
+                f"{self.base_url.rstrip('/')}/responses",
+                headers={
+                    "Authorization": f"Bearer {self._aktueller_api_key()}",
+                    "Content-Type": "application/json",
+                },
+                json=payload,
+                timeout=self._timeout(config),
+            )
+            response.raise_for_status()
+            data = response.json()
+            usage = data.get("usage")
+            usage_known = isinstance(usage, dict)
+            usage = usage or {}
+            input_details = usage.get("input_tokens_details") or {}
+            output_details = usage.get("output_tokens_details") or {}
+            input_tokens = int(usage.get("input_tokens", 0) or 0)
+            output_tokens = int(usage.get("output_tokens", 0) or 0)
+            cached_tokens = int(input_details.get("cached_tokens", 0) or 0)
+            cache_write_tokens = int(input_details.get("cache_write_tokens", 0) or 0)
+            reasoning_tokens = int(output_details.get("reasoning_tokens", 0) or 0)
+            service_tier = data.get("service_tier") or payload["service_tier"]
+
+            breakdown = cost_for_gang(
+                config.gang,
+                UsageRecord(
+                    input_tokens=input_tokens if usage_known else None,
+                    cached_input_tokens=cached_tokens if usage_known else None,
+                    cache_write_tokens=cache_write_tokens if usage_known else None,
+                    output_tokens=output_tokens if usage_known else None,
+                    reasoning_tokens=reasoning_tokens if usage_known else None,
+                    service_tier=service_tier,
+                    data_status="observed" if usage_known else "unknown",
+                ),
+            )
+            return MotorErgebnis(
+                text=self._response_text(data),
+                input_tokens=input_tokens,
+                output_tokens=output_tokens,
+                cached_input_tokens=cached_tokens,
+                cache_write_tokens=cache_write_tokens,
+                reasoning_tokens=reasoning_tokens,
+                usage_status="observed" if usage_known else "unknown",
+                requested_effort=config.effort,
+                effective_effort=config.effective_effort,
+                reasoning_mode=config.reasoning_mode,
+                service_tier=service_tier,
+                price_version=breakdown.pricing_version,
+                cost_usd=breakdown.total_usd,
+                cost_breakdown=breakdown.to_dict(),
+                model_id=data.get("model") or config.model_id,
+                provider=self.provider_name,
+                latenz_sekunden=time.time() - t0,
+            )
+        except Exception as e:
+            logger.error(f"OpenAIMotor Fehler: {e}")
+            return MotorErgebnis(
+                text="",
+                model_id=config.model_id,
+                provider=self.provider_name,
+                requested_effort=config.effort,
+                effective_effort=config.effective_effort,
+                reasoning_mode=config.reasoning_mode,
+                service_tier=config.service_tier,
+                latenz_sekunden=time.time() - t0,
+                erfolg=False,
+                fehler=str(e),
+            )
 
 
 # ---------------------------------------------------------------------------

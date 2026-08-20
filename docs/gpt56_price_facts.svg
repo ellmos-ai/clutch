@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="540" viewBox="0 0 920 540">
+<title>GPT-5.6 official price facts</title>
+<desc>Generated from clutch/config/getriebe.json. This is not a performance evaluation.</desc>
+<style>
+  .title { font: 700 24px system-ui, sans-serif; fill: #e2e8f0; }
+  .meta { font: 14px system-ui, sans-serif; fill: #94a3b8; }
+  .model { font: 700 16px ui-monospace, monospace; fill: #e2e8f0; }
+  .value { font: 14px system-ui, sans-serif; fill: #cbd5e1; }
+  .legend { font: 11px system-ui, sans-serif; fill: #94a3b8; }
+</style>
+<rect width="920" height="540" fill="#0f172a" rx="16"/>
+<text x="36" y="48" class="title">GPT-5.6 token price facts (USD / 1M tokens)</text>
+<text x="36" y="78" class="meta">data status: official price facts · not a performance evaluation</text>
+<text x="36" y="101" class="meta">effective: 2026-07-30 · checked: 2026-08-20 · version: openai-gpt-5.6-2026-07-30</text>
+<text x="36" y="124" class="meta">confidence: source-verified tariff; empirical quality sample: n/a</text>
+<text x="36" y="158" class="model">gpt-5.6-luna</text><text x="265" y="158" class="value">input $0.2 · cached $0.02 · output $1.2</text><rect x="265" y="173" width="3.47" height="10" fill="#38bdf8" rx="3"/><text x="796" y="182" class="legend">input</text><rect x="265" y="191" width="2.00" height="10" fill="#34d399" rx="3"/><text x="796" y="200" class="legend">cached</text><rect x="265" y="209" width="20.80" height="10" fill="#f59e0b" rx="3"/><text x="796" y="218" class="legend">output</text><text x="36" y="270" class="model">gpt-5.6-terra</text><text x="265" y="270" class="value">input $2 · cached $0.2 · output $12</text><rect x="265" y="285" width="34.67" height="10" fill="#38bdf8" rx="3"/><text x="796" y="294" class="legend">input</text><rect x="265" y="303" width="3.47" height="10" fill="#34d399" rx="3"/><text x="796" y="312" class="legend">cached</text><rect x="265" y="321" width="208.00" height="10" fill="#f59e0b" rx="3"/><text x="796" y="330" class="legend">output</text><text x="36" y="382" class="model">gpt-5.6-sol</text><text x="265" y="382" class="value">input $5 · cached $0.5 · output $30</text><rect x="265" y="397" width="86.67" height="10" fill="#38bdf8" rx="3"/><text x="796" y="406" class="legend">input</text><rect x="265" y="415" width="8.67" height="10" fill="#34d399" rx="3"/><text x="796" y="424" class="legend">cached</text><rect x="265" y="433" width="520.00" height="10" fill="#f59e0b" rx="3"/><text x="796" y="442" class="legend">output</text>
+<text x="36" y="511" class="meta">Long context &gt;272k: input ×2, output ×1.5 · cache write: uncached input ×1.25 · Fast: token price ×2</text>
+</svg>

@@ -31,6 +31,22 @@ class LaufendeMessung:
     wiederholungen: int = 0
     user_korrekturen: int = 0
     fehler_anzahl: int = 0
+    model_id: str = ""
+    requested_effort: Optional[str] = None
+    effective_effort: Optional[str] = None
+    mode: str = "standard"
+    service_tier: str = "default"
+    task_class: Optional[str] = None
+    eval_case: Optional[str] = None
+    input_tokens: int = 0
+    cached_input_tokens: int = 0
+    cache_write_tokens: int = 0
+    output_tokens: int = 0
+    reasoning_tokens: int = 0
+    tool_fees_usd: float = 0.0
+    usage_status: str = "unknown"
+    price_version: Optional[str] = None
+    cost_usd: Optional[float] = None
 
 
 class Tacho:
@@ -47,6 +63,13 @@ class Tacho:
             start_zeit=time.time(),
             config=config,
             strecken_typ=strecken_typ,
+            model_id=config.model_id,
+            requested_effort=config.effort,
+            effective_effort=config.effective_effort,
+            mode=config.reasoning_mode,
+            service_tier=config.service_tier,
+            task_class=config.task_class or strecken_typ,
+            eval_case=config.eval_case,
         )
         return fahrt_id
 
@@ -83,6 +106,22 @@ class Tacho:
             fehler_anzahl=m.fehler_anzahl,
             ist_erkundung=m.config.ist_erkundung,
             entscheidungs_grund=m.config.entscheidungs_grund,
+            model_id=m.model_id,
+            requested_effort=m.requested_effort,
+            effective_effort=m.effective_effort,
+            mode=m.mode,
+            service_tier=m.service_tier,
+            task_class=m.task_class,
+            eval_case=m.eval_case,
+            input_tokens=m.input_tokens,
+            cached_input_tokens=m.cached_input_tokens,
+            cache_write_tokens=m.cache_write_tokens,
+            output_tokens=m.output_tokens,
+            reasoning_tokens=m.reasoning_tokens,
+            tool_fees_usd=m.tool_fees_usd,
+            usage_status=m.usage_status,
+            price_version=m.price_version,
+            cost_usd=m.cost_usd,
         )
 
         self.buch.eintragen(eintrag)

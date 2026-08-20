@@ -108,7 +108,7 @@ def test_openai_gaenge_und_factory_registriert():
     assert isinstance(MotorBlock().motor_fuer("openai"), OpenAIMotor)
 
 
-def test_openai_motor_nutzt_max_completion_tokens(monkeypatch):
+def test_openai_motor_nutzt_responses_api(monkeypatch):
     cfg = _cfg("openai-gpt-5.6-sol")
     erfasst = {}
 
@@ -118,8 +118,14 @@ def test_openai_motor_nutzt_max_completion_tokens(monkeypatch):
 
         def json(self):
             return {
-                "choices": [{"message": {"content": "OPENAI_OK"}}],
-                "usage": {"prompt_tokens": 7, "completion_tokens": 2},
+                "output_text": "OPENAI_OK",
+                "service_tier": "default",
+                "usage": {
+                    "input_tokens": 7,
+                    "input_tokens_details": {"cached_tokens": 0, "cache_write_tokens": 0},
+                    "output_tokens": 2,
+                    "output_tokens_details": {"reasoning_tokens": 1},
+                },
             }
 
     def fake_post(url, headers=None, json=None, timeout=None):
@@ -135,9 +141,10 @@ def test_openai_motor_nutzt_max_completion_tokens(monkeypatch):
     assert ergebnis.erfolg
     assert ergebnis.text == "OPENAI_OK"
     assert ergebnis.provider == "openai"
-    assert erfasst["url"] == "https://api.openai.com/v1/chat/completions"
-    assert "max_completion_tokens" in erfasst["json"]
-    assert "max_tokens" not in erfasst["json"]
+    assert erfasst["url"] == "https://api.openai.com/v1/responses"
+    assert "max_output_tokens" in erfasst["json"]
+    assert erfasst["json"]["reasoning"]["effort"] == "medium"
+    assert ergebnis.reasoning_tokens == 1
 
 
 if __name__ == "__main__":

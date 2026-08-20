@@ -37,6 +37,24 @@ class FahrtEintrag:
     fehler_anzahl: int = 0
     ist_erkundung: bool = False
     entscheidungs_grund: str = ""
+    model_id: str = ""
+    requested_effort: Optional[str] = None
+    effective_effort: Optional[str] = None
+    mode: str = "standard"
+    service_tier: str = "default"
+    task_class: Optional[str] = None
+    eval_case: Optional[str] = None
+    input_tokens: int = 0
+    cached_input_tokens: int = 0
+    cache_write_tokens: int = 0
+    output_tokens: int = 0
+    reasoning_tokens: int = 0
+    tool_fees_usd: float = 0.0
+    usage_status: str = "unknown"
+    price_version: Optional[str] = None
+    cost_usd: Optional[float] = None
+    quality_score: Optional[float] = None
+    eval_pass: Optional[bool] = None
     timestamp: float = 0.0
 
     def __post_init__(self):
@@ -81,6 +99,24 @@ CREATE TABLE IF NOT EXISTS fahrten (
     fehler_anzahl INTEGER DEFAULT 0,
     ist_erkundung INTEGER DEFAULT 0,
     entscheidungs_grund TEXT DEFAULT '',
+    model_id TEXT DEFAULT '',
+    requested_effort TEXT,
+    effective_effort TEXT,
+    mode TEXT DEFAULT 'standard',
+    service_tier TEXT DEFAULT 'default',
+    task_class TEXT,
+    eval_case TEXT,
+    input_tokens INTEGER DEFAULT 0,
+    cached_input_tokens INTEGER DEFAULT 0,
+    cache_write_tokens INTEGER DEFAULT 0,
+    output_tokens INTEGER DEFAULT 0,
+    reasoning_tokens INTEGER DEFAULT 0,
+    tool_fees_usd REAL DEFAULT 0.0,
+    usage_status TEXT DEFAULT 'unknown',
+    price_version TEXT,
+    cost_usd REAL,
+    quality_score REAL,
+    eval_pass INTEGER,
     timestamp REAL NOT NULL
 );
 
@@ -99,6 +135,27 @@ CREATE TABLE IF NOT EXISTS routing_policy (
     aktualisiert REAL NOT NULL
 );
 """
+
+_MIGRATION_COLUMNS = {
+    "model_id": "TEXT DEFAULT ''",
+    "requested_effort": "TEXT",
+    "effective_effort": "TEXT",
+    "mode": "TEXT DEFAULT 'standard'",
+    "service_tier": "TEXT DEFAULT 'default'",
+    "task_class": "TEXT",
+    "eval_case": "TEXT",
+    "input_tokens": "INTEGER DEFAULT 0",
+    "cached_input_tokens": "INTEGER DEFAULT 0",
+    "cache_write_tokens": "INTEGER DEFAULT 0",
+    "output_tokens": "INTEGER DEFAULT 0",
+    "reasoning_tokens": "INTEGER DEFAULT 0",
+    "tool_fees_usd": "REAL DEFAULT 0.0",
+    "usage_status": "TEXT DEFAULT 'unknown'",
+    "price_version": "TEXT",
+    "cost_usd": "REAL",
+    "quality_score": "REAL",
+    "eval_pass": "INTEGER",
+}
 
 
 class Fahrtenbuch:
@@ -132,29 +189,89 @@ class Fahrtenbuch:
     def _init_db(self):
         with self._conn() as conn:
             conn.executescript(_SCHEMA)
+            existing = {row["name"] for row in conn.execute("PRAGMA table_info(fahrten)")}
+            for name, definition in _MIGRATION_COLUMNS.items():
+                if name not in existing:
+                    conn.execute(f"ALTER TABLE fahrten ADD COLUMN {name} {definition}")
 
     def eintragen(self, eintrag: FahrtEintrag) -> None:
+        columns = (
+            "fahrt_id", "strecken_typ", "gang", "provider", "gas", "muster",
+            "total_tokens", "thinking_tokens", "tool_calls", "files_read",
+            "files_changed", "latenz_sekunden", "erfolg", "wiederholungen",
+            "user_korrekturen", "fehler_anzahl", "ist_erkundung",
+            "entscheidungs_grund", "model_id", "requested_effort",
+            "effective_effort", "mode", "service_tier", "task_class",
+            "eval_case", "input_tokens", "cached_input_tokens",
+            "cache_write_tokens", "output_tokens", "reasoning_tokens",
+            "tool_fees_usd", "usage_status", "price_version", "cost_usd",
+            "quality_score", "eval_pass", "timestamp",
+        )
+        values = (
+            eintrag.fahrt_id, eintrag.strecken_typ, eintrag.gang,
+            eintrag.provider, eintrag.gas, eintrag.muster,
+            eintrag.total_tokens, eintrag.thinking_tokens,
+            eintrag.tool_calls, eintrag.files_read,
+            eintrag.files_changed, eintrag.latenz_sekunden,
+            int(eintrag.erfolg), eintrag.wiederholungen,
+            eintrag.user_korrekturen, eintrag.fehler_anzahl,
+            int(eintrag.ist_erkundung), eintrag.entscheidungs_grund,
+            eintrag.model_id, eintrag.requested_effort,
+            eintrag.effective_effort, eintrag.mode, eintrag.service_tier,
+            eintrag.task_class, eintrag.eval_case, eintrag.input_tokens,
+            eintrag.cached_input_tokens, eintrag.cache_write_tokens,
+            eintrag.output_tokens, eintrag.reasoning_tokens,
+            eintrag.tool_fees_usd, eintrag.usage_status,
+            eintrag.price_version, eintrag.cost_usd, eintrag.quality_score,
+            None if eintrag.eval_pass is None else int(eintrag.eval_pass),
+            eintrag.timestamp,
+        )
         with self._conn() as conn:
             conn.execute(
-                """INSERT OR REPLACE INTO fahrten
-                (fahrt_id, strecken_typ, gang, provider, gas, muster,
-                 total_tokens, thinking_tokens, tool_calls, files_read,
-                 files_changed, latenz_sekunden, erfolg, wiederholungen,
-                 user_korrekturen, fehler_anzahl, ist_erkundung,
-                 entscheidungs_grund, timestamp)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                (
-                    eintrag.fahrt_id, eintrag.strecken_typ, eintrag.gang,
-                    eintrag.provider, eintrag.gas, eintrag.muster,
-                    eintrag.total_tokens, eintrag.thinking_tokens,
-                    eintrag.tool_calls, eintrag.files_read,
-                    eintrag.files_changed, eintrag.latenz_sekunden,
-                    int(eintrag.erfolg), eintrag.wiederholungen,
-                    eintrag.user_korrekturen, eintrag.fehler_anzahl,
-                    int(eintrag.ist_erkundung), eintrag.entscheidungs_grund,
-                    eintrag.timestamp,
-                ),
+                f"INSERT OR REPLACE INTO fahrten ({', '.join(columns)}) "
+                f"VALUES ({', '.join('?' for _ in columns)})",
+                values,
             )
+
+    def kosten_uebersicht(self, seit: float = 0.0) -> dict:
+        """Summiert bekannte Kosten und weist ungemessene Fahrten separat aus."""
+        with self._conn() as conn:
+            row = conn.execute(
+                """SELECT COUNT(*) AS fahrten,
+                          SUM(CASE WHEN cost_usd IS NULL THEN 1 ELSE 0 END) AS ungemessen,
+                          SUM(cost_usd) AS kosten
+                   FROM fahrten WHERE timestamp >= ?""",
+                (seit,),
+            ).fetchone()
+        return {
+            "fahrten": int(row["fahrten"] or 0),
+            "unmetered_fahrten": int(row["ungemessen"] or 0),
+            "kosten_usd": round(float(row["kosten"] or 0.0), 12),
+        }
+
+    def eval_label_setzen(self, fahrt_id: str, quality_score: float, passed: bool) -> bool:
+        """Speichert ein externes Eval-Label; API-Erfolg allein ist kein Qualitätsbeleg."""
+        if not 0.0 <= quality_score <= 1.0:
+            raise ValueError("quality_score muss zwischen 0 und 1 liegen")
+        with self._conn() as conn:
+            cursor = conn.execute(
+                "UPDATE fahrten SET quality_score = ?, eval_pass = ? WHERE fahrt_id = ?",
+                (quality_score, int(passed), fahrt_id),
+            )
+            return cursor.rowcount > 0
+
+    def eval_daten(self, task_class: str, max_alter_tage: int = 30) -> list[dict]:
+        """Liefert ausschließlich gelabelte, gemessene Datensätze für Empirie-Routing."""
+        cutoff = time.time() - max_alter_tage * 86400
+        with self._conn() as conn:
+            rows = conn.execute(
+                """SELECT * FROM fahrten
+                   WHERE task_class = ? AND timestamp > ?
+                     AND quality_score IS NOT NULL AND eval_pass IS NOT NULL
+                     AND cost_usd IS NOT NULL AND usage_status = 'observed'""",
+                (task_class, cutoff),
+            ).fetchall()
+        return [dict(row) for row in rows]
 
     def statistik(
         self,

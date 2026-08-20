@@ -339,6 +339,10 @@ def create_app(
                     "endpoint": g.endpoint,
                     "catalog_source": g.catalog_source,
                     "quantization": g.quantization,
+                    "efforts": g.efforts,
+                    "reasoning_modes": g.reasoning_modes,
+                    "pricing": g.pricing.to_dict() if g.pricing else None,
+                    "pricing_stale": g.pricing.is_stale() if g.pricing else None,
                 }
                 for g in gaenge
             ]

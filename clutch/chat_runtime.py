@@ -128,6 +128,11 @@ class ChatRuntime:
             "gang": gang,
             "model": model,
             "tokens": in_tok + out_tok,
+            "usage_status": getattr(out, "usage_status", "unknown") if out is not None else "unknown",
+            "cost_usd": getattr(out, "cost_usd", None) if out is not None else None,
+            "cost_breakdown": getattr(out, "cost_breakdown", None) if out is not None else None,
+            "requested_effort": erg.requested_effort,
+            "effective_effort": erg.effective_effort,
             "latenz": erg.latenz_sekunden,
             "warnungen": erg.warnungen,
         }
