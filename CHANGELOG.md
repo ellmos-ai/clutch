@@ -6,6 +6,19 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1
 
 ---
 
+## [0.4.2] - 2026-08-21 - CI Matrix Hardening, Python 3.13 & Security Parity
+
+### Added
+- GitHub Actions CI Workflow (`.github/workflows/tests.yml`) um Python 3.13 Matrix-Unterstützung (`["3.10", "3.11", "3.12", "3.13"]`) und automatisierten `ruff check .` Linter-Schritt gehärtet.
+- Python 3.13 Classifier (`"Programming Language :: Python :: 3.13"`) in `pyproject.toml` ergänzt.
+- Direkte Sicherheitskontakt-E-Mail (`security@ellmos.ai` / `support@lukasgeiger.com`) in `SECURITY.md` (deutsch und englisch) integriert.
+- Automatisierte Metadaten- & Manifest-Paritätstestsuite in `tests/test_metadata.py` um CI-Matrix-, Ruff-Linting-, Pyproject-Klassifizierungs- und Sicherheitskontakt-Tests auf 7 Tests erweitert (338 Tests in Gesamt-Suite inkl. GPT-5.6 Cost-Routing-Suite).
+
+### Changed
+- `llms.txt`: Last-checked Timestamp auf `2026-08-21` und Test-Suite auf 338 Tests synchronisiert.
+- Shields.io-Badges in `README.md` & `README_de.md` auf 338 passed Tests aktualisiert.
+- Verifikation: 338/338 Pytest-Tests 100% grün, `compileall` & `ruff check` fehlerfrei.
+
 ## [0.4.1] - 2026-08-16 - Discoverability, README-Design & Metadata Parity Check
 
 ### Added

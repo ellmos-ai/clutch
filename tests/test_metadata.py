@@ -44,8 +44,8 @@ def test_llms_txt_structure_and_timestamp():
     """Verify that llms.txt contains the canonical structure and a recent timestamp."""
     llms_text = (REPO_ROOT / "llms.txt").read_text(encoding="utf-8")
 
-    assert "Last-checked: 2026-08-16" in llms_text, "llms.txt Last-checked timestamp should be 2026-08-16"
-    assert "314" in llms_text, "llms.txt should report 314 passing unit tests"
+    assert "Last-checked: 2026-08-21" in llms_text, "llms.txt Last-checked timestamp should be 2026-08-21"
+    assert "338" in llms_text, "llms.txt should report 338 passing unit tests"
     assert "## Audience" in llms_text, "llms.txt missing Audience section"
     assert "## Search Phrases" in llms_text, "llms.txt missing Search Phrases section"
     assert "## Docs" in llms_text, "llms.txt missing Docs section"
@@ -61,3 +61,29 @@ def test_security_and_ecosystem_sections():
     assert "Ecosystem & Sibling Tools" in readme_en, "README.md missing Ecosystem matrix"
     assert "Verwandte Tools & Ökosystem" in readme_de, "README_de.md missing Ecosystem matrix"
     assert "open-bricks" in readme_en and "open-bricks" in readme_de, "Ecosystem umbrella missing"
+
+
+def test_github_actions_workflow_ci_matrix_and_lint():
+    """Verify that GitHub Actions CI workflow tests across Python 3.10-3.13 and includes ruff linting."""
+    ci_file = REPO_ROOT / ".github" / "workflows" / "tests.yml"
+    assert ci_file.is_file(), "CI workflow .github/workflows/tests.yml missing"
+    ci_text = ci_file.read_text(encoding="utf-8")
+
+    assert 'python-version: ["3.10", "3.11", "3.12", "3.13"]' in ci_text, "CI matrix must cover Python 3.10 through 3.13"
+    assert "ruff check ." in ci_text, "CI workflow must include automated ruff check linting step"
+
+
+def test_pyproject_configuration_and_classifiers():
+    """Verify pyproject.toml PEP 621 metadata, Python 3.13 classifier, and ruff lint configuration."""
+    pyproject_text = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
+
+    assert "Programming Language :: Python :: 3.13" in pyproject_text, "pyproject.toml must include Python 3.13 classifier"
+    assert "[tool.ruff]" in pyproject_text, "pyproject.toml must include [tool.ruff] section"
+    assert "[tool.ruff.lint]" in pyproject_text, "pyproject.toml must include [tool.ruff.lint] section"
+
+
+def test_security_contact_email():
+    """Verify that SECURITY.md contains dedicated security contact email addresses."""
+    sec_text = (REPO_ROOT / "SECURITY.md").read_text(encoding="utf-8")
+    assert "security@ellmos.ai" in sec_text, "SECURITY.md must provide security@ellmos.ai"
+    assert "support@lukasgeiger.com" in sec_text, "SECURITY.md must provide support@lukasgeiger.com"

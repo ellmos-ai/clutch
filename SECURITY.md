@@ -16,7 +16,7 @@ Wenn Sie eine Sicherheitslücke in **clutch** finden, melden Sie diese bitte ver
 2. Tragen Sie Titel, Beschreibung, Schweregrad und betroffene Versionen ein
 3. Reichen Sie die Meldung privat ein
 
-Falls Private Vulnerability Reporting im Repository noch nicht aktiviert ist, kontaktieren Sie die Maintainer direkt über GitHub und veröffentlichen Sie keine Details in einem öffentlichen Issue.
+Falls Private Vulnerability Reporting im Repository noch nicht aktiviert ist, kontaktieren Sie das Sicherheitsteam direkt per E-Mail unter `security@ellmos.ai` (oder `support@lukasgeiger.com`) und veröffentlichen Sie keine Details in einem öffentlichen Issue.
 
 ### Sicherheitsprinzipien & Geltungsbereich
 
@@ -47,7 +47,7 @@ If you discover a security vulnerability in **clutch**, please report it respons
 2. Fill in title, description, severity rating, and affected versions
 3. Submit the advisory privately
 
-If private vulnerability reporting is not yet active, contact the maintainers directly through GitHub without posting confidential details publicly.
+If private vulnerability reporting is not yet active, contact the security team directly via email at `security@ellmos.ai` (or `support@lukasgeiger.com`) without posting confidential details publicly.
 
 ### Security Principles & Scope
 

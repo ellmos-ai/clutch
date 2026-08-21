@@ -11,7 +11,7 @@
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Lizenz: MIT](https://img.shields.io/badge/Lizenz-MIT-green.svg)](LICENSE)
 [![Version 0.4.0](https://img.shields.io/badge/Version-0.4.0-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
-[![Pytest](https://img.shields.io/badge/Pytest-314%20bestanden-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
+[![Pytest](https://img.shields.io/badge/Pytest-338%20bestanden-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
 [![Provider](https://img.shields.io/badge/Provider-Anthropic%20%7C%20Gemini%20%7C%20OpenAI%20%7C%20Ollama%20%7C%20Kimi-purple.svg)](https://github.com/ellmos-ai/clutch)
 [![Sicherheit: Local-First](https://img.shields.io/badge/Sicherheit-Local--First-green.svg)](SECURITY.md)
 [![Ökosystem: ellmos-ai](https://img.shields.io/badge/%C3%96kosystem-ellmos--ai-blue.svg)](https://github.com/ellmos-ai)
