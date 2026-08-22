@@ -1,0 +1,23 @@
+{
+  "schema": "ellmos.clutch.provider-catalog.v1",
+  "provider": "google",
+  "source": "https://ai.google.dev/gemini-api/docs/models",
+  "checked_at": "2026-08-22T00:00:00Z",
+  "entries": [
+    {
+      "registry_name": "gemini-preview-fixture",
+      "model_id": "gemini-preview-fixture",
+      "lifecycle": "preview",
+      "source": "https://ai.google.dev/gemini-api/docs/models",
+      "checked_at": "2026-08-22T00:00:00Z",
+      "availability": {
+        "provider_documented": true,
+        "provider_api_listed": true,
+        "account_accessible": true,
+        "runner_compatible": true,
+        "host_ready": false
+      },
+      "runners": ["agy"]
+    }
+  ]
+}

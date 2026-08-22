@@ -117,6 +117,7 @@ def _cmd_models(args: argparse.Namespace) -> int:
     """Alle Gänge aus dem Getriebe listen."""
     try:
         from clutch.getriebe import Getriebe
+        from clutch.execution_registry import ModelAvailability
         from pathlib import Path as _Path
         import clutch as _clutch_pkg
         config_dir = _Path(_clutch_pkg.__file__).parent / "config"
@@ -153,6 +154,10 @@ def _cmd_models(args: argparse.Namespace) -> int:
                     "model_id": g.model_id,
                     "endpoint": g.endpoint,
                     "catalog_source": g.catalog_source,
+                    "catalog_checked_at": g.catalog_checked_at,
+                    "lifecycle": g.lifecycle,
+                    "availability": ModelAvailability.from_mapping(g.availability).to_dict(),
+                    "runners": g.runners,
                     "quantization": g.quantization,
                     "efforts": g.efforts,
                     "reasoning_modes": g.reasoning_modes,
@@ -181,6 +186,27 @@ def _cmd_models(args: argparse.Namespace) -> int:
 
     except Exception as e:
         print(t("error.models", e=e), file=sys.stderr)
+        return 1
+
+
+def _cmd_resolve(args: argparse.Namespace) -> int:
+    """Öffentlichen Execution-Selektor rein lesend auflösen."""
+    try:
+        from clutch.execution_registry import resolve_execution_selector
+
+        result = resolve_execution_selector(args.selector, runner=args.runner)
+        if args.json:
+            _drucke_json(result.to_dict())
+        else:
+            status = "resolved" if result.resolved else "unresolved"
+            print(f"{status}: {result.canonical_selector or result.normalized_selector}")
+            print(f"fingerprint: {result.registry_fingerprint}")
+            print(f"claimable: {str(result.claimable).lower()}")
+            if result.reason:
+                print(f"reason: {result.reason}")
+        return 0 if result.resolved else 3
+    except Exception as exc:
+        print(f"Resolver-Fehler: {type(exc).__name__}", file=sys.stderr)
         return 1
 
 
@@ -505,7 +531,7 @@ def _cmd_chat(args: argparse.Namespace) -> int:
 # Argparse-Setup
 # ---------------------------------------------------------------------------
 
-_SUBCOMMANDS = {"route", "models", "cost", "config", "stats", "run", "chat", "serve", "keys"}
+_SUBCOMMANDS = {"route", "models", "resolve", "cost", "config", "stats", "run", "chat", "serve", "keys"}
 
 
 def _build_subparser(subparsers: argparse._SubParsersAction) -> None:  # noqa: SLF001
@@ -532,6 +558,16 @@ def _build_subparser(subparsers: argparse._SubParsersAction) -> None:  # noqa: S
         help="Ollama-Discovery für diesen Aufruf deaktivieren",
     )
     p_models.add_argument("--db", metavar="PFAD", default=None)
+
+    # --- resolve ---
+    p_resolve = subparsers.add_parser(
+        "resolve",
+        help="Runner-, Self-, Familien- oder exakten Modellselektor auflösen",
+    )
+    p_resolve.add_argument("selector", help="Selektor, z. B. gpt, self, gpt5 oder ein exakter Modellname")
+    p_resolve.add_argument("--runner", default=None, help="Optionaler Runner-Kontext")
+    p_resolve.add_argument("--json", action="store_true", help="JSON-Ausgabe")
+    p_resolve.add_argument("--db", metavar="PFAD", default=None)
 
     # --- cost ---
     p_cost = subparsers.add_parser(
@@ -640,7 +676,7 @@ def _build_subparser(subparsers: argparse._SubParsersAction) -> None:  # noqa: S
     # Subcommand stehen (z.B. `clutch models --lang de`). SUPPRESS verhindert,
     # dass ein fehlender Subcommand-Wert einen vorher gesetzten globalen Wert
     # überschreibt.
-    for subparser in (p_route, p_models, p_cost, p_config, p_stats, p_run, p_chat, p_serve, p_keys):
+    for subparser in (p_route, p_models, p_resolve, p_cost, p_config, p_stats, p_run, p_chat, p_serve, p_keys):
         subparser.add_argument(
             "--lang",
             metavar="CODE",
@@ -661,6 +697,7 @@ def _build_top_parser() -> argparse.ArgumentParser:
             "Beispiele:\n"
             "  clutch route \"Fix den Bug in auth.py\"\n"
             "  clutch models --json\n"
+            "  clutch resolve gpt5 --json\n"
             "  clutch cost --model gpt-5.6-terra --input 100000 --output 10000 --json\n"
             "  clutch run \"Erkläre Quantenmechanik\"\n"
             "  clutch \"Erkläre Quantenmechanik\"\n"
@@ -770,6 +807,8 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_route(args)
     elif sub == "models":
         return _cmd_models(args)
+    elif sub == "resolve":
+        return _cmd_resolve(args)
     elif sub == "cost":
         return _cmd_cost(args)
     elif sub == "config":

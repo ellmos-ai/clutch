@@ -433,6 +433,47 @@
       "basis_url": "https://api.moonshot.ai/v1"
     }
   },
+  "execution_registry": {
+    "schema": "ellmos.clutch.execution-registry.v1",
+    "_doc": "Öffentlicher Resolververtrag. Exakte Modelle werden ausschließlich aus gaenge abgeleitet; hier gibt es keine zweite Modellliste.",
+    "aliases": {
+      "gpt": "codex",
+      "gpt5": "openai-gpt-5"
+    },
+    "profiles": {
+      "claude": {
+        "kind": "runner",
+        "selection": "self",
+        "runner": "claude",
+        "providers": ["anthropic", "claude-code"]
+      },
+      "codex": {
+        "kind": "runner",
+        "selection": "self",
+        "runner": "codex",
+        "providers": ["openai"]
+      },
+      "agy": {
+        "kind": "runner",
+        "selection": "self",
+        "runner": "agy",
+        "providers": ["agy"]
+      },
+      "ollama": {
+        "kind": "runner",
+        "selection": "self",
+        "runner": "ollama",
+        "providers": ["ollama"]
+      },
+      "openai-gpt-5": {
+        "kind": "family",
+        "selection": "family",
+        "runner": "codex",
+        "provider": "openai",
+        "model_id_prefix": "gpt-5."
+      }
+    }
+  },
   "fahrer_optionen": {
     "_doc": "Welche Modelle als Fahrer (Orchestrator) fungieren koennen. claude-code = die aktuelle Claude Code Session (z.B. du selbst)",
     "standard": "claude-code",

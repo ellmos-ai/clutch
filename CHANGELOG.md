@@ -35,6 +35,22 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1
 
 ## [Unreleased]
 
+### Public execution-selector registry (2026-08-22)
+
+- Öffentliche Python- und CLI-Auflösung für Runner-, Self-, Familien- und
+  exakte Selektoren mit expliziter Aliasnormalisierung und stabilem
+  Registry-Fingerprint ergänzt.
+- Verfügbarkeit in `provider_documented`, `provider_api_listed`,
+  `account_accessible`, `runner_compatible` und `host_ready` getrennt; Self-
+  und Familienrouting bleibt ohne vollständige Belegkette fail-closed.
+- Providerneutralen, injizierbaren Refresh-Vertrag mit Quellen-, Prüfzeit-,
+  Lebenszyklus- und Diff-Beleg ergänzt. Fehler behalten den letzten belegten
+  Snapshot und geben keine rohe Providerfehlermeldung aus.
+- Exakte Modelle werden nicht still ersetzt. `claude-opus-5` bleibt vor einem
+  belegten Provider- und Registry-Refresh ungelöst.
+- Verifikation: 359 Pytests einschließlich 21 neuer Resolver-/Refresh-
+  Regressionstests, Ruff, Compileall und Diff-Check grün.
+
 ### GPT-5.6 cost and empirical routing (2026-08-20)
 
 - GPT-5.6 Luna, Terra und Sol mit sechs Effort-Stufen, aktuellen

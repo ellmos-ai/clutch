@@ -11,7 +11,7 @@
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Lizenz: MIT](https://img.shields.io/badge/Lizenz-MIT-green.svg)](LICENSE)
 [![Version 0.4.0](https://img.shields.io/badge/Version-0.4.0-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
-[![Pytest](https://img.shields.io/badge/Pytest-338%20bestanden-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
+[![Pytest](https://img.shields.io/badge/Pytest-359%20bestanden-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
 [![Provider](https://img.shields.io/badge/Provider-Anthropic%20%7C%20Gemini%20%7C%20OpenAI%20%7C%20Ollama%20%7C%20Kimi-purple.svg)](https://github.com/ellmos-ai/clutch)
 [![Sicherheit: Local-First](https://img.shields.io/badge/Sicherheit-Local--First-green.svg)](SECURITY.md)
 [![Ökosystem: ellmos-ai](https://img.shields.io/badge/%C3%96kosystem-ellmos--ai-blue.svg)](https://github.com/ellmos-ai)
@@ -28,7 +28,7 @@
 - **Provider-neutral** -- Anthropic (Claude), Google (Gemini), OpenAI (GPT/Codex), Ollama (lokal & remote), Claude Code, **agy via companion-for-agy** sowie **Kimi** (Moonshot API / CLI / Ollama Cloud)
 - **Automatisches Routing** -- analysiert Aufgabenkomplexität *und Zweck* (Coding, Vision, Recherche, Bulk) und wählt optimales Modell + Reasoning-Level
 - **Zweck- und Vision-bewusst** -- leitet Bild-/Dokumenteingaben an vision-fähige Modelle weiter; passt Aufgaben an Modellstärken an
-- **CLI + Web-UI** -- `clutch route/run/chat/models/stats`, plus optionale FastAPI-Web-Chat-Oberfläche (`clutch serve --web`)
+- **CLI + Web-UI** -- `clutch route/run/chat/models/resolve/stats`, plus optionale FastAPI-Web-Chat-Oberfläche (`clutch serve --web`)
 - **Credential-Speicher** -- API-Keys sicher in `~/.clutch/credentials.json` ablegen (`clutch keys ...`); Umgebungsvariablen haben Vorrang
 - **Modell-Erkennung** -- automatische Erkennung installierter Ollama-Modelle (lokal/remote) und OpenAI-kompatibler `/v1/models`-Endpunkte
 - **Budget-Tracking** -- Tankuhr mit vier Zonen (grün/gelb/orange/rot) mit täglichen und monatlichen Limits
@@ -175,6 +175,7 @@ clutch "Explain quantum computing"    # one-shot: route + execute, print the ans
 clutch run "..." --json               # machine-readable output (for other agents)
 clutch chat                           # interactive REPL
 clutch models [--json]                # list all gears (models)
+clutch resolve gpt5 --json            # Ausführungsselektor ohne Modellaufruf auflösen
 clutch stats                          # usage / budget / health dashboard
 clutch config <key> [value]           # read/set CLI settings
 clutch keys set MOONSHOT_API_KEY      # store an API key (hidden input; values never shown)
@@ -205,6 +206,54 @@ Die Standardkonfiguration liegt in `clutch/config/`, sodass bearbeitbare Install
 | `getriebe.json` | Alle Gänge + Provider-Zuordnungen |
 | `strecken.json` | Streckentyp-zu-Gang/Gas/Effort-Zuordnung |
 | `fitness_criteria.json` | Schwellenwerte der Lernengine |
+
+### Öffentlicher Ausführungsselektor
+
+`clutch` ist die einzige Modell- und Profilregistry. Aufrufer lösen Runner-,
+Self-, Familien- und exakte Selektoren über dieselbe öffentliche API auf:
+
+```python
+from clutch import resolve_execution_selector
+
+bindung = resolve_execution_selector("gpt5")
+print(bindung.canonical_selector)      # openai-gpt-5
+print(bindung.registry_fingerprint)    # sha256:...
+
+exakt = resolve_execution_selector("openai-gpt-5.6-sol", runner="codex")
+print(exakt.to_dict())
+```
+
+Die CLI bietet denselben rein lesenden Vertrag:
+
+```bash
+clutch resolve gpt --json
+clutch resolve self --runner claude --json
+clutch resolve gpt5 --json
+clutch resolve openai-gpt-5.6-sol --runner codex --json
+```
+
+`gpt` ist ein expliziter Alias für den Runner `codex`; `gpt5` bezeichnet das
+versionierte Familienprofil `openai-gpt-5`. Exakte Selektoren werden nur gegen
+die Gänge in `clutch/config/getriebe.json` geprüft. Es gibt keine unscharfe
+Präfixsuche und keine stille Ersatzwahl. Deshalb bleibt `claude-opus-5` bis zu
+einem belegten Provider- **und** Registry-Refresh `unresolved`; es wird weder
+auf `claude-opus-4-6` noch auf `claude-fable-5` umgebogen.
+
+Verfügbarkeit besteht aus fünf unabhängigen, dreistufigen Belegen (`true`,
+`false`, `null` = ungeprüft): `provider_documented`, `provider_api_listed`,
+`account_accessible`, `runner_compatible` und `host_ready`. Ein Self- oder
+Familienprofil liefert nur Kandidaten, bei denen alle fünf Stufen wahr und der
+Runner ausdrücklich erlaubt sind. Eine Anbieterdokumentation beweist daher
+weder Accountzugriff noch lokale Startbereitschaft.
+
+Provider-Aktualisierungen nutzen den injizierbaren
+`ProviderCatalogAdapter`-Vertrag. Der Clutch-Kern liest dabei weder Keys noch
+Providerendpunkte. Adapter liefern Snapshots mit Quelle, Prüfzeit,
+Lebenszyklus (`ga`, `preview`, `limited`, `deprecated`, `retired`), den fünf
+Verfügbarkeitsstufen und Fingerprint. Schlägt ein Adapter fehl, bleibt der
+letzte belegte Snapshot erhalten; rohe Fehlermeldungen werden nicht
+weitergereicht. Neue exakte Profile benötigen anschließend weiterhin einen
+expliziten Registry-Eintrag.
 
 ### Reasoning-Effort
 
@@ -276,6 +325,7 @@ clutch/
 |   +-- fahrer.py          # Orchestrator
 |   +-- strecke.py         # Task analysis
 |   +-- getriebe.py        # Model registry
+|   +-- execution_registry.py # Public execution-selector and catalog-evidence contract
 |   +-- kupplung.py        # Model switching
 |   +-- motorblock.py      # Unified API layer
 |   +-- gas_bremse.py      # Reasoning level

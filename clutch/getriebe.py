@@ -11,6 +11,7 @@ es stellt nur die Gaenge bereit.
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
@@ -38,6 +39,9 @@ class Gang:
     catalog_source: Optional[str] = None
     quantization: Optional[str] = None
     pricing: Optional[PricingSpec] = None
+    lifecycle: str = "unknown"
+    availability: dict[str, Optional[bool]] = field(default_factory=dict)
+    runners: list[str] = field(default_factory=list)
 
     @property
     def ist_lokal(self) -> bool:
@@ -88,6 +92,7 @@ class Getriebe:
         self._gaenge: dict[str, Gang] = {}
         self._provider: dict[str, ProviderInfo] = {}
         self._fahrer_optionen: dict = {}
+        self._execution_registry: dict = {}
         self._load()
 
     def _load(self) -> None:
@@ -125,6 +130,9 @@ class Getriebe:
                 catalog_source=cfg.get("catalog_source"),
                 quantization=cfg.get("quantization"),
                 pricing=pricing,
+                lifecycle=cfg.get("lifecycle", "unknown"),
+                availability=cfg.get("availability", {}),
+                runners=cfg.get("runners", []),
             )
 
         # Provider laden
@@ -137,6 +145,23 @@ class Getriebe:
             )
 
         self._fahrer_optionen = data.get("fahrer_optionen", {})
+        self._execution_registry = data.get("execution_registry", {})
+
+    def execution_registry_config(self) -> dict:
+        """Return an isolated copy of the public selector-profile contract."""
+        return deepcopy(self._execution_registry)
+
+    def registry_fingerprint(self) -> str:
+        """Fingerprint model identities, evidence, aliases, and profiles."""
+        from clutch.execution_registry import ExecutionRegistry
+
+        return ExecutionRegistry(self).fingerprint()
+
+    def resolve_execution_selector(self, selector: str, runner: Optional[str] = None):
+        """Resolve a public runner/self/family/exact execution selector."""
+        from clutch.execution_registry import ExecutionRegistry
+
+        return ExecutionRegistry(self).resolve(selector, runner=runner)
 
     def gang(self, name: str) -> Optional[Gang]:
         """Gibt einen Gang nach Name zurueck."""
