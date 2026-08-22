@@ -6,34 +6,19 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1
 
 ---
 
-## [0.4.2] - 2026-08-21 - CI Matrix Hardening, Python 3.13 & Security Parity
-
-### Added
-- GitHub Actions CI Workflow (`.github/workflows/tests.yml`) um Python 3.13 Matrix-Unterstützung (`["3.10", "3.11", "3.12", "3.13"]`) und automatisierten `ruff check .` Linter-Schritt gehärtet.
-- Python 3.13 Classifier (`"Programming Language :: Python :: 3.13"`) in `pyproject.toml` ergänzt.
-- Direkte Sicherheitskontakt-E-Mail (`security@ellmos.ai` / `support@lukasgeiger.com`) in `SECURITY.md` (deutsch und englisch) integriert.
-- Automatisierte Metadaten- & Manifest-Paritätstestsuite in `tests/test_metadata.py` um CI-Matrix-, Ruff-Linting-, Pyproject-Klassifizierungs- und Sicherheitskontakt-Tests auf 7 Tests erweitert (338 Tests in Gesamt-Suite inkl. GPT-5.6 Cost-Routing-Suite).
-
-### Changed
-- `llms.txt`: Last-checked Timestamp auf `2026-08-21` und Test-Suite auf 338 Tests synchronisiert.
-- Shields.io-Badges in `README.md` & `README_de.md` auf 338 passed Tests aktualisiert.
-- Verifikation: 338/338 Pytest-Tests 100% grün, `compileall` & `ruff check` fehlerfrei.
-
-## [0.4.1] - 2026-08-16 - Discoverability, README-Design & Metadata Parity Check
-
-### Added
-- Automatisierte Metadaten- & Manifest-Paritätstestsuite in `tests/test_metadata.py` (4/4 passed).
-- Shields.io-Badges für Local-First-Sicherheit, Version (0.4.0), Discovery (`llms.txt`) und synchronisierte Pytest-Suite (314 passed, 100% grün) in `README.md` und `README_de.md`.
-- Geschwisterwerkzeuge-Matrix für das gesamte `ellmos-ai`-, `dev-bricks`- und `open-bricks`-Ökosystem (`coma`, `swarm-ai`, `system-explorer`, `policy-registry`, `sqlite-transit-sync`, `workflowhooker`, `memoryhooker`, `DevCenter`, `CodeBox`) zweisprachig integriert.
-- Standardisierte bilingual-strukturierte `SECURITY.md` mit Local-First-Routing, Keyring-Credential-Speicherung, Null-Telemetrie und privater Schwachstellenmeldung.
-- Ruff-Linter-Konfiguration (`[tool.ruff]` und `[tool.ruff.lint]`, line-length 120, py310) in `pyproject.toml`.
-
-### Changed
-- `llms.txt`: Last-checked Timestamp auf `2026-08-16` und Test-Suite auf 314 Tests synchronisiert.
-- `tests/test_m4_cli.py`, `tests/test_m5a_session_store.py`, `tests/test_m5b_prompt_library.py`: Unbenutzte Test-Variablen bereinigt; `ruff check .` 100% sauber.
-- Verifikation: 314/314 Pytest-Tests 100% grün, `compileall` & `ruff check` fehlerfrei.
-
 ## [Unreleased]
+
+## [0.5.0] - 2026-08-22 - Public execution-selector registry
+
+### Added
+
+- Public runner, self, family and exact selector resolution with explicit
+  alias normalization, evidence-separated availability and a stable registry
+  fingerprint.
+- Provider-neutral refresh snapshots retain the last proven catalog on an
+  adapter failure and expose source, checked time, lifecycle and diff evidence.
+- Exact selectors never silently substitute another model; unresolved names
+  remain non-claimable.
 
 ### Public execution-selector registry (2026-08-22)
 
@@ -190,6 +175,33 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1
   Env-Variable `CLUTCH_OLLAMA_TIMEOUT` (Sekunden) einstellbar. Grosse lokale Modelle
   (30B+) brauchen beim Kaltstart länger als der Cloud-orientierte Default; ohne
   Override bleibt das Verhalten unverändert (60 s). Tests in `test_ollama_endpoint.py`.
+
+## [0.4.2] - 2026-08-21 - CI Matrix Hardening, Python 3.13 & Security Parity
+
+### Added
+- GitHub Actions CI Workflow (`.github/workflows/tests.yml`) um Python 3.13 Matrix-Unterstützung (`["3.10", "3.11", "3.12", "3.13"]`) und automatisierten `ruff check .` Linter-Schritt gehärtet.
+- Python 3.13 Classifier (`"Programming Language :: Python :: 3.13"`) in `pyproject.toml` ergänzt.
+- Direkte Sicherheitskontakt-E-Mail (`security@ellmos.ai` / `support@lukasgeiger.com`) in `SECURITY.md` (deutsch und englisch) integriert.
+- Automatisierte Metadaten- & Manifest-Paritätstestsuite in `tests/test_metadata.py` um CI-Matrix-, Ruff-Linting-, Pyproject-Klassifizierungs- und Sicherheitskontakt-Tests auf 7 Tests erweitert (338 Tests in Gesamt-Suite inkl. GPT-5.6 Cost-Routing-Suite).
+
+### Changed
+- `llms.txt`: Last-checked Timestamp auf `2026-08-21` und Test-Suite auf 338 Tests synchronisiert.
+- Shields.io-Badges in `README.md` & `README_de.md` auf 338 passed Tests aktualisiert.
+- Verifikation: 338/338 Pytest-Tests 100% grün, `compileall` & `ruff check` fehlerfrei.
+
+## [0.4.1] - 2026-08-16 - Discoverability, README-Design & Metadata Parity Check
+
+### Added
+- Automatisierte Metadaten- & Manifest-Paritätstestsuite in `tests/test_metadata.py` (4/4 passed).
+- Shields.io-Badges für Local-First-Sicherheit, Version (0.4.0), Discovery (`llms.txt`) und synchronisierte Pytest-Suite (314 passed, 100% grün) in `README.md` und `README_de.md`.
+- Geschwisterwerkzeuge-Matrix für das gesamte `ellmos-ai`-, `dev-bricks`- und `open-bricks`-Ökosystem (`coma`, `swarm-ai`, `system-explorer`, `policy-registry`, `sqlite-transit-sync`, `workflowhooker`, `memoryhooker`, `DevCenter`, `CodeBox`) zweisprachig integriert.
+- Standardisierte bilingual-strukturierte `SECURITY.md` mit Local-First-Routing, Keyring-Credential-Speicherung, Null-Telemetrie und privater Schwachstellenmeldung.
+- Ruff-Linter-Konfiguration (`[tool.ruff]` und `[tool.ruff.lint]`, line-length 120, py310) in `pyproject.toml`.
+
+### Changed
+- `llms.txt`: Last-checked Timestamp auf `2026-08-16` und Test-Suite auf 314 Tests synchronisiert.
+- `tests/test_m4_cli.py`, `tests/test_m5a_session_store.py`, `tests/test_m5b_prompt_library.py`: Unbenutzte Test-Variablen bereinigt; `ruff check .` 100% sauber.
+- Verifikation: 314/314 Pytest-Tests 100% grün, `compileall` & `ruff check` fehlerfrei.
 
 ## [0.4.0] -- 2026-06-14
 

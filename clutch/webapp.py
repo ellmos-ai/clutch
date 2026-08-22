@@ -107,7 +107,7 @@ def create_app(
     app = FastAPI(
         title="clutch Web-API",
         description="Provider-neutraler LLM-Router — Web-Oberfläche (M6)",
-        version="0.4.0",
+        version="0.5.0",
     )
     env_lang = os.environ.get("CLUTCH_LANG")
     app.state.lang = normalisiere_sprache(lang or env_lang) if (lang or env_lang) else None
