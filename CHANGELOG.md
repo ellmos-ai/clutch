@@ -6,6 +6,18 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1
 
 ---
 
+## [0.4.3] - 2026-08-25 - Google Model Documentation Parity
+
+### Changed
+- `README.md` and `README_de.md` now document Gemini 3.7 Flash as the preferred Google Flash gear, while keeping Gemini 3.5 Flash explicit as fallback.
+- `llms.txt` Last-checked timestamp and test-suite count synchronized to 2026-08-25 / 339 passed tests.
+
+### Added
+- Metadata contract coverage verifies that both maintained READMEs describe the current preferred Google Flash gear and fallback.
+
+### Verification
+- `python -m pytest -q` passed with 339/339 tests.
+
 ## [0.4.2] - 2026-08-21 - CI Matrix Hardening, Python 3.13 & Security Parity
 
 ### Added

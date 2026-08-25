@@ -44,8 +44,8 @@ def test_llms_txt_structure_and_timestamp():
     """Verify that llms.txt contains the canonical structure and a recent timestamp."""
     llms_text = (REPO_ROOT / "llms.txt").read_text(encoding="utf-8")
 
-    assert "Last-checked: 2026-08-21" in llms_text, "llms.txt Last-checked timestamp should be 2026-08-21"
-    assert "338" in llms_text, "llms.txt should report 338 passing unit tests"
+    assert "Last-checked: 2026-08-25" in llms_text, "llms.txt Last-checked timestamp should be 2026-08-25"
+    assert "339" in llms_text, "llms.txt should report 339 passing unit tests"
     assert "## Audience" in llms_text, "llms.txt missing Audience section"
     assert "## Search Phrases" in llms_text, "llms.txt missing Search Phrases section"
     assert "## Docs" in llms_text, "llms.txt missing Docs section"
@@ -80,6 +80,17 @@ def test_pyproject_configuration_and_classifiers():
     assert "Programming Language :: Python :: 3.13" in pyproject_text, "pyproject.toml must include Python 3.13 classifier"
     assert "[tool.ruff]" in pyproject_text, "pyproject.toml must include [tool.ruff] section"
     assert "[tool.ruff.lint]" in pyproject_text, "pyproject.toml must include [tool.ruff.lint] section"
+
+
+def test_readme_google_model_table_matches_catalog():
+    """Verify that maintained READMEs document the current preferred Google Flash gear."""
+    readme_en = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+    readme_de = (REPO_ROOT / "README_de.md").read_text(encoding="utf-8")
+
+    assert "Gemini 3.7 Flash (preferred)" in readme_en, "README.md must list Gemini 3.7 Flash as preferred"
+    assert "Gemini 3.5 Flash fallback" in readme_en, "README.md must keep Gemini 3.5 Flash as fallback"
+    assert "Gemini 3.7 Flash (bevorzugt)" in readme_de, "README_de.md must list Gemini 3.7 Flash as preferred"
+    assert "Gemini 3.5 Flash als Fallback" in readme_de, "README_de.md must keep Gemini 3.5 Flash as fallback"
 
 
 def test_security_contact_email():
