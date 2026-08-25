@@ -17,6 +17,22 @@ from clutch.pricing import UsageRecord, cost_for_gang
 
 
 @dataclass
+class AnthropicSchattenZone:
+    """Schatten-Dimension (Stufe 1, T-20260825-939511775/T1E): Anthropic-5h/7d-
+    Fensterwerte + EMA-Durchsatzrate, rein zur Anzeige/zum Logging.
+
+    Fliesst NICHT in TankStand.zone, verbrauch_pct() oder irgendeine
+    Gas/Bremse-Entscheidung ein -- siehe Tankuhr.anthropic_schatten_stand()."""
+    five_hour_pct: Optional[float]
+    five_hour_rate_ema_per_hour: Optional[float]
+    seven_day_pct: Optional[float]
+    seven_day_rate_ema_per_hour: Optional[float]
+    zone: str
+    stale: bool
+    sample_count: int
+
+
+@dataclass
 class TankStand:
     """Aktueller Budget-Stand."""
     kosten_heute_usd: float = 0.0
@@ -119,6 +135,38 @@ class Tankuhr:
 
     def zone(self) -> str:
         return self.stand().zone
+
+    def anthropic_schatten_stand(self, record_shadow_log: bool = False) -> Optional[AnthropicSchattenZone]:
+        """Stufe 1 SCHATTENMODUS (T1E, T-20260825-939511775): liest die
+        Anthropic-5h/7d-Werte ueber clutch.token_throughput und klassifiziert
+        sie NUR zur Anzeige/zum Logging in eine zweite Zonen-Dimension.
+
+        Absichtlich getrennt von stand()/zone()/verbrauch_pct(): diese Methode
+        wird nie automatisch aufgerufen und hat keinerlei Einfluss auf die
+        bestehende Budget-/Gas-Bremse-Logik. Gibt None zurueck, wenn keine
+        Bridge-Daten verfuegbar sind (fail-open, wie die bestehenden Hooks).
+
+        record_shadow_log=True haengt zusaetzlich einen Datensatz ans
+        Schatten-Protokoll an (was die Schatten-Zone vorschlaegt vs. was
+        sparmodus real gerade tut) -- fuer die Beobachtung in Stufe 2."""
+        from clutch.token_throughput import classify_zone, record_point, record_shadow_decision
+
+        snapshot = record_point()
+        if snapshot is None:
+            return None
+
+        if record_shadow_log:
+            record_shadow_decision(snapshot)
+
+        return AnthropicSchattenZone(
+            five_hour_pct=snapshot.five_hour_pct,
+            five_hour_rate_ema_per_hour=snapshot.five_hour_rate_ema_per_hour,
+            seven_day_pct=snapshot.seven_day_pct,
+            seven_day_rate_ema_per_hour=snapshot.seven_day_rate_ema_per_hour,
+            zone=classify_zone(snapshot.five_hour_pct),
+            stale=snapshot.stale,
+            sample_count=snapshot.sample_count,
+        )
 
     def verbrauch_pct(self) -> float:
         s = self.stand()

@@ -6,6 +6,23 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1
 
 ---
 
+## [0.5.0] - 2026-08-25 - Stufe 1 Schattenmodus: Anthropic-5h/7d als zweite Tankuhr-Dimension
+
+T-20260825-939511775 (T1E, User-Entscheidung, Stufenplan siehe [`docs/STAGED-MIGRATION.md`](docs/STAGED-MIGRATION.md)).
+
+### Added
+- Neues Modul `clutch/token_throughput.py`: liest die bestehende Claude-Code-Statusline-Bridge-Datei (`~/.claude/state/token_budget.json`) read-only, führt ein eigenes Rolling-Log (`token_throughput_log.jsonl`) und berechnet eine EMA-geglättete Durchsatzrate (Prozentpunkte/Stunde) -- Vorbild: Antigravity `token_analytics_engine` 7d-Burn-Rate. Erkennt Fenster-Resets (`resets_at`-Wechsel) und wertet sie nicht als negativen Verbrauch.
+- Neue, rein optionale Methode `Tankuhr.anthropic_schatten_stand()` liefert die Anthropic-5h/7d-Werte + EMA-Rate + eine informative Zonen-Einordnung (green/yellow/orange/red, dieselben Schwellen wie sparmodus) als zweite Dimension -- ohne jeden Einfluss auf `stand()`, `zone()`, `verbrauch_pct()` oder Gas/Bremse.
+- Schatten-Protokoll (`clutch_shadow_protocol.jsonl`, via `record_shadow_decision()`): hält fest, was die Schatten-Zone vorschlägt vs. was sparmodus real tut -- reine Beobachtung für das geplante Stufe-2-Auswertungsfenster.
+- `docs/STAGED-MIGRATION.md`: vollständiger Stufenplan (1 Schattenmodus → 2 Beobachtung → 3 Strategie-Migration) plus Reifekriterium für den Übergang Stufe 1 → 2.
+- 12 neue Tests in `tests/test_m13_token_throughput.py` (EMA-Berechnung, Reset-Erkennung, Zonenklassifikation, Schatten-Protokoll, Log-Pruning, Additivität der Tankuhr-Erweiterung).
+
+### Nicht enthalten (bewusst außerhalb des Ticket-Scopes)
+- Keine Änderung an `token_budget_guard.py`, `token_budget_statusline.py` oder den Sparmodus-Skills -- alle Dateien in `~/.claude/hooks/` bleiben unangetastet.
+- Keine automatische Boost-/Drossel-Entscheidung auf Basis des neuen Signals -- Stufe 1 ist reines Messen/Loggen.
+
+---
+
 ## [0.4.3] - 2026-08-25 - Google Model Documentation Parity
 
 ### Changed

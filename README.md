@@ -10,8 +10,8 @@
 
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Version 0.4.0](https://img.shields.io/badge/Version-0.4.0-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
-[![Pytest](https://img.shields.io/badge/Pytest-339%20passed-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
+[![Version 0.5.0](https://img.shields.io/badge/Version-0.5.0-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
+[![Pytest](https://img.shields.io/badge/Pytest-351%20passed-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
 [![Providers](https://img.shields.io/badge/Providers-Anthropic%20%7C%20Gemini%20%7C%20OpenAI%20%7C%20Ollama%20%7C%20Kimi-purple.svg)](https://github.com/ellmos-ai/clutch)
 [![Security: Local-First](https://img.shields.io/badge/Security-Local--First-green.svg)](SECURITY.md)
 [![Ecosystem: ellmos-ai](https://img.shields.io/badge/Ecosystem-ellmos--ai-blue.svg)](https://github.com/ellmos-ai)
@@ -105,6 +105,7 @@ graph TD
 | **Bordcomputer** (Onboard Computer) | Health monitor, circuit breaker | `bordcomputer.py` |
 | **Fahrtenbuch** (Trip Log) | SQLite metrics storage | `fahrtenbuch.py` |
 | **Fahrschule** (Driving School) | Learning / evolution engine | `fahrschule.py` |
+| **Token-Throughput** (Shadow zone, Stage 1) | Anthropic 5h/7d rate-limit window as a second, display-only zone alongside Tankuhr's USD zones -- see [`docs/STAGED-MIGRATION.md`](docs/STAGED-MIGRATION.md) | `token_throughput.py` |
 
 ## Road Types
 
