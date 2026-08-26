@@ -42,6 +42,26 @@ provider-neutral LLM orchestration library.
   English descriptions.
 - [ ] Verify current provider model IDs before the next release.
 
+## Routing- und Lern-Governance nach ArenaOS/HarnessRanger [2026-08-15]
+
+- [ ] Einen versionierten, redigierten Event-Vertrag für Routingläufe
+  definieren: Eingabe-Fingerprint, gewählter Provider/Modus, beobachtete Kosten,
+  Latenz, Fehlerklasse und **extern geliefertes** Ergebnislabel. Telemetrie darf
+  nicht als Beweis für Aufgabenerfolg umgedeutet werden.
+- [ ] Deterministischen Offline-Replay gegen feste Fälle ermöglichen. Live-
+  Routing erzeugt höchstens einen unveränderlichen Kandidaten; es verändert
+  keine Gewichte, Regeln oder Providerzuordnungen selbst.
+- [ ] Promotion-Pipeline spezifizieren: Kandidat → Holdout-Evaluation → explizite
+  Freigabe → begrenzter Canary → Readback → Rollback. Jede Stufe braucht einen
+  Receipt und darf bei fehlendem/mehrdeutigem Outcome konservativ abbrechen.
+- [ ] Strukturierte Streaming-Ereignisse und Kompaktierung so entwerfen, dass
+  Entscheidungen, Toolergebnisse, Fehler und offene Aktionen erhalten bleiben;
+  Rohinhalte und Geheimnisse werden vor Persistenz redigiert und durch harte
+  Größen-/TTL-Grenzen begrenzt.
+- [ ] Host-spezifische Integration über Adapter statt Kernverzweigungen:
+  `detect`, `status`, `setup --dry-run`, `uninstall`; nur belegte Laufzeitpfade
+  als unterstützt kennzeichnen, Scaffolds ausdrücklich als solche ausweisen.
+
 ## Modell-Erkennung & -Verwaltung (Feature-Block) [2026-06-12]
 
 Clutch kennt aktuell nur statisch in `getriebe.json` hinterlegte Modelle. Das Ziel:

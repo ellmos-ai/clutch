@@ -531,7 +531,7 @@ class ProviderCatalogDiff:
 @dataclass(frozen=True)
 class ProviderRefreshResult:
     provider: str
-    applied: bool
+    snapshot_accepted: bool
     retained_previous: bool
     snapshot: Optional[ProviderCatalogSnapshot]
     diff: ProviderCatalogDiff
@@ -540,7 +540,7 @@ class ProviderRefreshResult:
     def to_dict(self) -> dict[str, Any]:
         return {
             "provider": self.provider,
-            "applied": self.applied,
+            "snapshot_accepted": self.snapshot_accepted,
             "retained_previous": self.retained_previous,
             "snapshot": self.snapshot.to_dict() if self.snapshot else None,
             "snapshot_fingerprint": self.snapshot.fingerprint if self.snapshot else None,
@@ -622,7 +622,7 @@ def refresh_provider_catalog(
         if previous is not None and previous.provider != provider:
             return ProviderRefreshResult(
                 provider=provider,
-                applied=False,
+                snapshot_accepted=False,
                 retained_previous=False,
                 snapshot=None,
                 diff=ProviderCatalogDiff(),
@@ -636,7 +636,7 @@ def refresh_provider_catalog(
         diff = _catalog_diff(previous, snapshot)
         return ProviderRefreshResult(
             provider=provider,
-            applied=True,
+            snapshot_accepted=True,
             retained_previous=False,
             snapshot=snapshot,
             diff=diff,
@@ -644,7 +644,7 @@ def refresh_provider_catalog(
     except Exception as exc:  # adapter boundary must fail closed
         return ProviderRefreshResult(
             provider=provider,
-            applied=False,
+            snapshot_accepted=False,
             retained_previous=previous is not None,
             snapshot=previous,
             diff=ProviderCatalogDiff(),

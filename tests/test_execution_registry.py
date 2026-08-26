@@ -341,7 +341,7 @@ def test_provider_refresh_reports_diff_without_provider_call_in_core():
 
     result = refresh_provider_catalog(FixtureAdapter(), previous=previous)
 
-    assert result.applied
+    assert result.snapshot_accepted
     assert not result.retained_previous
     assert result.diff.added == ("claude-opus-5",)
     assert result.diff.removed == ()
@@ -361,7 +361,7 @@ def test_provider_refresh_failure_retains_last_proven_snapshot_and_hides_error_t
 
     result = refresh_provider_catalog(FailingAdapter(), previous=previous)
 
-    assert not result.applied
+    assert not result.snapshot_accepted
     assert result.retained_previous
     assert result.snapshot == previous
     assert result.error_code == "adapter-error:RuntimeError"
@@ -379,7 +379,7 @@ def test_provider_refresh_hides_failure_while_reading_provider_identity():
 
     result = refresh_provider_catalog(FailingProviderPropertyAdapter())
 
-    assert not result.applied
+    assert not result.snapshot_accepted
     assert result.provider == "unknown"
     assert result.error_code == "adapter-error:RuntimeError"
     assert "credential-like" not in json.dumps(result.to_dict())

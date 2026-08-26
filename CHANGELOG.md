@@ -6,21 +6,18 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1
 
 ---
 
-## [Unreleased]
+## [0.5.0] - 2026-08-26 - Schattenmodus und öffentlicher Ausführungsselektor
 
-## [0.5.0] - 2026-08-22 - Public execution-selector registry
+T-20260825-939511775 (T1E, User-Entscheidung, Stufenplan siehe [`docs/STAGED-MIGRATION.md`](docs/STAGED-MIGRATION.md)).
 
 ### Added
+- Neues Modul `clutch/token_throughput.py`: liest die bestehende Claude-Code-Statusline-Bridge-Datei (`~/.claude/state/token_budget.json`) read-only, führt ein eigenes Rolling-Log (`token_throughput_log.jsonl`) und berechnet eine EMA-geglättete Durchsatzrate (Prozentpunkte/Stunde) -- Vorbild: Antigravity `token_analytics_engine` 7d-Burn-Rate. Erkennt Fenster-Resets (`resets_at`-Wechsel) und wertet sie nicht als negativen Verbrauch.
+- Neue, rein optionale Methode `Tankuhr.anthropic_schatten_stand()` liefert die Anthropic-5h/7d-Werte + EMA-Rate + eine informative Zonen-Einordnung (green/yellow/orange/red, dieselben Schwellen wie sparmodus) als zweite Dimension -- ohne jeden Einfluss auf `stand()`, `zone()`, `verbrauch_pct()` oder Gas/Bremse.
+- Schatten-Protokoll (`clutch_shadow_protocol.jsonl`, via `record_shadow_decision()`): hält fest, was die Schatten-Zone vorschlägt vs. was sparmodus real tut -- reine Beobachtung für das geplante Stufe-2-Auswertungsfenster.
+- `docs/STAGED-MIGRATION.md`: vollständiger Stufenplan (1 Schattenmodus → 2 Beobachtung → 3 Strategie-Migration) plus Reifekriterium für den Übergang Stufe 1 → 2.
+- 12 neue Tests in `tests/test_m13_token_throughput.py` (EMA-Berechnung, Reset-Erkennung, Zonenklassifikation, Schatten-Protokoll, Log-Pruning, Additivität der Tankuhr-Erweiterung).
 
-- Public runner, self, family and exact selector resolution with explicit
-  alias normalization, evidence-separated availability and a stable registry
-  fingerprint.
-- Provider-neutral refresh snapshots retain the last proven catalog on an
-  adapter failure and expose source, checked time, lifecycle and diff evidence.
-- Exact selectors never silently substitute another model; unresolved names
-  remain non-claimable.
-
-### Public execution-selector registry (2026-08-22)
+### Public execution-selector registry
 
 - Öffentliche Python- und CLI-Auflösung für Runner-, Self-, Familien- und
   exakte Selektoren mit expliziter Aliasnormalisierung und stabilem
@@ -29,12 +26,66 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1
   `account_accessible`, `runner_compatible` und `host_ready` getrennt; Self-
   und Familienrouting bleibt ohne vollständige Belegkette fail-closed.
 - Providerneutralen, injizierbaren Refresh-Vertrag mit Quellen-, Prüfzeit-,
-  Lebenszyklus- und Diff-Beleg ergänzt. Fehler behalten den letzten belegten
-  Snapshot und geben keine rohe Providerfehlermeldung aus.
+  Lebenszyklus- und Diff-Beleg ergänzt. Ein validierter Apply-Pfad reichert
+  ausschließlich bereits kuratierte Gänge atomar an; unbekannte Modelle werden
+  nicht automatisch registriert.
 - Exakte Modelle werden nicht still ersetzt. `claude-opus-5` bleibt vor einem
   belegten Provider- und Registry-Refresh ungelöst.
-- Verifikation: 359 Pytests einschließlich 21 neuer Resolver-/Refresh-
-  Regressionstests, Ruff, Compileall und Diff-Check grün.
+- Reviewhärtung: Namens-/Model-ID-Kollisionen, skalare Runnerfelder und rohe
+  Adapterfehler werden fail-closed behandelt. `clutch resolve
+  --require-claimable` unterscheidet bekannte, aber nicht startbereite
+  Selektoren per Exit 4 von ausführbaren Bindungen.
+- Snapshot-Annahme (`snapshot_accepted`) und atomare Registry-Anreicherung
+  (`ProviderCatalogApplyResult.applied`) sind in API und Dokumentation klar
+  getrennt; der neue CLI-Name `resolve` ist als reservierter Subcommand
+  dokumentiert.
+
+### Nicht enthalten (bewusst außerhalb des Ticket-Scopes)
+- Keine Änderung an `token_budget_guard.py`, `token_budget_statusline.py` oder den Sparmodus-Skills -- alle Dateien in `~/.claude/hooks/` bleiben unangetastet.
+- Keine automatische Boost-/Drossel-Entscheidung auf Basis des neuen Signals -- Stufe 1 ist reines Messen/Loggen.
+
+---
+
+## [0.4.3] - 2026-08-25 - Google Model Documentation Parity
+
+### Changed
+- `README.md` and `README_de.md` now document Gemini 3.7 Flash as the preferred Google Flash gear, while keeping Gemini 3.5 Flash explicit as fallback.
+- `llms.txt` Last-checked timestamp and test-suite count synchronized to 2026-08-25 / 339 passed tests.
+
+### Added
+- Metadata contract coverage verifies that both maintained READMEs describe the current preferred Google Flash gear and fallback.
+
+### Verification
+- `python -m pytest -q` passed with 339/339 tests.
+
+## [0.4.2] - 2026-08-21 - CI Matrix Hardening, Python 3.13 & Security Parity
+
+### Added
+- GitHub Actions CI Workflow (`.github/workflows/tests.yml`) um Python 3.13 Matrix-Unterstützung (`["3.10", "3.11", "3.12", "3.13"]`) und automatisierten `ruff check .` Linter-Schritt gehärtet.
+- Python 3.13 Classifier (`"Programming Language :: Python :: 3.13"`) in `pyproject.toml` ergänzt.
+- Direkte Sicherheitskontakt-E-Mail (`security@ellmos.ai` / `support@lukasgeiger.com`) in `SECURITY.md` (deutsch und englisch) integriert.
+- Automatisierte Metadaten- & Manifest-Paritätstestsuite in `tests/test_metadata.py` um CI-Matrix-, Ruff-Linting-, Pyproject-Klassifizierungs- und Sicherheitskontakt-Tests auf 7 Tests erweitert (338 Tests in Gesamt-Suite inkl. GPT-5.6 Cost-Routing-Suite).
+
+### Changed
+- `llms.txt`: Last-checked Timestamp auf `2026-08-21` und Test-Suite auf 338 Tests synchronisiert.
+- Shields.io-Badges in `README.md` & `README_de.md` auf 338 passed Tests aktualisiert.
+- Verifikation: 338/338 Pytest-Tests 100% grün, `compileall` & `ruff check` fehlerfrei.
+
+## [0.4.1] - 2026-08-16 - Discoverability, README-Design & Metadata Parity Check
+
+### Added
+- Automatisierte Metadaten- & Manifest-Paritätstestsuite in `tests/test_metadata.py` (4/4 passed).
+- Shields.io-Badges für Local-First-Sicherheit, Version (0.4.0), Discovery (`llms.txt`) und synchronisierte Pytest-Suite (314 passed, 100% grün) in `README.md` und `README_de.md`.
+- Geschwisterwerkzeuge-Matrix für das gesamte `ellmos-ai`-, `dev-bricks`- und `open-bricks`-Ökosystem (`coma`, `swarm-ai`, `system-explorer`, `policy-registry`, `sqlite-transit-sync`, `workflowhooker`, `memoryhooker`, `DevCenter`, `CodeBox`) zweisprachig integriert.
+- Standardisierte bilingual-strukturierte `SECURITY.md` mit Local-First-Routing, Keyring-Credential-Speicherung, Null-Telemetrie und privater Schwachstellenmeldung.
+- Ruff-Linter-Konfiguration (`[tool.ruff]` und `[tool.ruff.lint]`, line-length 120, py310) in `pyproject.toml`.
+
+### Changed
+- `llms.txt`: Last-checked Timestamp auf `2026-08-16` und Test-Suite auf 314 Tests synchronisiert.
+- `tests/test_m4_cli.py`, `tests/test_m5a_session_store.py`, `tests/test_m5b_prompt_library.py`: Unbenutzte Test-Variablen bereinigt; `ruff check .` 100% sauber.
+- Verifikation: 314/314 Pytest-Tests 100% grün, `compileall` & `ruff check` fehlerfrei.
+
+## [Unreleased]
 
 ### GPT-5.6 cost and empirical routing (2026-08-20)
 

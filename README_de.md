@@ -11,7 +11,7 @@
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Lizenz: MIT](https://img.shields.io/badge/Lizenz-MIT-green.svg)](LICENSE)
 [![Version 0.5.0](https://img.shields.io/badge/Version-0.5.0-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
-[![Pytest](https://img.shields.io/badge/Pytest-359%20bestanden-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
+[![Pytest](https://img.shields.io/badge/Pytest-382%20bestanden-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
 [![Provider](https://img.shields.io/badge/Provider-Anthropic%20%7C%20Gemini%20%7C%20OpenAI%20%7C%20Ollama%20%7C%20Kimi-purple.svg)](https://github.com/ellmos-ai/clutch)
 [![Sicherheit: Local-First](https://img.shields.io/badge/Sicherheit-Local--First-green.svg)](SECURITY.md)
 [![Ökosystem: ellmos-ai](https://img.shields.io/badge/%C3%96kosystem-ellmos--ai-blue.svg)](https://github.com/ellmos-ai)
@@ -105,6 +105,7 @@ graph TD
 | **Bordcomputer** (Bordcomputer) | Gesundheitsmonitor, Circuit-Breaker | `bordcomputer.py` |
 | **Fahrtenbuch** (Fahrtenbuch) | SQLite-Metrikspeicher | `fahrtenbuch.py` |
 | **Fahrschule** (Fahrschule) | Lern- / Evolutionsengine | `fahrschule.py` |
+| **Token-Durchsatz** (Schatten-Zone, Stufe 1) | Anthropic-5h/7d-Fenster als zweite, rein informative Zone neben der Tankuhr-USD-Zone -- siehe [`docs/STAGED-MIGRATION.md`](docs/STAGED-MIGRATION.md) | `token_throughput.py` |
 
 ## Streckentypen
 
@@ -230,7 +231,14 @@ clutch resolve gpt --json
 clutch resolve self --runner claude --json
 clutch resolve gpt5 --json
 clutch resolve openai-gpt-5.6-sol --runner codex --json
+clutch resolve gpt5 --require-claimable --json
 ```
+
+`resolve` ist damit ein reservierter CLI-Subcommand. Ohne
+`--require-claimable` bedeutet Exit 0 nur, dass der Selektor eindeutig bekannt
+ist. Für Automatisierung verlangt das Flag zusätzlich vollständige
+Verfügbarkeitsbelege; ein bekannter, aber derzeit nicht claimbarer Selektor
+liefert Exit 4.
 
 `gpt` ist ein expliziter Alias für den Runner `codex`; `gpt5` bezeichnet das
 versionierte Familienprofil `openai-gpt-5`. Exakte Selektoren werden nur gegen
@@ -252,8 +260,15 @@ Providerendpunkte. Adapter liefern Snapshots mit Quelle, Prüfzeit,
 Lebenszyklus (`ga`, `preview`, `limited`, `deprecated`, `retired`), den fünf
 Verfügbarkeitsstufen und Fingerprint. Schlägt ein Adapter fehl, bleibt der
 letzte belegte Snapshot erhalten; rohe Fehlermeldungen werden nicht
-weitergereicht. Neue exakte Profile benötigen anschließend weiterhin einen
-expliziten Registry-Eintrag.
+weitergereicht. `snapshot_accepted` bestätigt dabei nur die validierte
+Snapshot-Annahme. Mit `Getriebe.apply_provider_catalog(snapshot)` werden die
+Belege anschließend atomar auf bereits kuratierte Gänge gelegt. Unbekannte
+Modelle werden gemeldet, aber niemals automatisch registriert; neue exakte
+Profile benötigen weiterhin einen expliziten Registry-Eintrag.
+
+Die gebündelte Registry enthält nur statische Quellen-, Lifecycle- und
+Runnerbelege. Accountzugriff und Hostbereitschaft bleiben bis zu einem
+aktuellen Adapter-/Probe-Snapshot `null` und damit nicht claimbar.
 
 ### Reasoning-Effort
 
@@ -289,7 +304,7 @@ auf den Mac-Studio-Compute-Pfad.
 | Anbieter | Modelle | Lokal |
 |----------|--------|-------|
 | **Anthropic** | Claude Fable 5, Haiku, Sonnet, Opus | Nein |
-| **Google** | Gemini 3.5 Flash, Gemini 3.1 Pro Preview | Nein |
+| **Google** | Gemini 3.7 Flash (bevorzugt), Gemini 3.5 Flash als Fallback, Gemini 3.1 Pro Preview | Nein |
 | **OpenAI** | GPT-5.6 Luna/Terra/Sol via Responses API, GPT-5.3-Codex | Nein |
 | **Ollama** | Qwen, Mistral und weitere (lokal & remote) | Ja |
 | **Claude Code** | Via Subprocess (CLI-Session) | Ja |

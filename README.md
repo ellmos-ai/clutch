@@ -11,7 +11,7 @@
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Version 0.5.0](https://img.shields.io/badge/Version-0.5.0-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
-[![Pytest](https://img.shields.io/badge/Pytest-359%20passed-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
+[![Pytest](https://img.shields.io/badge/Pytest-382%20passed-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
 [![Providers](https://img.shields.io/badge/Providers-Anthropic%20%7C%20Gemini%20%7C%20OpenAI%20%7C%20Ollama%20%7C%20Kimi-purple.svg)](https://github.com/ellmos-ai/clutch)
 [![Security: Local-First](https://img.shields.io/badge/Security-Local--First-green.svg)](SECURITY.md)
 [![Ecosystem: ellmos-ai](https://img.shields.io/badge/Ecosystem-ellmos--ai-blue.svg)](https://github.com/ellmos-ai)
@@ -105,6 +105,7 @@ graph TD
 | **Bordcomputer** (Onboard Computer) | Health monitor, circuit breaker | `bordcomputer.py` |
 | **Fahrtenbuch** (Trip Log) | SQLite metrics storage | `fahrtenbuch.py` |
 | **Fahrschule** (Driving School) | Learning / evolution engine | `fahrschule.py` |
+| **Token-Throughput** (Shadow zone, Stage 1) | Anthropic 5h/7d rate-limit window as a second, display-only zone alongside Tankuhr's USD zones -- see [`docs/STAGED-MIGRATION.md`](docs/STAGED-MIGRATION.md) | `token_throughput.py` |
 
 ## Road Types
 
@@ -232,7 +233,13 @@ clutch resolve gpt --json
 clutch resolve self --runner claude --json
 clutch resolve gpt5 --json
 clutch resolve openai-gpt-5.6-sol --runner codex --json
+clutch resolve gpt5 --require-claimable --json
 ```
+
+`resolve` is therefore a reserved CLI subcommand. Without
+`--require-claimable`, exit 0 only means that the selector is known and
+unambiguous. Automation can require complete availability evidence with the
+flag; a known but currently non-claimable selector exits 4.
 
 `gpt` is an explicit alias for the `codex` runner; `gpt5` names the versioned
 `openai-gpt-5` family profile. Exact selectors are checked only against gears
@@ -253,8 +260,15 @@ Clutch core reads neither credentials nor provider endpoints. Adapters return
 snapshots with source, check time, lifecycle (`ga`, `preview`, `limited`,
 `deprecated`, `retired`), the five availability levels, and a fingerprint. If
 an adapter fails, the last proven snapshot is retained and raw exception text
-is not propagated. A new exact profile still requires an explicit registry
-entry afterwards.
+is not propagated. `snapshot_accepted` only confirms validated snapshot
+acceptance. `Getriebe.apply_provider_catalog(snapshot)` then overlays the
+evidence atomically onto already curated gears. Unknown models are reported
+but never auto-registered; a new exact profile still requires an explicit
+registry entry.
+
+The bundled registry carries static source, lifecycle, and runner evidence
+only. Account access and host readiness stay `null` and non-claimable until a
+current adapter/probe snapshot supplies them.
 
 ### Reasoning Effort
 
@@ -288,7 +302,7 @@ more, route that step to the Mac Studio compute path.
 | Provider | Models | Local |
 |----------|--------|-------|
 | **Anthropic** | Claude Fable 5, Haiku, Sonnet, Opus | No |
-| **Google** | Gemini 3.5 Flash, Gemini 3.1 Pro Preview | No |
+| **Google** | Gemini 3.7 Flash (preferred), Gemini 3.5 Flash fallback, Gemini 3.1 Pro Preview | No |
 | **OpenAI** | GPT-5.6 Luna/Terra/Sol via Responses API, GPT-5.3-Codex | No |
 | **Ollama** | Qwen, Mistral, and more (local & remote) | Yes |
 | **Claude Code** | Via subprocess (CLI session) | Yes |
