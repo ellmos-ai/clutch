@@ -26,6 +26,11 @@ from typing import Optional
 from clutch.strecke import StreckenProfil, Tempo
 from clutch.getriebe import Getriebe, Gang
 from clutch.gas_bremse import GasBremse, GasStellung
+from clutch.budget_policy import (
+    BudgetErschoepftError,
+    lade_budget_zonen,
+    max_gang_fuer_zone,
+)
 
 # Agentische CLI-Motoren fuehren Tools mit Auto-Approve (--yolo) auf dem Host aus.
 # Aus untrusted Quellen (Web/API) duerfen sie NICHT automatisch gewaehlt werden.
@@ -104,6 +109,7 @@ class Kupplung:
         self._strecken_config = self._load_strecken()
         self._standard = self._strecken_config.get("standard", {})
         self._erkundungsrate = self._strecken_config.get("erkundungsrate", 0.10)
+        self._budget_zonen = lade_budget_zonen(self.config_dir)
         self._overrides: dict[str, dict] = {}
 
     def einlegen(
@@ -165,15 +171,16 @@ class Kupplung:
         # 6. Budget-Constraint
         limit = max_gang if max_gang is not None else 5
         if budget_zone:
-            # SSOT: identisch zu bordcomputer._budget_zonen / README (orange = G1-G2).
-            zone_max = {"green": 5, "yellow": 3, "orange": 2, "red": 0}
-            limit = min(limit, zone_max.get(budget_zone, 5))
+            zone_limit = max_gang_fuer_zone(self._budget_zonen, budget_zone)
+            if zone_limit == 0:
+                raise BudgetErschoepftError(
+                    f"Budget-Zone {budget_zone!r} erlaubt keinen LLM-Einsatz"
+                )
+            limit = min(limit, zone_limit)
             if gang and gang.gang > limit:
                 guenstigere = self.getriebe.filter(max_gang=limit)
                 if guenstigere:
                     gang = guenstigere[-1]  # Hoechster erlaubter Gang
-                elif limit == 0:
-                    gang = None  # Budget erschoepft
 
         # 6b. Zweck-Refinement: Gang nach Zweck/Modalitaet anpassen (staerken-Match).
         #     Bildbewusst: zweck="vision" erzwingt ein vision-faehiges Modell (M2).

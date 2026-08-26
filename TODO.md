@@ -181,14 +181,11 @@ Einschränkung, **niedrig** = Hygiene/Konsistenz.
 
 ### Fixes
 
-- [ ] **(hoch) Budget-Zonen dreifach inkonsistent definiert:** README
-  (Orange = G1–G2, Green = G1–G5), `clutch/kupplung.py:136`
-  (`zone_max = {"green": 5, "yellow": 3, "orange": 1, "red": 0}` → Orange nur G1)
-  und `clutch/config/fitness_criteria.json` (`budget_zones`: green = [1,2,3],
-  yellow = [1,2], orange = [1]) widersprechen sich. `Bordcomputer.max_gang_fuer_zone()`
-  (`clutch/bordcomputer.py:130`) liest aus der JSON, `Kupplung.einlegen()` hardcodet.
-  Eine Single Source of Truth festlegen (empfohlen: JSON), Kupplung darauf umstellen,
-  README-Tabelle angleichen.
+- [x] **(hoch) Budget-Zonen dreifach inkonsistent definiert:** Behoben mit
+  T-20260826-117243495. `clutch/config/fitness_criteria.json` enthält den
+  dokumentierten Vertrag Grün G1–G5 / Gelb G1–G3 / Orange G1–G2 / Rot keine.
+  `Bordcomputer` und `Kupplung` lesen beide die validierte Policy aus
+  `clutch/budget_policy.py`; Rot stoppt das Routing explizit.
 - [ ] **(hoch) Tankuhr wird im Fahrer-Flow nie befüllt:** `Fahrer.fahren()`
   (`clutch/fahrer.py:130–179`) ruft `Tankuhr.tanken()` nirgends auf, und die
   Token aus einem `MotorErgebnis` fließen nicht via `Tacho.update()` in den
@@ -235,9 +232,10 @@ Einschränkung, **niedrig** = Hygiene/Konsistenz.
   `FitnessBewerter.__init__` (`clutch/fahrschule.py:33`) hardcodet eigene
   Werte. Entweder Gewichte aus der JSON laden oder den `criteria`-Block
   als tot entfernen.
-- [ ] **(niedrig) Phantom-Datei `fitness.json`:** `clutch/bordcomputer.py:183,195`
-  sucht zuerst `fitness.json`, die weder im Repo existiert noch dokumentiert
-  ist. Auf `fitness_criteria.json` vereinheitlichen.
+- [x] **(niedrig) Phantom-Datei `fitness.json`:** Mit T-20260826-117243495
+  entfernt. Die Fitness- und Budgetkonfiguration wird ausschließlich aus
+  `fitness_criteria.json` geladen; ein Regressionstest ignoriert eine zusätzlich
+  vorhandene `fitness.json`.
 - [ ] **(niedrig) Tote Tabellenwerte in GasBremse:** Die Token-/Timeout-
   Multiplikatoren in `_STELLUNGEN` (`clutch/gas_bremse.py:27–35`) werden in
   `stellung()` (Zeilen 71–72) immer durch lineare Interpolation überschrieben —

@@ -11,7 +11,7 @@
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Lizenz: MIT](https://img.shields.io/badge/Lizenz-MIT-green.svg)](LICENSE)
 [![Version 0.5.0](https://img.shields.io/badge/Version-0.5.0-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
-[![Pytest](https://img.shields.io/badge/Pytest-351%20bestanden-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
+[![Pytest](https://img.shields.io/badge/Pytest-355%20bestanden-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
 [![Provider](https://img.shields.io/badge/Provider-Anthropic%20%7C%20Gemini%20%7C%20OpenAI%20%7C%20Ollama%20%7C%20Kimi-purple.svg)](https://github.com/ellmos-ai/clutch)
 [![Sicherheit: Local-First](https://img.shields.io/badge/Sicherheit-Local--First-green.svg)](SECURITY.md)
 [![Ökosystem: ellmos-ai](https://img.shields.io/badge/%C3%96kosystem-ellmos--ai-blue.svg)](https://github.com/ellmos-ai)
@@ -235,6 +235,10 @@ auf den Mac-Studio-Compute-Pfad.
 | Gelb | 30--60 % | G1--G3 |
 | Orange | 60--80 % | Nur G1--G2 |
 | Rot | 80--100 % | Keine (Budget erschöpft) |
+
+`clutch/config/fitness_criteria.json` ist die einzige Laufzeitquelle für diese
+Grenzen. Bordcomputer und Kupplung lesen dieselbe Policy; bei Rot stoppt das
+Routing, bevor ein LLM ausgewählt wird.
 
 ## Unterstützte Anbieter
 

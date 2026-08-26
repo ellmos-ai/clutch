@@ -9,7 +9,6 @@ Ueberwacht den Systemzustand:
 
 from __future__ import annotations
 
-import json
 import time
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -17,6 +16,11 @@ from pathlib import Path
 from typing import Optional
 
 from clutch.fahrtenbuch import Fahrtenbuch, FahrtEintrag
+from clutch.budget_policy import (
+    budget_zonen_aus_kriterien,
+    lade_fitness_kriterien,
+    max_gang_fuer_zone,
+)
 
 
 @dataclass
@@ -50,14 +54,15 @@ class Bordcomputer:
         self._fehler_log: dict[str, list[float]] = defaultdict(list)
 
         config_dir = config_dir or Path(__file__).parent / "config"
-        schwellwerte = self._load_schwellwerte(config_dir)
+        fitness_kriterien = lade_fitness_kriterien(config_dir)
+        schwellwerte = fitness_kriterien.get("anomaly_thresholds", {})
 
         self.overkill_schwelle = schwellwerte.get("overkill_score", 5.0)
         self.token_explosion_faktor = schwellwerte.get("token_explosion_factor", 2.0)
         self.max_fehler_serie = schwellwerte.get("consecutive_failures", 3)
         self.fehler_pro_stunde_limit = schwellwerte.get("errors_per_hour_circuit_break", 5)
 
-        self._budget_zonen = self._load_budget_zonen(config_dir)
+        self._budget_zonen = budget_zonen_aus_kriterien(fitness_kriterien)
 
     def pruefe(self, budget_verbraucht_pct: float = 0.0) -> SystemStatus:
         status = SystemStatus()
@@ -128,9 +133,7 @@ class Bordcomputer:
         return circuit.zustand != "open"
 
     def max_gang_fuer_zone(self, zone: str) -> int:
-        zone_config = self._budget_zonen.get(zone, {})
-        tiers = zone_config.get("allowed_tiers", [1, 2, 3, 4, 5])
-        return max(tiers) if tiers else 0
+        return max_gang_fuer_zone(self._budget_zonen, zone)
 
     # --- Private ---
 
@@ -187,30 +190,3 @@ class Bordcomputer:
             if verbraucht_pct <= cfg.get("max_pct", 100):
                 return name
         return "red"
-
-    def _load_schwellwerte(self, config_dir: Path) -> dict:
-        path = config_dir / "fitness.json"
-        if path.exists():
-            with open(path, encoding="utf-8") as f:
-                return json.load(f).get("anomaly_thresholds", {})
-        # Fallback: alte Config
-        path2 = config_dir / "fitness_criteria.json"
-        if path2.exists():
-            with open(path2, encoding="utf-8") as f:
-                return json.load(f).get("anomaly_thresholds", {})
-        return {}
-
-    def _load_budget_zonen(self, config_dir: Path) -> dict:
-        for fname in ("fitness.json", "fitness_criteria.json"):
-            path = config_dir / fname
-            if path.exists():
-                with open(path, encoding="utf-8") as f:
-                    data = json.load(f)
-                    if "budget_zones" in data:
-                        return data["budget_zones"]
-        return {
-            "green":  {"min_pct": 0,  "max_pct": 30, "allowed_tiers": [1, 2, 3, 4, 5]},
-            "yellow": {"min_pct": 30, "max_pct": 60, "allowed_tiers": [1, 2, 3]},
-            "orange": {"min_pct": 60, "max_pct": 80, "allowed_tiers": [1, 2]},
-            "red":    {"min_pct": 80, "max_pct": 100, "allowed_tiers": []},
-        }
