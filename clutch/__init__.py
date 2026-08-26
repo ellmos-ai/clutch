@@ -24,8 +24,10 @@ from clutch.execution_registry import (
     ExecutionResolution,
     ModelAvailability,
     ProviderCatalogAdapter,
+    ProviderCatalogApplyResult,
     ProviderCatalogSnapshot,
     ProviderRefreshResult,
+    apply_provider_catalog,
     refresh_provider_catalog,
     resolve_execution_selector,
 )
@@ -35,6 +37,7 @@ __all__ = [
     "Getriebe", "Gang", "Kupplung",
     "MotorBlock", "MotorErgebnis",
     "ExecutionRegistry", "ExecutionResolution", "ModelAvailability",
-    "ProviderCatalogAdapter", "ProviderCatalogSnapshot", "ProviderRefreshResult",
-    "refresh_provider_catalog", "resolve_execution_selector",
+    "ProviderCatalogAdapter", "ProviderCatalogApplyResult", "ProviderCatalogSnapshot",
+    "ProviderRefreshResult", "apply_provider_catalog", "refresh_provider_catalog",
+    "resolve_execution_selector",
 ]

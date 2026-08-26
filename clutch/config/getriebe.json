@@ -436,6 +436,43 @@
   "execution_registry": {
     "schema": "ellmos.clutch.execution-registry.v1",
     "_doc": "Öffentlicher Resolververtrag. Exakte Modelle werden ausschließlich aus gaenge abgeleitet; hier gibt es keine zweite Modellliste.",
+    "provider_evidence": {
+      "anthropic": {
+        "lifecycle": "ga",
+        "catalog_source": "https://platform.claude.com/docs/en/about-claude/models/overview",
+        "catalog_checked_at": "2026-08-22",
+        "runners": ["claude"],
+        "availability": {"provider_documented": true, "provider_api_listed": null, "account_accessible": null, "runner_compatible": true, "host_ready": null}
+      },
+      "openai": {
+        "lifecycle": "ga",
+        "catalog_source": "https://developers.openai.com/api/docs/models",
+        "catalog_checked_at": "2026-08-22",
+        "runners": ["codex"],
+        "availability": {"provider_documented": true, "provider_api_listed": null, "account_accessible": null, "runner_compatible": true, "host_ready": null}
+      },
+      "agy": {
+        "lifecycle": "ga",
+        "catalog_source": "https://github.com/ellmos-ai/companion-for-agy",
+        "catalog_checked_at": "2026-07-28",
+        "runners": ["agy"],
+        "availability": {"provider_documented": true, "provider_api_listed": null, "account_accessible": null, "runner_compatible": true, "host_ready": null}
+      },
+      "ollama": {
+        "lifecycle": "ga",
+        "catalog_source": "https://ollama.com/library",
+        "catalog_checked_at": "2026-08-22",
+        "runners": ["ollama"],
+        "availability": {"provider_documented": true, "provider_api_listed": null, "account_accessible": null, "runner_compatible": true, "host_ready": null}
+      },
+      "claude-code": {
+        "lifecycle": "ga",
+        "catalog_source": "https://docs.anthropic.com/en/docs/claude-code/overview",
+        "catalog_checked_at": "2026-08-22",
+        "runners": ["claude"],
+        "availability": {"provider_documented": true, "provider_api_listed": null, "account_accessible": null, "runner_compatible": true, "host_ready": null}
+      }
+    },
     "aliases": {
       "gpt": "codex",
       "gpt5": "openai-gpt-5"

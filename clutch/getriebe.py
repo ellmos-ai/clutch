@@ -103,9 +103,13 @@ class Getriebe:
         with open(path, encoding="utf-8") as f:
             data = json.load(f)
 
+        self._execution_registry = data.get("execution_registry", {})
+        provider_evidence = self._execution_registry.get("provider_evidence", {})
+
         # Gaenge laden
         for name, cfg in data.get("gaenge", {}).items():
             pricing = PricingSpec.from_dict(cfg["pricing"]) if cfg.get("pricing") else None
+            evidence = provider_evidence.get(cfg.get("provider", "unknown"), {})
             self._gaenge[name] = Gang(
                 name=name,
                 provider=cfg.get("provider", "unknown"),
@@ -126,13 +130,17 @@ class Getriebe:
                 endpoint=cfg.get("endpoint"),
                 efforts=cfg.get("efforts", []),
                 reasoning_modes=cfg.get("reasoning_modes", []),
-                catalog_checked_at=cfg.get("catalog_checked_at"),
-                catalog_source=cfg.get("catalog_source"),
+                catalog_checked_at=cfg.get(
+                    "catalog_checked_at", evidence.get("catalog_checked_at")
+                ),
+                catalog_source=cfg.get("catalog_source", evidence.get("catalog_source")),
                 quantization=cfg.get("quantization"),
                 pricing=pricing,
-                lifecycle=cfg.get("lifecycle", "unknown"),
-                availability=cfg.get("availability", {}),
-                runners=cfg.get("runners", []),
+                lifecycle=cfg.get("lifecycle", evidence.get("lifecycle", "unknown")),
+                availability=deepcopy(
+                    cfg.get("availability", evidence.get("availability", {}))
+                ),
+                runners=list(cfg.get("runners", evidence.get("runners", []))),
             )
 
         # Provider laden
@@ -145,8 +153,6 @@ class Getriebe:
             )
 
         self._fahrer_optionen = data.get("fahrer_optionen", {})
-        self._execution_registry = data.get("execution_registry", {})
-
     def execution_registry_config(self) -> dict:
         """Return an isolated copy of the public selector-profile contract."""
         return deepcopy(self._execution_registry)
@@ -162,6 +168,12 @@ class Getriebe:
         from clutch.execution_registry import ExecutionRegistry
 
         return ExecutionRegistry(self).resolve(selector, runner=runner)
+
+    def apply_provider_catalog(self, snapshot):
+        """Overlay validated provider evidence onto existing curated gears."""
+        from clutch.execution_registry import apply_provider_catalog
+
+        return apply_provider_catalog(self, snapshot)
 
     def gang(self, name: str) -> Optional[Gang]:
         """Gibt einen Gang nach Name zurueck."""

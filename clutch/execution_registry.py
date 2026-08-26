@@ -235,17 +235,14 @@ class ExecutionRegistry:
                 resolved_at,
             )
 
-        matches = [
-            gang
-            for gang in self.getriebe.alle_gaenge()
-            if normalize_selector_token(gang.name) == canonical
-        ]
-        if not matches:
-            matches = [
-                gang
-                for gang in self.getriebe.alle_gaenge()
-                if normalize_selector_token(gang.model_id) == canonical
-            ]
+        matches_by_name: dict[str, Any] = {}
+        for gang in self.getriebe.alle_gaenge():
+            if (
+                normalize_selector_token(gang.name) == canonical
+                or normalize_selector_token(gang.model_id) == canonical
+            ):
+                matches_by_name[gang.name] = gang
+        matches = list(matches_by_name.values())
         if len(matches) > 1 and requested_runner:
             compatible = [gang for gang in matches if requested_runner in gang.runners]
             if compatible:
@@ -432,6 +429,16 @@ class ProviderCatalogEntry:
         required = ("registry_name", "model_id", "source", "checked_at")
         if any(not data.get(field) for field in required):
             raise ValueError("provider catalog entry is missing required evidence")
+        raw_runners = data.get("runners", [])
+        if not isinstance(raw_runners, (list, tuple)):
+            raise ValueError("provider catalog runners must be a list of strings")
+        runners = []
+        for runner in raw_runners:
+            if not isinstance(runner, str) or not normalize_selector_token(runner):
+                raise ValueError("provider catalog runners must contain non-empty strings")
+            runners.append(normalize_selector_token(runner))
+        if len(runners) != len(set(runners)):
+            raise ValueError("provider catalog runners must be unique")
         return cls(
             provider=provider,
             registry_name=str(data["registry_name"]),
@@ -440,7 +447,7 @@ class ProviderCatalogEntry:
             source=str(data["source"]),
             checked_at=str(data["checked_at"]),
             availability=ModelAvailability.from_mapping(data.get("availability")),
-            runners=tuple(sorted(set(data.get("runners", [])))),
+            runners=tuple(sorted(runners)),
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -542,6 +549,63 @@ class ProviderRefreshResult:
         }
 
 
+@dataclass(frozen=True)
+class ProviderCatalogApplyResult:
+    """Result of enriching existing curated gears with runtime evidence."""
+
+    provider: str
+    applied: bool
+    updated: tuple[str, ...] = ()
+    skipped_unregistered: tuple[str, ...] = ()
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "provider": self.provider,
+            "applied": self.applied,
+            "updated": list(self.updated),
+            "skipped_unregistered": list(self.skipped_unregistered),
+        }
+
+
+def apply_provider_catalog(
+    getriebe: Any,
+    snapshot: ProviderCatalogSnapshot,
+) -> ProviderCatalogApplyResult:
+    """Atomically enrich existing gears from one validated provider snapshot.
+
+    Provider discovery is evidence, not model curation: unknown registry names
+    are reported but never added.  Every known entry is validated before any
+    gear is changed, so an identity mismatch cannot leave a partial overlay.
+    """
+    if not isinstance(snapshot, ProviderCatalogSnapshot):
+        raise TypeError("snapshot must be ProviderCatalogSnapshot")
+
+    updates: list[tuple[Any, ProviderCatalogEntry]] = []
+    skipped: list[str] = []
+    for entry in snapshot.entries:
+        gang = getriebe.gang(entry.registry_name)
+        if gang is None:
+            skipped.append(entry.registry_name)
+            continue
+        if gang.provider != snapshot.provider or gang.model_id != entry.model_id:
+            raise ValueError(f"provider catalog identity mismatch: {entry.registry_name}")
+        updates.append((gang, entry))
+
+    for gang, entry in updates:
+        gang.lifecycle = entry.lifecycle
+        gang.catalog_source = entry.source
+        gang.catalog_checked_at = entry.checked_at
+        gang.availability = entry.availability.to_dict()
+        gang.runners = list(entry.runners)
+
+    return ProviderCatalogApplyResult(
+        provider=snapshot.provider,
+        applied=True,
+        updated=tuple(entry.registry_name for _, entry in updates),
+        skipped_unregistered=tuple(skipped),
+    )
+
+
 def refresh_provider_catalog(
     adapter: ProviderCatalogAdapter,
     *,
@@ -552,17 +616,18 @@ def refresh_provider_catalog(
     Raw exception text is deliberately not returned because provider clients
     may include request or credential material in their messages.
     """
-    provider = str(getattr(adapter, "provider", "unknown"))
-    if previous is not None and previous.provider != provider:
-        return ProviderRefreshResult(
-            provider=provider,
-            applied=False,
-            retained_previous=False,
-            snapshot=None,
-            diff=ProviderCatalogDiff(),
-            error_code="invalid-previous-provider",
-        )
+    provider = previous.provider if previous is not None else "unknown"
     try:
+        provider = str(getattr(adapter, "provider", "unknown"))
+        if previous is not None and previous.provider != provider:
+            return ProviderRefreshResult(
+                provider=provider,
+                applied=False,
+                retained_previous=False,
+                snapshot=None,
+                diff=ProviderCatalogDiff(),
+                error_code="invalid-previous-provider",
+            )
         snapshot = adapter.fetch()
         if not isinstance(snapshot, ProviderCatalogSnapshot):
             raise TypeError("adapter must return ProviderCatalogSnapshot")

@@ -204,7 +204,11 @@ def _cmd_resolve(args: argparse.Namespace) -> int:
             print(f"claimable: {str(result.claimable).lower()}")
             if result.reason:
                 print(f"reason: {result.reason}")
-        return 0 if result.resolved else 3
+        if not result.resolved:
+            return 3
+        if args.require_claimable and not result.claimable:
+            return 4
+        return 0
     except Exception as exc:
         print(f"Resolver-Fehler: {type(exc).__name__}", file=sys.stderr)
         return 1
@@ -566,6 +570,11 @@ def _build_subparser(subparsers: argparse._SubParsersAction) -> None:  # noqa: S
     )
     p_resolve.add_argument("selector", help="Selektor, z. B. gpt, self, gpt5 oder ein exakter Modellname")
     p_resolve.add_argument("--runner", default=None, help="Optionaler Runner-Kontext")
+    p_resolve.add_argument(
+        "--require-claimable",
+        action="store_true",
+        help="Exit 4, wenn der Selektor bekannt, aber aktuell nicht claimbar ist",
+    )
     p_resolve.add_argument("--json", action="store_true", help="JSON-Ausgabe")
     p_resolve.add_argument("--db", metavar="PFAD", default=None)
 

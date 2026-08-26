@@ -15,8 +15,10 @@ from clutch import resolve_execution_selector
 from clutch.cli import main
 from clutch.execution_registry import (
     AVAILABILITY_STAGES,
+    LIFECYCLES,
     ModelAvailability,
     ProviderCatalogSnapshot,
+    apply_provider_catalog,
     refresh_provider_catalog,
 )
 from clutch.getriebe import Gang, Getriebe
@@ -179,6 +181,43 @@ def test_ambiguous_exact_model_id_requires_runner_disambiguation():
     assert exact.registry_name == "bridge-same"
 
 
+def test_exact_selector_rejects_cross_namespace_name_model_id_collision():
+    getriebe = Getriebe()
+    getriebe.registriere_gang(
+        Gang(
+            name="collision-token",
+            provider="openai",
+            model_id="different-model-id",
+            gang=3,
+            leistung="hoch",
+            kosten_input_1k=0,
+            kosten_output_1k=0,
+            availability=_all_available(),
+            runners=["codex"],
+        )
+    )
+    getriebe.registriere_gang(
+        Gang(
+            name="different-registry-name",
+            provider="openai",
+            model_id="collision-token",
+            gang=3,
+            leistung="hoch",
+            kosten_input_1k=0,
+            kosten_output_1k=0,
+            availability=_all_available(),
+            runners=["codex"],
+        )
+    )
+
+    result = resolve_execution_selector(
+        "collision-token", runner="codex", getriebe=getriebe
+    )
+
+    assert not result.resolved
+    assert result.reason == "ambiguous-exact-selector"
+
+
 def test_availability_stages_are_independent_and_fail_closed():
     values = {
         "provider_documented": True,
@@ -256,6 +295,14 @@ def test_provider_catalog_fixtures_keep_lifecycle_and_availability_separate(
     assert snapshot.fingerprint.startswith("sha256:")
 
 
+def test_provider_catalog_rejects_scalar_runner_text():
+    data = json.loads((FIXTURES / "openai.json").read_text(encoding="utf-8"))
+    data["entries"][0]["runners"] = "codex"
+
+    with pytest.raises(ValueError, match="runners"):
+        ProviderCatalogSnapshot.from_dict(data)
+
+
 def test_provider_fixtures_cover_required_lifecycle_boundaries():
     lifecycles = set()
     for fixture in FIXTURES.glob("*.json"):
@@ -321,6 +368,89 @@ def test_provider_refresh_failure_retains_last_proven_snapshot_and_hides_error_t
     assert "raw-provider-detail" not in json.dumps(result.to_dict())
 
 
+def test_provider_refresh_hides_failure_while_reading_provider_identity():
+    class FailingProviderPropertyAdapter:
+        @property
+        def provider(self):
+            raise RuntimeError("credential-like raw detail")
+
+        def fetch(self):
+            raise AssertionError("fetch must not run")
+
+    result = refresh_provider_catalog(FailingProviderPropertyAdapter())
+
+    assert not result.applied
+    assert result.provider == "unknown"
+    assert result.error_code == "adapter-error:RuntimeError"
+    assert "credential-like" not in json.dumps(result.to_dict())
+
+
+def test_provider_catalog_can_atomically_enrich_curated_registry_entry():
+    getriebe = Getriebe()
+    snapshot = ProviderCatalogSnapshot.from_dict(
+        json.loads((FIXTURES / "openai.json").read_text(encoding="utf-8"))
+    )
+
+    result = apply_provider_catalog(getriebe, snapshot)
+    resolution = resolve_execution_selector(
+        "openai-gpt-5.6-sol", runner="codex", getriebe=getriebe
+    )
+
+    assert result.applied
+    assert result.updated == ("openai-gpt-5.6-sol",)
+    assert result.skipped_unregistered == ()
+    assert resolution.resolved and resolution.claimable
+    assert resolution.lifecycle == "ga"
+    assert resolution.catalog_checked_at == "2026-08-22T00:00:00Z"
+
+
+def test_provider_catalog_apply_rejects_identity_mismatch_without_partial_mutation():
+    getriebe = Getriebe()
+    gang = getriebe.gang("openai-gpt-5.6-sol")
+    assert gang is not None
+    original = (gang.lifecycle, gang.availability.copy(), list(gang.runners))
+    data = json.loads((FIXTURES / "openai.json").read_text(encoding="utf-8"))
+    data["entries"][0]["model_id"] = "different-model-id"
+    snapshot = ProviderCatalogSnapshot.from_dict(data)
+
+    with pytest.raises(ValueError, match="identity mismatch"):
+        apply_provider_catalog(getriebe, snapshot)
+
+    assert (gang.lifecycle, gang.availability, gang.runners) == original
+
+
+@pytest.mark.parametrize(
+    ("name", "runner"),
+    [
+        ("openai-gpt-5.6-sol", "codex"),
+        ("claude-fable", "claude"),
+        ("agy-gemini-3.6-flash", "agy"),
+        ("ollama-qwen3", "ollama"),
+    ],
+)
+def test_default_registry_carries_static_runner_evidence_but_not_host_claims(
+    name: str,
+    runner: str,
+):
+    getriebe = Getriebe()
+    gang = getriebe.gang(name)
+    assert gang is not None
+
+    assert gang.runners == [runner]
+    assert gang.lifecycle in LIFECYCLES - {"unknown"}
+    assert gang.availability["provider_documented"] is True
+    assert gang.availability["runner_compatible"] is True
+    assert gang.availability["account_accessible"] is None
+    assert gang.availability["host_ready"] is None
+
+    resolution = resolve_execution_selector(
+        name, runner=runner, getriebe=getriebe
+    )
+    assert resolution.resolved
+    assert not resolution.claimable
+    assert resolution.reason == "availability-unproven"
+
+
 def test_cli_resolve_is_machine_readable_and_unresolved_returns_three(capsys):
     ok = main(["resolve", "gpt", "--json"])
     output = json.loads(capsys.readouterr().out)
@@ -332,6 +462,16 @@ def test_cli_resolve_is_machine_readable_and_unresolved_returns_three(capsys):
     assert output["registry_fingerprint"].startswith("sha256:")
     assert missing == 3
     assert missing_output["reason"] == "selector-not-in-registry"
+
+
+def test_cli_resolve_can_require_claimable_for_automation(capsys):
+    code = main(["resolve", "gpt", "--require-claimable", "--json"])
+    output = json.loads(capsys.readouterr().out)
+
+    assert code == 4
+    assert output["resolved"] is True
+    assert output["claimable"] is False
+    assert output["reason"] == "no-eligible-models"
 
 
 def test_models_json_exposes_all_availability_stages(capsys):
