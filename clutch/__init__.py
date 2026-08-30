@@ -19,9 +19,11 @@ from clutch.strecke import StreckenAnalyse, StreckenTyp
 from clutch.getriebe import Getriebe, Gang
 from clutch.kupplung import Kupplung
 from clutch.motorblock import MotorBlock, MotorErgebnis
+from clutch.execution import ExecutionRegistryError, resolve_execution_selector
 
 __all__ = [
     "Fahrer", "StreckenAnalyse", "StreckenTyp",
     "Getriebe", "Gang", "Kupplung",
     "MotorBlock", "MotorErgebnis",
+    "ExecutionRegistryError", "resolve_execution_selector",
 ]
