@@ -22,7 +22,14 @@ provider-neutral LLM orchestration library.
 - [x] **W195 / T-20260830-195164348 (U1-U3):** Persistente Modell-/Provider-
   Verfügbarkeit, update-festes Nutzer-Overlay und Routing-Wünsche/Ausschlüsse
   pro Aufruf einschließlich zweier JSON-Alternativen. DONE 2026-08-30 in
-  Version 0.6.0. U4+ (Discovery/Probe/Katalogpflege) bleibt separat offen.
+  Version 0.6.0. U4+ bleibt separat offen; der nachfolgende Katalogvertrag
+  ersetzt keine echten Provider-I/O-Adapter oder Account-/Host-Probes.
+- [x] **T-20260822-230246761 (Provider-Katalogvertrag):** Validierte, injizierbare
+  Provider-Snapshots, deterministischer Diff und fünf getrennte Evidenzstufen
+  für fail-closed Ausführungsauflösung. DONE 2026-08-30 im 0.6.1-Kandidaten auf
+  PR #6 mit 16 Resolver-/Katalogtests und fünf Offline-Fixtures. Merge, erste
+  Registry-Veröffentlichung und OneDrive-Projektion warten auf unabhängiges
+  Review; fehlende Live-Evidenz wird nicht als Verfügbarkeit ausgegeben.
 
 - [x] **M6 Web-UI: CLI- + Env-/Key-Verwaltung spiegeln** — Settings-Panel in der
   Web-Oberfläche, das `clutch keys` (set/list/remove, Werte nie anzeigen) und
@@ -31,7 +38,7 @@ provider-neutral LLM orchestration library.
   gemeinsames, einklappbares Panel mit sicherem Credential-CRUD, Config-Liste,
   Editierformular und sichtbarem Erfolgs-/Fehlerstatus; laufende API-Motoren
   erkennen neu gespeicherte Keys ohne Serverneustart.
-- [ ] **i18n ausbauen** — App-Strings (CLI + Web-UI) auf DE/EN + Standardsprachen
+- [x] **i18n ausbauen** — App-Strings (CLI + Web-UI) auf DE/EN + Standardsprachen
   (es, zh, ja, ru) wie bei den MCP-Servern; Übersetzungen delegierbar (Sonnet/Haiku/agy,
   JSON-Locales). README in allen Sprachen. DONE 2026-08-11: gemeinsamer
   Locale-Bootstrap für die Web-UI, lokalisierte Statusmeldungen und CLI-Ausgaben.
@@ -44,7 +51,9 @@ provider-neutral LLM orchestration library.
 - [x] Add focused tests for provider availability checks without requiring live
   Anthropic, Google, Ollama, or Claude Code credentials.
   DONE 2026-08-30: persistente Circuit-/Kontingentpfade, rote 5h/7d-Signale,
-  `notaus`, 429-/Rate-Limit und agy-Leerausgabe werden offline getestet.
+  `notaus`, 429-/Rate-Limit und agy-Leerausgabe werden offline getestet. Der
+  0.6.1-Kandidat ergänzt unabhängige Provider-Dokumentation, API-Listung,
+  Accountzugriff, Runner-Kompatibilität und Hostbereitschaft per Offline-Fixture.
 - [ ] Decide whether `clutch/config/` display strings should stay German or gain parallel
   English descriptions.
 - [ ] Verify current provider model IDs before the next release.
@@ -275,17 +284,15 @@ Einschränkung, **niedrig** = Hygiene/Konsistenz.
 
 ### Upgrades
 
-- [ ] **(mittel) Python 3.13/3.14 unterstützen:** CI-Matrix
-  (`.github/workflows/tests.yml:19`) endet bei 3.12; `pyproject.toml`-Classifiers
-  ebenso. 3.13 (und nach Verifikation 3.14) ergänzen.
-- [ ] **(mittel) Lint-/Typecheck-Tooling einführen:** Kein ruff/flake8/mypy
-  konfiguriert. `[tool.ruff]` in `pyproject.toml` + Lint-Step in
-  `.github/workflows/tests.yml` würde u. a. die oben gelisteten toten Importe
-  automatisch finden.
-- [ ] **(mittel) Tests für MotorBlock ergänzen:** `clutch/motorblock.py`
-  (468 Zeilen, 4 Provider-Motoren) hat keinerlei Testabdeckung. Mit gemockten
-  SDK-Clients/`requests` testbar ohne Credentials — deckt zugleich den
-  bestehenden TODO-Punkt "provider availability checks" ab.
+- [ ] **(mittel) Python 3.14 unterstützen:** Python 3.13 ist seit 2026-08-30 in
+  CI-Matrix und Paket-Classifiers enthalten und auf PR #6 grün. Python 3.14
+  bleibt bis zur separaten Kompatibilitätsprüfung offen.
+- [x] **(mittel) Lint-Tooling einführen:** Ruff ist in `pyproject.toml`
+  konfiguriert und läuft in `.github/workflows/tests.yml`; PR #6 ist grün.
+  Ein statischer Typecheck bleibt eine unabhängige mögliche Erweiterung.
+- [x] **(mittel) Tests für MotorBlock ergänzen:** Gemockte Motor-/SDK-, CLI- und
+  Remote-Ollama-Pfade werden ohne Credentials getestet; zusätzliche
+  Provider-Katalogtests prüfen die fünf Evidenzstufen fail-closed.
 - [ ] **(niedrig) Coverage-Reporting in CI:** `pytest --cov=clutch` +
   Coverage-Artefakt im Workflow.
 - [ ] **(niedrig) `requirements.txt` konsolidieren:** Dupliziert die
