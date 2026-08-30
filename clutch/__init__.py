@@ -12,7 +12,7 @@ Auto-Metapher:
   Tankuhr  = Budget-Tracking
 """
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 
 from clutch.fahrer import Fahrer
 from clutch.strecke import StreckenAnalyse, StreckenTyp

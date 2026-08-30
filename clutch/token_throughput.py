@@ -11,10 +11,11 @@ WICHTIG -- Schattenmodus-Grenze (nicht ueberschreiten):
   * Dieses Modul SCHREIBT NICHTS in ~/.claude/hooks/, ~/.claude/settings.json
     oder eine der bestehenden Hook-Zustandsdateien (token_budget_guard_state.json,
     sparmodus_state.json). Es liest sie hoechstens (read-only), niemals schreibend.
-  * Es TRIFFT keine Boost-/Drossel-Entscheidung und aendert kein Verhalten von
-    clutch selbst -- record_point() liefert nur Messwerte, classify_zone() nur
-    eine informative Einordnung. Die bestehende sparmodus/notaus-Schwellenlogik
-    bleibt in Stufe 1 die einzig wirksame Steuerung.
+  * Dieses Modul TRIFFT keine Boost-/Drossel-Entscheidung -- record_point()
+    liefert nur Messwerte, classify_zone() nur eine informative Einordnung.
+    Seit clutch 0.6 liest der Bordcomputer die Bridge unabhaengig davon als
+    harte rote Verfuegbarkeitssperre; EMA/Trend wirken weiterhin nicht aufs
+    Routing und sparmodus/notaus bleibt als Notbremse bestehen.
   * Alle Dateien, die dieses Modul anlegt, sind NEU (token_throughput_log.jsonl,
     clutch_shadow_protocol.jsonl) -- keine bestehende Datei wird angefasst.
 

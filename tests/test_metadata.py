@@ -44,8 +44,8 @@ def test_llms_txt_structure_and_timestamp():
     """Verify that llms.txt contains the canonical structure and a recent timestamp."""
     llms_text = (REPO_ROOT / "llms.txt").read_text(encoding="utf-8")
 
-    assert "Last-checked: 2026-08-25" in llms_text, "llms.txt Last-checked timestamp should be 2026-08-25"
-    assert "351" in llms_text, "llms.txt should report 351 passing unit tests"
+    assert "Last-checked: 2026-08-30" in llms_text, "llms.txt Last-checked timestamp should be 2026-08-30"
+    assert "367" in llms_text, "llms.txt should report 367 passing unit tests"
     assert "## Audience" in llms_text, "llms.txt missing Audience section"
     assert "## Search Phrases" in llms_text, "llms.txt missing Search Phrases section"
     assert "## Docs" in llms_text, "llms.txt missing Docs section"

@@ -1,7 +1,10 @@
 # Staged Migration: Anthropic Session-Fenster als Zweite Tankuhr-Dimension
 
-**Status:** Stufe 1 aktiv (Schattenmodus). **User-Entscheidung:** T1=E (USMC-Notiz
-923, aus Ticket `T-20260825-322087069`, umgesetzt in `T-20260825-939511775`).
+**Status:** Stufe 1 aktiv (Schattenmodus). Seit clutch 0.6.0 existiert daneben
+eine eng begrenzte rote Verfügbarkeitssperre (siehe unten), aber weiterhin
+keine EMA-basierte Boost-/Drossel-Migration. **User-Entscheidung:** T1=E
+(USMC-Notiz 923, aus Ticket `T-20260825-322087069`, umgesetzt in
+`T-20260825-939511775`).
 
 ## Worum es geht
 
@@ -22,6 +25,19 @@ sparmodus/notaus heute die einzige *verlässliche* Notbremse sind und das
 bleiben müssen, bis clutch nachweislich denselben Job zuverlässig erledigt.
 
 ## Die drei Stufen
+
+### Sicherheits-Gate seit 0.6.0 (W195, keine Vorwegnahme von Stufe 2/3)
+
+`Bordcomputer.pruefe()` liest ein frisches rotes 5h- **oder** 7d-Signal als
+harte Provider-Nichtverfügbarkeit und persistiert die Sperre mit Reset-Zeit in
+`~/.clutch/availability.json`. Gleiches gilt für `sparmodus mode=notaus`.
+Fehlende oder veraltete Bridge-Daten erzeugen keine neue Sperre; ein zuvor
+belegter roter Zustand bleibt bis `until` wirksam.
+
+Dieses Gate bewertet weder EMA-Rate noch Verbrauchstrend und ersetzt keinen
+Hook. Vor W195 war kein `clutch_shadow_protocol.jsonl` vorhanden; damit war das
+unten definierte Reifekriterium nicht belegbar. Die allgemeine
+Boost-/Drossel-Strategie bleibt deshalb unverändert in Stufe 1.
 
 ### Stufe 1 -- Schattenmodus (AKTIV, dieses Ticket)
 
@@ -95,7 +111,9 @@ Folgeticket zu Stufe 2.
 - Keine Änderung an `token_budget_guard.py`, `token_budget_statusline.py`
   oder einer der Sparmodus-Skills (`skills/sparmodus`, `skills/notaus`).
 - Keine neue Hook-Registrierung in `~/.claude/settings.json`.
-- Keine automatische Entscheidung -- `anthropic_schatten_stand()` muss aktiv
-  aufgerufen werden, sonst passiert nichts.
+- Keine automatische EMA-/Schattenentscheidung --
+  `anthropic_schatten_stand()` muss aktiv aufgerufen werden, sonst passiert
+  dort nichts. Davon getrennt ist ausschließlich das oben dokumentierte harte
+  rote Verfügbarkeits-Gate aktiv.
 - Kein Ersatz für sparmodus/notaus als Notbremse -- die bleibt unverändert
   wirksam, solange Stufe 1/2 läuft.
