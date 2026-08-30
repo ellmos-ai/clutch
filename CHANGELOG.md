@@ -6,6 +6,36 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1
 
 ---
 
+## [0.6.1] - 2026-08-30 - Beleggestützter Ausführungsresolver
+
+T-20260822-230246761. Dieser Patch vereinigt den in 0.6.0 eingeführten
+öffentlichen Resolver mit dem noch offenen Provider-Katalogvertrag aus PR #4,
+ohne die zwischenzeitlich hinzugekommenen Availability-/Preference-Funktionen
+zu überschreiben.
+
+### Added
+- Öffentliche, JSON-fähige Auflösung für Runner, `self`, Familien, exakte
+  Registrynamen und Modell-IDs samt Aliasnormalisierung und stabilem
+  Registry-Fingerprint; `clutch resolve` stellt denselben Vertrag per CLI bereit.
+- Injizierbarer `ProviderCatalogAdapter`, validierte Snapshots mit Quelle,
+  Prüfzeit und Lebenszyklus, deterministischer Diff sowie fail-closed Refresh,
+  der bei Fehlern den letzten belegten Snapshot behält und Rohfehler verbirgt.
+- Fünf getrennte Evidenzstufen: `provider_documented`, `provider_api_listed`,
+  `account_accessible`, `runner_compatible` und `host_ready`. Erst fünf positive
+  Belege und ein zulässiger Lebenszyklus machen ein Modell claimbar.
+- Atomare Kataloganwendung reichert ausschließlich bereits kuratierte Gänge an;
+  unbekannte Provider-Modelle werden gemeldet, aber nicht still registriert.
+- 16 neue Resolver-/Katalogtests und fünf Provider-Fixtures; Gesamtsuite 383
+  Tests.
+
+### Compatibility
+- `resolve_execution_selector()` behält die in 0.6.0 veröffentlichte
+  JSON-/Dict-Rückgabe. Das unveröffentlichte `getriebe=`-Schlüsselwort aus PR #4
+  bleibt als Alias zu `registry=` nutzbar.
+- Statische Katalogeinträge beweisen bewusst weder Accountzugriff noch
+  Hostbereitschaft. Bestehende Selektoren bleiben auflösbar, aber ohne injizierte
+  Laufzeitevidenz fail-closed und nicht claimbar.
+
 ## [0.6.0] - 2026-08-30 - Persistente Verfügbarkeit, Nutzer-Overlay und Routing-Wünsche
 
 T-20260830-195164348 / W195. Dieser Release umfasst ausschließlich U1, U2 und

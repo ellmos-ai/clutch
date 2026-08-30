@@ -21,8 +21,9 @@ def test_runner_alias_reuses_getriebe_models():
     assert result["model_selection"] == "self"
     assert result["runner"] == "codex"
     assert result["resolved"] is True
-    assert result["claimable"] is True
-    assert "openai-gpt-5.6-sol" in result["eligible_models"]
+    assert result["claimable"] is False
+    assert result["eligible_models"] == []
+    assert result["reason"] == "no-eligible-models"
     assert result["registry_fingerprint"].startswith("sha256:")
     assert result["resolved_at"] == NOW
 
@@ -34,9 +35,9 @@ def test_family_resolution_is_runner_compatible_and_deterministic():
     assert first["selector_type"] == "family"
     assert first["model_selection"] == "family"
     assert first["allowed_runners"] == ["codex"]
-    assert first["claimable"] is True
+    assert first["claimable"] is False
     assert first["eligible_models"] == sorted(first["eligible_models"])
-    assert "openai-gpt-5.6-sol" in first["eligible_models"]
+    assert first["eligible_models"] == []
     assert first["registry_fingerprint"] == second["registry_fingerprint"]
 
 
@@ -50,8 +51,12 @@ def test_exact_model_resolution_exposes_getriebe_identity():
     assert result["provider"] == "openai"
     assert result["registry_name"] == "openai-gpt-5.6-sol"
     assert result["model_id"] == "gpt-5.6-sol"
-    assert result["eligible_models"] == ["openai-gpt-5.6-sol"]
-    assert result["reason"] is None
+    assert result["eligible_models"] == []
+    assert result["claimable"] is False
+    assert result["reason"] == "availability-unproven"
+    assert result["availability"]["provider_documented"] is True
+    assert result["availability"]["account_accessible"] is None
+    assert result["availability"]["host_ready"] is None
 
 
 def test_incompatible_runner_and_unknown_selector_are_distinguishable():

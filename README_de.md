@@ -10,8 +10,8 @@
 
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Lizenz: MIT](https://img.shields.io/badge/Lizenz-MIT-green.svg)](LICENSE)
-[![Version 0.6.0](https://img.shields.io/badge/Version-0.6.0-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
-[![Pytest](https://img.shields.io/badge/Pytest-367%20bestanden-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
+[![Version 0.6.1](https://img.shields.io/badge/Version-0.6.1-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
+[![Pytest](https://img.shields.io/badge/Pytest-383%20bestanden-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
 [![Provider](https://img.shields.io/badge/Provider-Anthropic%20%7C%20Gemini%20%7C%20OpenAI%20%7C%20Ollama%20%7C%20Kimi-purple.svg)](https://github.com/ellmos-ai/clutch)
 [![Sicherheit: Local-First](https://img.shields.io/badge/Sicherheit-Local--First-green.svg)](SECURITY.md)
 [![Ökosystem: ellmos-ai](https://img.shields.io/badge/%C3%96kosystem-ellmos--ai-blue.svg)](https://github.com/ellmos-ai)
@@ -36,6 +36,7 @@
 - **Ausführungsmuster** -- Einzelaufgaben, Ketten (Kolonne), parallele Teams und Schwarm-Verarbeitung
 - **Persistente Verfügbarkeit** -- Circuit-Breaker und Kontingentsperren überleben One-Shot-Prozesse; rote Anthropic-5h/7d-Fenster, `notaus` und Provider-Rate-Limits werden bis zum Reset umgangen
 - **Update-festes Nutzer-Overlay** -- Modelle deaktivieren, Modelle/Provider bevorzugen, Gangstufen begrenzen, Aliase und Modellkosten in `~/.clutch/user_overrides.json` pflegen
+- **Beleggestützte Ausführungsselektoren** -- Runner-, Familien- und exakte Modellbindungen ohne stille Ersetzung auflösen; Provider-Adapter halten fünf Verfügbarkeitsstufen getrennt
 - **Routing-Wünsche pro Aufruf** -- Gänge bevorzugen oder ausschließen, Zweck/Effort überschreiben und zwei gerankte Fallback-Alternativen erhalten
 - **Gesundheitsüberwachung** -- persistente Circuit-Breaker, Latenz-Tracking, Overkill/Token-Explosion-Alarme, Provider-Failover
 - **SQLite-Metriken** -- persistentes Fahrtenbuch, Chat-Sitzungen, Prompt-Bibliothek und Profile
@@ -182,6 +183,7 @@ clutch chat                           # interactive REPL
 clutch models [--status] [--json]     # Modelle plus Verfügbarkeit/Reset-Grund
 clutch models disable claude-sonnet   # persistentes, update-festes Nutzer-Override
 clutch models enable claude-sonnet
+clutch resolve gpt5 --runner codex --json  # nur auflösen; führt kein Modell aus
 clutch config prefer openai           # Modell oder Provider dauerhaft bevorzugen
 clutch stats                          # usage / budget / health dashboard
 clutch config <key> [value]           # read/set CLI settings
@@ -236,6 +238,28 @@ prozessübergreifend fest. Jeder Aufruf von `Bordcomputer.pruefe()` liest sie
 neu, sodass getrennte CLI-Prozesse dieselbe Verfügbarkeitsentscheidung teilen.
 Fehlende oder veraltete Token-Budget-Daten erzeugen keine neue Sperre; eine
 zuvor belegte rote Sperre bleibt jedoch bis zu ihrem Reset aktiv.
+
+### Ausführungsselektoren und Provider-Evidenz
+
+`resolve_execution_selector()` löst Runnerprofile (`claude`, `codex`, `agy`,
+`clutch`, `ollama`, `kimi`), `self`, Familien wie `gpt5` sowie exakte
+Registrynamen oder Modell-IDs auf. Exakte Selektoren werden niemals ersetzt.
+Das JSON-Ergebnis trennt `resolved` (Selektor existiert) von `claimable` (alle
+erforderlichen Belege liegen vor) und enthält einen deterministischen
+Registry-Fingerprint.
+
+Für Claimability müssen fünf unabhängige Stufen wahr sein:
+`provider_documented`, `provider_api_listed`, `account_accessible`,
+`runner_compatible` und `host_ready`. Gebündelte Katalogdaten leiten weder
+Accountzugriff noch Hostbereitschaft ab und bleiben deshalb fail-closed, bis ein
+Aufrufer einen belegten `ProviderCatalogSnapshot` anwendet.
+
+Provider-I/O bleibt außerhalb des Kernpakets. Injizierte
+`ProviderCatalogAdapter` liefern validierte Snapshots;
+`refresh_provider_catalog()` weist den Diff aus und behält bei einem Fehler den
+letzten belegten Snapshot. Das Anwenden eines Snapshots darf bestehende
+kuratierte Gänge anreichern, aber niemals ein providerseitig gefundenes Modell
+neu in die Registry aufnehmen.
 
 ### Routing-Wünsche pro Aufruf
 
