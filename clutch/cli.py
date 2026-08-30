@@ -31,7 +31,8 @@ from clutch.i18n import t, set_lang, LANGS
 
 def _config_pfad() -> Path:
     """Gibt den Pfad zur CLI-Konfigurationsdatei zurück."""
-    config_dir = Path.home() / ".clutch"
+    from clutch.user_overrides import clutch_home
+    config_dir = clutch_home()
     config_dir.mkdir(parents=True, exist_ok=True)
     return config_dir / "cli_config.json"
 
@@ -79,7 +80,14 @@ def _cmd_route(args: argparse.Namespace) -> int:
         profil = fahrer.strecke_analysieren(prompt)
         scorer = get_scorer()
         score_ergebnis = scorer.bewerte(prompt)
-        config = fahrer.kuppeln(profil, zweck=score_ergebnis.zweck)
+        zweck = args.zweck or score_ergebnis.zweck
+        config = fahrer.kuppeln(
+            profil,
+            zweck=zweck,
+            effort_override=args.effort,
+            ausschluss=args.exclude,
+            praeferenz=args.prefer,
+        )
 
         ergebnis = {
             "gang": config.gang.name,
@@ -87,10 +95,11 @@ def _cmd_route(args: argparse.Namespace) -> int:
             "gas": round(config.gas.wert, 3),
             "effort": config.effort,
             "muster": config.muster,
-            "zweck": score_ergebnis.zweck,
+            "zweck": zweck,
             "score": score_ergebnis.score,
             "gang_stufe": config.gang.gang,
             "grund": config.entscheidungs_grund,
+            "alternativen": config.alternativen,
         }
 
         if args.json:
@@ -105,6 +114,7 @@ def _cmd_route(args: argparse.Namespace) -> int:
             print(f"  {t('route.zweck'):<9} {ergebnis['zweck']}")
             print(f"  {t('route.score'):<9} {ergebnis['score']}/100")
             print(f"  {t('route.grund'):<9} {ergebnis['grund']}")
+            print(f"  {'Alternativen':<9} {', '.join(ergebnis['alternativen']) or '-'}")
 
         return 0
 
@@ -117,10 +127,27 @@ def _cmd_models(args: argparse.Namespace) -> int:
     """Alle Gänge aus dem Getriebe listen."""
     try:
         from clutch.getriebe import Getriebe
+        from clutch.user_overrides import setze_modell_aktiv
         from pathlib import Path as _Path
         import clutch as _clutch_pkg
         config_dir = _Path(_clutch_pkg.__file__).parent / "config"
         getriebe = Getriebe(config_dir=config_dir)
+        if args.action:
+            if not args.name:
+                raise ValueError(f"clutch models {args.action} benoetigt einen Modellnamen")
+            aktiv = args.action == "enable"
+            canonical = getriebe.resolve_name(args.name)
+            data = setze_modell_aktiv(canonical, aktiv=aktiv)
+            result = {
+                "model": canonical,
+                "enabled": aktiv,
+                "disabled_models": data["disabled_models"],
+            }
+            if args.json:
+                _drucke_json(result)
+            else:
+                print(f"{canonical}: {'enabled' if aktiv else 'disabled'}")
+            return 0
         # Discovery ist on-demand und nicht persistent: statische Katalogdaten
         # bleiben die Quelle der Wahrheit, neue Ollama-Gänge gelten für diesen
         # Aufruf und die Web-Anfrage. Ein kurzer Timeout hält die CLI offline
@@ -138,7 +165,19 @@ def _cmd_models(args: argparse.Namespace) -> int:
                 ollama_hosts=konfigurierte_ollama_hosts(),
                 ollama_timeout=discovery_timeout,
             )
-        gaenge = getriebe.alle_gaenge()
+        gaenge = getriebe.alle_gaenge(einschliesslich_deaktiviert=True)
+        status_map: dict[str, dict] = {}
+        if args.status:
+            from clutch.bordcomputer import Bordcomputer
+            from clutch.fahrtenbuch import Fahrtenbuch
+            from clutch.user_overrides import clutch_home
+            db_path = Path(args.db) if args.db else clutch_home() / "clutch.db"
+            buch = Fahrtenbuch(db_path=db_path)
+            status = Bordcomputer(
+                buch,
+                model_provider={gang.name: gang.provider for gang in gaenge},
+            ).pruefe()
+            status_map = status.verfuegbarkeit
 
         if args.json:
             liste = [
@@ -158,6 +197,23 @@ def _cmd_models(args: argparse.Namespace) -> int:
                     "reasoning_modes": g.reasoning_modes,
                     "pricing": g.pricing.to_dict() if g.pricing else None,
                     "pricing_stale": g.pricing.is_stale() if g.pricing else None,
+                    "enabled": not getriebe.ist_deaktiviert(g.name),
+                    **(
+                        {
+                            "availability": (
+                                "disabled" if getriebe.ist_deaktiviert(g.name)
+                                else status_map.get(g.name, {}).get("state", "available")
+                            ),
+                            "blocked_until": status_map.get(g.name, {}).get("until"),
+                            "resets_at": status_map.get(g.name, {}).get("resets_at"),
+                            "availability_reason": (
+                                "user_overrides.disabled_models"
+                                if getriebe.ist_deaktiviert(g.name)
+                                else status_map.get(g.name, {}).get("reason")
+                            ),
+                        }
+                        if args.status else {}
+                    ),
                 }
                 for g in gaenge
             ]
@@ -169,12 +225,24 @@ def _cmd_models(args: argparse.Namespace) -> int:
             h_leist = t("models.header_leistung")
             h_in = t("models.header_kosten_in")
             h_out = t("models.header_kosten_out")
-            print(f"{h_name:<25} {h_prov:<15} {h_stufe:>5}  {h_leist:<10}  {h_in:>8}  {h_out:>9}")
-            print("-" * 80)
+            status_header = "  STATUS" if args.status else ""
+            print(f"{h_name:<25} {h_prov:<15} {h_stufe:>5}  {h_leist:<10}  {h_in:>8}  {h_out:>9}{status_header}")
+            print("-" * (100 if args.status else 80))
             for g in gaenge:
+                status_text = ""
+                if args.status:
+                    detail = status_map.get(g.name, {})
+                    state = "disabled" if getriebe.ist_deaktiviert(g.name) else detail.get("state", "available")
+                    until = detail.get("until")
+                    reason = "user override" if getriebe.ist_deaktiviert(g.name) else detail.get("reason")
+                    status_text = f"  {state}"
+                    if until is not None:
+                        status_text += f" until={until}"
+                    if reason:
+                        status_text += f" ({reason})"
                 print(
                     f"{g.name:<25} {g.provider:<15} {'G' + str(g.gang):>5}  "
-                    f"{g.leistung:<10}  {g.kosten_input_1k:>8.4f}  {g.kosten_output_1k:>9.4f}"
+                    f"{g.leistung:<10}  {g.kosten_input_1k:>8.4f}  {g.kosten_output_1k:>9.4f}{status_text}"
                 )
 
         return 0
@@ -187,6 +255,34 @@ def _cmd_models(args: argparse.Namespace) -> int:
 def _cmd_config(args: argparse.Namespace) -> int:
     """Einstellungen lesen oder setzen."""
     try:
+        if args.key == "prefer":
+            from clutch.getriebe import Getriebe
+            from clutch.user_overrides import lade_user_overrides, setze_praeferenz
+            getriebe = Getriebe()
+            if args.value is None:
+                overrides = lade_user_overrides()
+                result = {
+                    "preferred_models": overrides["preferred_models"],
+                    "preferred_providers": overrides["preferred_providers"],
+                }
+            else:
+                kind, matches = getriebe.passende_praeferenz(args.value)
+                is_provider = kind == "provider"
+                value = args.value if is_provider else (matches[0].name if matches else getriebe.resolve_name(args.value))
+                overrides = setze_praeferenz(value, provider=is_provider)
+                result = {
+                    "preferred": value,
+                    "kind": "provider" if is_provider else "model",
+                    "preferred_models": overrides["preferred_models"],
+                    "preferred_providers": overrides["preferred_providers"],
+                    "gespeichert": True,
+                }
+            if args.json:
+                _drucke_json(result)
+            else:
+                print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0
+
         daten = _lade_config()
 
         if args.value is None:
@@ -519,6 +615,10 @@ def _build_subparser(subparsers: argparse._SubParsersAction) -> None:  # noqa: S
     p_route.add_argument("prompt", help="Der Prompt")
     p_route.add_argument("--json", action="store_true", help="JSON-Ausgabe")
     p_route.add_argument("--db", metavar="PFAD", default=None)
+    p_route.add_argument("--prefer", action="extend", nargs="+", default=[], metavar="GANG|PROVIDER")
+    p_route.add_argument("--exclude", "--skip", action="extend", nargs="+", default=[], metavar="GANG")
+    p_route.add_argument("--zweck", default=None, metavar="ZWECK")
+    p_route.add_argument("--effort", choices=["none", "low", "medium", "high", "xhigh", "max", "max-delegate"])
 
     # --- models ---
     p_models = subparsers.add_parser(
@@ -526,6 +626,9 @@ def _build_subparser(subparsers: argparse._SubParsersAction) -> None:  # noqa: S
         help="Alle Gänge (Modelle) listen",
     )
     p_models.add_argument("--json", action="store_true", help="JSON-Ausgabe")
+    p_models.add_argument("action", nargs="?", choices=["disable", "enable"])
+    p_models.add_argument("name", nargs="?", default=None)
+    p_models.add_argument("--status", action="store_true", help="Verfuegbarkeit und Sperrgrund anzeigen")
     p_models.add_argument(
         "--no-discovery",
         action="store_true",

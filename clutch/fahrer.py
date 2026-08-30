@@ -31,6 +31,7 @@ from clutch.tacho import Tacho
 from clutch.fahrschule import Fahrschule
 from clutch.scorer import get_scorer
 from clutch.pricing import UsageRecord, cost_for_gang
+from clutch.user_overrides import clutch_home
 
 logger = logging.getLogger("clutch")
 
@@ -72,22 +73,40 @@ class Fahrer:
         print(fahrer.status())
     """
 
-    def __init__(self, base_dir: Optional[Path] = None, db_path: Optional[Path] = None):
+    def __init__(
+        self,
+        base_dir: Optional[Path] = None,
+        db_path: Optional[Path] = None,
+        overrides_path: Optional[Path] = None,
+        availability_path: Optional[Path] = None,
+        token_budget_path: Optional[Path] = None,
+        sparmodus_path: Optional[Path] = None,
+    ):
         self.base_dir = base_dir or Path(__file__).parent
         config_dir = self.base_dir / "config"
 
         # DB-Pfad: NICHT ins Repo/OneDrive schreiben. Default = User-Home.
         if db_path is None:
-            db_path = Path.home() / ".clutch" / "clutch.db"
+            db_path = clutch_home() / "clutch.db"
         db_path = Path(db_path)
         db_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Kern-Komponenten (Auto-Teile)
         self.analyse = StreckenAnalyse()
-        self.getriebe = Getriebe(config_dir=config_dir)
+        self.getriebe = Getriebe(config_dir=config_dir, overrides_path=overrides_path)
         self.kupplungs_mechanik = Kupplung(self.getriebe, config_dir=config_dir)
         self.buch = Fahrtenbuch(db_path=db_path)
-        self.bordcomputer = Bordcomputer(self.buch, config_dir=config_dir)
+        self.bordcomputer = Bordcomputer(
+            self.buch,
+            config_dir=config_dir,
+            availability_path=availability_path,
+            token_budget_path=token_budget_path,
+            sparmodus_path=sparmodus_path,
+            model_provider={
+                gang.name: gang.provider
+                for gang in self.getriebe.alle_gaenge(einschliesslich_deaktiviert=True)
+            },
+        )
         self.tankuhr = Tankuhr(config_dir=config_dir, buch=self.buch)
         self.tacho = Tacho(self.buch)
         self.fahrschule = Fahrschule(self.buch, self.kupplungs_mechanik, config_dir=config_dir)
@@ -106,7 +125,9 @@ class Fahrer:
 
     def kuppeln(self, profil: StreckenProfil, zweck: Optional[str] = None,
                 vertrauenswuerdig: bool = True,
-                effort_override: Optional[str] = None) -> FahrtConfig:
+                effort_override: Optional[str] = None,
+                ausschluss: Optional[list[str]] = None,
+                praeferenz: Optional[list[str]] = None) -> FahrtConfig:
         """Kuppelt: Waehlt Gang und Gas basierend auf Strecke + Systemzustand.
 
         zweck (coding/vision/research/...) steuert das Zweck-Routing (M2):
@@ -128,6 +149,8 @@ class Fahrer:
             zweck=zweck,
             vertrauenswuerdig=vertrauenswuerdig,
             effort_override=effort_override,
+            ausschluss=ausschluss,
+            praeferenz=praeferenz,
         )
 
         # Gesperrtes Modell Fallback
@@ -174,6 +197,8 @@ class Fahrer:
         zweck = self.scorer.erkenne_zweck(beschreibung, hat_bild=hat_bild)
         vertrauenswuerdig = bool(kontext.get("vertrauenswuerdig", True)) if kontext else True
         effort_override = kontext.get("effort") if kontext else None
+        ausschluss = kontext.get("ausschluss") if kontext else None
+        praeferenz = kontext.get("praeferenz") if kontext else None
 
         # 2. Kuppeln (zweck-bewusst)
         config = self.kuppeln(
@@ -181,6 +206,8 @@ class Fahrer:
             zweck=zweck,
             vertrauenswuerdig=vertrauenswuerdig,
             effort_override=effort_override,
+            ausschluss=ausschluss,
+            praeferenz=praeferenz,
         )
         config.task_class = (
             str(kontext.get("task_class")) if kontext and kontext.get("task_class")
@@ -198,12 +225,27 @@ class Fahrer:
                     None,
                 )
                 if gang is not None:
+                    task_fields = {
+                        "task_class": config.task_class,
+                        "eval_case": config.eval_case,
+                        "reasoning_mode": config.reasoning_mode,
+                        "service_tier": config.service_tier,
+                        "is_delegate": config.is_delegate,
+                    }
+                    empirical_preferences = [*(praeferenz or []), gang.name]
+                    routed = self.kuppeln(
+                        profil,
+                        zweck=zweck,
+                        vertrauenswuerdig=vertrauenswuerdig,
+                        effort_override=decision.effort,
+                        ausschluss=ausschluss,
+                        praeferenz=empirical_preferences,
+                    )
                     config = replace(
-                        config,
-                        gang=gang,
-                        effort=decision.effort,
+                        routed,
+                        **task_fields,
                         entscheidungs_grund=(
-                            config.entscheidungs_grund
+                            routed.entscheidungs_grund
                             + f" | empirical:{decision.status}:{decision.reason}"
                         ),
                     )
@@ -213,12 +255,15 @@ class Fahrer:
         # 3. Fahren + messen
         fahrt_id = self.tacho.start(profil.typ.value, config)
 
+        fehlertext = None
         try:
             output = handler(config, beschreibung)
             erfolg = bool(getattr(output, "erfolg", True))
+            fehlertext = getattr(output, "fehler", None)
         except Exception as e:
             output = None
             erfolg = False
+            fehlertext = str(e)
             logger.error(f"Fahrt {fahrt_id} gescheitert: {e}")
 
         # 3b. Tokens + Kosten verbuchen (falls Handler ein MotorErgebnis lieferte)
@@ -230,7 +275,11 @@ class Fahrer:
         # 5. Bordcomputer informieren
         warnungen = []
         if eintrag:
-            warnungen = self.bordcomputer.fahrt_auswerten(eintrag)
+            warnungen = self.bordcomputer.fahrt_auswerten(
+                eintrag,
+                fehlertext=fehlertext,
+                output_text=getattr(output, "text", None),
+            )
 
         return FahrtErgebnis(
             fahrt_id=fahrt_id,
@@ -256,17 +305,24 @@ class Fahrer:
         start = time.time()
         fahrt_id = self.tacho.start(strecken_typ, config)
 
+        fehlertext = None
         try:
             output = handler(config)
             erfolg = bool(getattr(output, "erfolg", True))
+            fehlertext = getattr(output, "fehler", None)
         except Exception as e:
             output = None
             erfolg = False
+            fehlertext = str(e)
             logger.error(f"Fahrt {fahrt_id} gescheitert: {e}")
 
         self._verbuchen(fahrt_id, config, output)
         eintrag = self.tacho.stop(fahrt_id, erfolg=erfolg)
-        warnungen = self.bordcomputer.fahrt_auswerten(eintrag) if eintrag else []
+        warnungen = self.bordcomputer.fahrt_auswerten(
+            eintrag,
+            fehlertext=fehlertext,
+            output_text=getattr(output, "text", None),
+        ) if eintrag else []
 
         return FahrtErgebnis(
             fahrt_id=fahrt_id,
@@ -369,6 +425,7 @@ class Fahrer:
                 "gesund": system.gesund,
                 "warnungen": system.warnungen,
                 "gesperrte_modelle": system.gesperrte_modelle,
+                "verfuegbarkeit": system.verfuegbarkeit,
             },
             "tankuhr": {
                 "zone": tank.zone,

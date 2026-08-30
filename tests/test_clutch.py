@@ -176,7 +176,7 @@ def test_fahrtenbuch():
 def test_bordcomputer():
     with tempfile.TemporaryDirectory() as tmpdir:
         buch = Fahrtenbuch(db_path=Path(tmpdir) / "test.db")
-        bc = Bordcomputer(buch)
+        bc = Bordcomputer(buch, availability_path=Path(tmpdir) / "availability.json")
 
         # Gesund
         status = bc.pruefe(budget_verbraucht_pct=10)
@@ -208,7 +208,7 @@ def test_circuit_breaker_consecutive_failures():
     """3 Fehler in Folge oeffnen den Breaker auch unter dem Stundenlimit (5)."""
     with tempfile.TemporaryDirectory() as tmpdir:
         buch = Fahrtenbuch(db_path=Path(tmpdir) / "test.db")
-        bc = Bordcomputer(buch)
+        bc = Bordcomputer(buch, availability_path=Path(tmpdir) / "availability.json")
         assert bc.max_fehler_serie == 3
 
         for i in range(3):

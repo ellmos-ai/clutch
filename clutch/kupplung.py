@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import json
 import random
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
@@ -49,6 +49,7 @@ class FahrtConfig:
     is_delegate: bool = False
     task_class: Optional[str] = None
     eval_case: Optional[str] = None
+    alternativen: list[str] = field(default_factory=list)
 
     @property
     def model_id(self) -> str:
@@ -77,6 +78,7 @@ class FahrtConfig:
             "eval_case": self.eval_case,
             "ist_erkundung": self.ist_erkundung,
             "grund": self.entscheidungs_grund,
+            "alternativen": list(self.alternativen),
         }
 
 
@@ -115,12 +117,20 @@ class Kupplung:
         zweck: Optional[str] = None,
         vertrauenswuerdig: bool = True,
         effort_override: Optional[str] = None,
+        ausschluss: Optional[list[str]] = None,
+        praeferenz: Optional[list[str]] = None,
     ) -> FahrtConfig:
         """Bestimmt die optimale FahrtConfig fuer ein StreckenProfil.
 
         Das ist der Kupplungsvorgang: Gang waehlen + Gas einstellen.
         """
-        gesperrte = gesperrte_modelle or []
+        gesperrte = list(gesperrte_modelle or [])
+        ausgeschlossen = {
+            self.getriebe.resolve_name(name)
+            for name in (ausschluss or [])
+            if isinstance(name, str) and name.strip()
+        }
+        blockiert = set(gesperrte) | ausgeschlossen
 
         # 1. Strecken-Lookup
         strecken_key = profil.typ.value
@@ -178,15 +188,15 @@ class Kupplung:
         # 6b. Zweck-Refinement: Gang nach Zweck/Modalitaet anpassen (staerken-Match).
         #     Bildbewusst: zweck="vision" erzwingt ein vision-faehiges Modell (M2).
         if gang and zweck and zweck != "general":
-            passend = self._zweck_gang(zweck, gang, limit, gesperrte)
+            passend = self._zweck_gang(zweck, gang, limit, list(blockiert))
             if passend and passend.name != gang.name:
                 gang = passend
 
         # 7. Gesperrte Modelle
-        if gang and gang.name in gesperrte:
+        if gang and gang.name in blockiert:
             alternativen = [
                 g for g in self.getriebe.alle_gaenge()
-                if g.name not in gesperrte and g.gang <= (gang.gang if gang else 5)
+                if g.name not in blockiert and g.gang <= (gang.gang if gang else 5)
             ]
             gang = alternativen[-1] if alternativen else None
 
@@ -222,12 +232,15 @@ class Kupplung:
                     gang = teurere[0]
             if profil.tempo == Tempo.EILIG:
                 gas_wert = min(gas_wert, 0.5)
+            if gang.name in blockiert:
+                gang = gang_vor_erkundung
+                ist_erkundung = False
 
         # 10b. Harte Modalitaet: vision darf NICHT durch Exploration gebrochen werden
         #      (ein Nicht-Vision-Modell kann das Bild nicht sehen). Wiederherstellen.
         zusatz_grund = ""
         if zweck == "vision" and gang and "vision" not in gang.staerken:
-            passend = self._zweck_gang("vision", gang, limit, gesperrte)
+            passend = self._zweck_gang("vision", gang, limit, list(blockiert))
             if passend:
                 gang = passend
                 ist_erkundung = False
@@ -238,11 +251,41 @@ class Kupplung:
         # 10c. Untrusted (Web/API): keine agentischen CLI-Motoren mit Auto-Approve.
         if not vertrauenswuerdig and gang and gang.provider in AGENTIC_CLI_PROVIDERS:
             sicher = [g for g in self.getriebe.filter(max_gang=limit)
-                      if g.provider not in AGENTIC_CLI_PROVIDERS and g.name not in gesperrte]
+                      if g.provider not in AGENTIC_CLI_PROVIDERS and g.name not in blockiert]
             if sicher:
                 gang = sicher[-1]
                 ist_erkundung = False
                 zusatz_grund += " | untrusted: agentische CLI ausgeschlossen"
+
+        # 10d. Aufruf- und Nutzerpraeferenzen wirken nach allen harten Gates.
+        # Explizite Aufrufpraeferenzen stehen vor dem update-festen Overlay.
+        kandidaten = self._routing_kandidaten(
+            gang,
+            limit,
+            blockiert,
+            zweck=zweck,
+            vertrauenswuerdig=vertrauenswuerdig,
+        )
+        if not kandidaten:
+            raise RuntimeError("kein verfuegbarer Gang nach Ausschluss- und Verfuegbarkeitsfiltern")
+        if gang.name not in {kandidat.name for kandidat in kandidaten}:
+            gang = min(kandidaten, key=lambda kandidat: (abs(kandidat.gang - gang.gang), -kandidat.gang))
+            ist_erkundung = False
+        tokens = [*(praeferenz or []), *self.getriebe.preferred_models, *self.getriebe.preferred_providers]
+        bevorzugt = self._bevorzugter_gang(tokens, kandidaten, gang)
+        if bevorzugt is not None and bevorzugt.name != gang.name:
+            gang = bevorzugt
+            ist_erkundung = False
+            zusatz_grund += f" | praeferenz={bevorzugt.name}"
+
+        if ausgeschlossen:
+            zusatz_grund += " | ausschluss=" + ",".join(sorted(ausgeschlossen))
+
+        alternativen = [
+            kandidat.name
+            for kandidat in self._rangiere_alternativen(kandidaten, gang, zweck)
+            if kandidat.name != gang.name
+        ][:2]
 
         # Gas-Stellung berechnen
         gas_stellung = self.pedal.stellung(gas_wert)
@@ -256,6 +299,7 @@ class Kupplung:
             ist_erkundung=ist_erkundung,
             entscheidungs_grund=grund,
             effort=effort,
+            alternativen=alternativen,
         )
 
     def override(self, strecken_typ: str, config: dict) -> None:
@@ -314,6 +358,66 @@ class Kupplung:
         elif profil.ist_pipeline:
             return "kolonne"
         return basis_muster
+
+    def _routing_kandidaten(
+        self,
+        aktuell: Gang,
+        limit: int,
+        blockiert: set[str],
+        *,
+        zweck: Optional[str],
+        vertrauenswuerdig: bool,
+    ) -> list[Gang]:
+        kandidaten = [
+            gang for gang in self.getriebe.filter(max_gang=limit)
+            if gang.name not in blockiert
+            and (vertrauenswuerdig or gang.provider not in AGENTIC_CLI_PROVIDERS)
+        ]
+        if zweck == "vision":
+            vision_kandidaten = [gang for gang in kandidaten if "vision" in gang.staerken]
+            if vision_kandidaten:
+                kandidaten = vision_kandidaten
+        aktuell_erlaubt = (
+            aktuell.name not in blockiert
+            and aktuell.gang <= limit
+            and (vertrauenswuerdig or aktuell.provider not in AGENTIC_CLI_PROVIDERS)
+        )
+        if aktuell not in kandidaten and aktuell_erlaubt:
+            kandidaten.append(aktuell)
+        return kandidaten
+
+    def _bevorzugter_gang(
+        self,
+        tokens: list[str],
+        kandidaten: list[Gang],
+        aktuell: Gang,
+    ) -> Optional[Gang]:
+        erlaubt = {gang.name: gang for gang in kandidaten}
+        for token in tokens:
+            if not isinstance(token, str) or not token.strip():
+                continue
+            _, matches = self.getriebe.passende_praeferenz(token.strip())
+            passend = [gang for gang in matches if gang.name in erlaubt]
+            if passend:
+                return min(passend, key=lambda gang: (abs(gang.gang - aktuell.gang), -gang.gang))
+        return None
+
+    def _rangiere_alternativen(
+        self,
+        kandidaten: list[Gang],
+        aktuell: Gang,
+        zweck: Optional[str],
+    ) -> list[Gang]:
+        reihenfolge = {gang.name: index for index, gang in enumerate(self.getriebe.alle_gaenge())}
+        return sorted(
+            kandidaten,
+            key=lambda gang: (
+                0 if gang.name == aktuell.name else 1,
+                0 if not zweck or zweck == "general" or zweck in gang.staerken else 1,
+                abs(gang.gang - aktuell.gang),
+                reihenfolge.get(gang.name, 10_000),
+            ),
+        )
 
     def _erkunden(self, gang: Gang, gas: float) -> tuple[Gang, float, bool]:
         """Epsilon-Greedy: Zufaellige Alternative testen."""
