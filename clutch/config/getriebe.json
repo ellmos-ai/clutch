@@ -433,6 +433,90 @@
       "basis_url": "https://api.moonshot.ai/v1"
     }
   },
+  "execution_registry": {
+    "schema": "ellmos.clutch.execution-registry.v1",
+    "_doc": "Öffentlicher Resolververtrag. Exakte Modelle werden ausschließlich aus gaenge abgeleitet; hier gibt es keine zweite Modellliste.",
+    "provider_evidence": {
+      "anthropic": {
+        "lifecycle": "ga",
+        "catalog_source": "https://platform.claude.com/docs/en/about-claude/models/overview",
+        "catalog_checked_at": "2026-08-22",
+        "runners": ["claude"],
+        "availability": {"provider_documented": true, "provider_api_listed": null, "account_accessible": null, "runner_compatible": true, "host_ready": null}
+      },
+      "openai": {
+        "lifecycle": "ga",
+        "catalog_source": "https://developers.openai.com/api/docs/models",
+        "catalog_checked_at": "2026-08-22",
+        "runners": ["codex"],
+        "availability": {"provider_documented": true, "provider_api_listed": null, "account_accessible": null, "runner_compatible": true, "host_ready": null}
+      },
+      "google": {
+        "lifecycle": "ga",
+        "catalog_source": "https://ai.google.dev/gemini-api/docs/models",
+        "catalog_checked_at": "2026-08-22",
+        "runners": ["clutch"],
+        "availability": {"provider_documented": true, "provider_api_listed": null, "account_accessible": null, "runner_compatible": true, "host_ready": null}
+      },
+      "ollama": {
+        "lifecycle": "ga",
+        "catalog_source": "https://ollama.com/library",
+        "catalog_checked_at": "2026-08-22",
+        "runners": ["clutch", "ollama"],
+        "availability": {"provider_documented": true, "provider_api_listed": null, "account_accessible": null, "runner_compatible": true, "host_ready": null}
+      },
+      "agy": {
+        "lifecycle": "ga",
+        "catalog_source": "https://github.com/ellmos-ai/companion-for-agy",
+        "catalog_checked_at": "2026-07-28",
+        "runners": ["agy"],
+        "availability": {"provider_documented": true, "provider_api_listed": null, "account_accessible": null, "runner_compatible": true, "host_ready": null}
+      },
+      "claude-code": {
+        "lifecycle": "ga",
+        "catalog_source": "https://docs.anthropic.com/en/docs/claude-code/overview",
+        "catalog_checked_at": "2026-08-22",
+        "runners": ["claude"],
+        "availability": {"provider_documented": true, "provider_api_listed": null, "account_accessible": null, "runner_compatible": true, "host_ready": null}
+      },
+      "kimi-cli": {
+        "lifecycle": "ga",
+        "catalog_source": "https://platform.kimi.ai/docs",
+        "catalog_checked_at": "2026-08-22",
+        "runners": ["kimi"],
+        "availability": {"provider_documented": true, "provider_api_listed": null, "account_accessible": null, "runner_compatible": true, "host_ready": null}
+      },
+      "kimi-code": {
+        "lifecycle": "ga",
+        "catalog_source": "https://platform.kimi.ai/docs",
+        "catalog_checked_at": "2026-08-22",
+        "runners": ["kimi"],
+        "availability": {"provider_documented": true, "provider_api_listed": null, "account_accessible": null, "runner_compatible": true, "host_ready": null}
+      },
+      "kimi-api": {
+        "lifecycle": "ga",
+        "catalog_source": "https://platform.kimi.ai/docs/models",
+        "catalog_checked_at": "2026-08-22",
+        "runners": ["kimi"],
+        "availability": {"provider_documented": true, "provider_api_listed": null, "account_accessible": null, "runner_compatible": true, "host_ready": null}
+      }
+    },
+    "aliases": {
+      "gpt": "codex",
+      "gpt5": "openai-gpt-5"
+    },
+    "profiles": {
+      "claude": {"kind": "runner", "selection": "self", "runner": "claude", "providers": ["anthropic", "claude-code"]},
+      "codex": {"kind": "runner", "selection": "self", "runner": "codex", "providers": ["openai"]},
+      "agy": {"kind": "runner", "selection": "self", "runner": "agy", "providers": ["agy"]},
+      "clutch": {"kind": "runner", "selection": "self", "runner": "clutch", "providers": ["google", "ollama"]},
+      "ollama": {"kind": "runner", "selection": "self", "runner": "ollama", "providers": ["ollama"]},
+      "kimi": {"kind": "runner", "selection": "self", "runner": "kimi", "providers": ["kimi-api", "kimi-cli", "kimi-code"]},
+      "claude-opus": {"kind": "family", "selection": "family", "runner": "claude", "provider": "anthropic", "model_id_prefix": "claude-opus"},
+      "claude-sonnet": {"kind": "family", "selection": "family", "runner": "claude", "provider": "anthropic", "model_id_prefix": "claude-sonnet"},
+      "openai-gpt-5": {"kind": "family", "selection": "family", "runner": "codex", "provider": "openai", "model_id_prefix": "gpt-5."}
+    }
+  },
   "fahrer_optionen": {
     "_doc": "Welche Modelle als Fahrer (Orchestrator) fungieren koennen. claude-code = die aktuelle Claude Code Session (z.B. du selbst)",
     "standard": "claude-code",

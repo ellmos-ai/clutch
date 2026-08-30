@@ -45,7 +45,7 @@ def test_llms_txt_structure_and_timestamp():
     llms_text = (REPO_ROOT / "llms.txt").read_text(encoding="utf-8")
 
     assert "Last-checked: 2026-08-30" in llms_text, "llms.txt Last-checked timestamp should be 2026-08-30"
-    assert "367" in llms_text, "llms.txt should report 367 passing unit tests"
+    assert "383" in llms_text, "llms.txt should report 383 passing unit tests"
     assert "## Audience" in llms_text, "llms.txt missing Audience section"
     assert "## Search Phrases" in llms_text, "llms.txt missing Search Phrases section"
     assert "## Docs" in llms_text, "llms.txt missing Docs section"
@@ -91,6 +91,8 @@ def test_readme_google_model_table_matches_catalog():
     assert "Gemini 3.5 Flash fallback" in readme_en, "README.md must keep Gemini 3.5 Flash as fallback"
     assert "Gemini 3.7 Flash (bevorzugt)" in readme_de, "README_de.md must list Gemini 3.7 Flash as preferred"
     assert "Gemini 3.5 Flash als Fallback" in readme_de, "README_de.md must keep Gemini 3.5 Flash as fallback"
+    assert "Execution selectors and provider evidence" in readme_en
+    assert "Ausführungsselektoren und Provider-Evidenz" in readme_de
 
 
 def test_security_contact_email():

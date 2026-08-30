@@ -10,8 +10,8 @@
 
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Version 0.6.0](https://img.shields.io/badge/Version-0.6.0-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
-[![Pytest](https://img.shields.io/badge/Pytest-367%20passed-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
+[![Version 0.6.1](https://img.shields.io/badge/Version-0.6.1-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
+[![Pytest](https://img.shields.io/badge/Pytest-383%20passed-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
 [![Providers](https://img.shields.io/badge/Providers-Anthropic%20%7C%20Gemini%20%7C%20OpenAI%20%7C%20Ollama%20%7C%20Kimi-purple.svg)](https://github.com/ellmos-ai/clutch)
 [![Security: Local-First](https://img.shields.io/badge/Security-Local--First-green.svg)](SECURITY.md)
 [![Ecosystem: ellmos-ai](https://img.shields.io/badge/Ecosystem-ellmos--ai-blue.svg)](https://github.com/ellmos-ai)
@@ -36,6 +36,7 @@
 - **Execution patterns** -- single tasks, chains (convoy), parallel teams, and swarm processing
 - **Persistent availability** -- circuit breakers and quota blocks survive one-shot processes; red Anthropic 5h/7d windows, `notaus`, and provider rate-limit failures are routed around until reset
 - **Update-safe user overlay** -- disable models, prefer models/providers, cap model tiers, define aliases, and override model costs in `~/.clutch/user_overrides.json`
+- **Evidence-bearing execution selectors** -- resolve runner, family, and exact model bindings without silently substituting models; provider adapters keep five availability stages separate
 - **Per-call routing wishes** -- prefer or exclude gears, override purpose/effort, and receive two ranked fallback alternatives
 - **Health monitoring** -- persistent circuit breakers, latency tracking, overkill/token-explosion alerts, provider failover
 - **SQLite metrics** -- persistent trip log, chat sessions, prompt library, and profiles
@@ -182,6 +183,7 @@ clutch chat                           # interactive REPL
 clutch models [--status] [--json]     # models plus optional availability/reset reason
 clutch models disable claude-sonnet   # persistent, update-safe user override
 clutch models enable claude-sonnet
+clutch resolve gpt5 --runner codex --json  # resolve only; never executes a model
 clutch config prefer openai           # prefer a model or provider persistently
 clutch stats                          # usage / budget / health dashboard
 clutch config <key> [value]           # read/set CLI settings
@@ -237,6 +239,25 @@ states and provider quota blocks with `until`/`resets_at`; every
 `Bordcomputer.pruefe()` reloads it, so separate CLI processes share the same
 availability decision. Missing or stale token-budget input never creates a new
 block, while a previously evidenced red block remains active until its reset.
+
+### Execution selectors and provider evidence
+
+`resolve_execution_selector()` resolves runner profiles (`claude`, `codex`,
+`agy`, `clutch`, `ollama`, `kimi`), `self`, families such as `gpt5`, and exact
+registry names or model IDs. Exact selectors are never substituted. The JSON
+result separates `resolved` (the selector exists) from `claimable` (all required
+evidence exists) and includes a deterministic registry fingerprint.
+
+Claimability requires five independent stages to be true:
+`provider_documented`, `provider_api_listed`, `account_accessible`,
+`runner_compatible`, and `host_ready`. Bundled catalog data deliberately does
+not infer account access or host readiness, so it fails closed until a caller
+applies a proven `ProviderCatalogSnapshot`.
+
+Provider I/O remains outside the core package. Injected `ProviderCatalogAdapter`
+implementations return validated snapshots; `refresh_provider_catalog()` reports
+their diff and retains the last proven snapshot on failure. Applying a snapshot
+can enrich existing curated gears but never adds a provider-discovered model.
 
 ### Per-call routing wishes
 
