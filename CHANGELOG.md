@@ -6,6 +6,38 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1
 
 ---
 
+## [0.6.0] - 2026-08-30 - Persistente Verfügbarkeit, Nutzer-Overlay und Routing-Wünsche
+
+T-20260830-195164348 / W195. Dieser Release umfasst ausschließlich U1, U2 und
+U3; Discovery-Änderungen aus U4 sowie U5+ sind ausdrücklich nicht enthalten.
+
+### Added
+- Prozessübergreifende `~/.clutch/availability.json` für Circuit-Zustände und
+  Provider-Kontingentsperren mit `until`/`resets_at`. `Bordcomputer.pruefe()`
+  liest den Zustand bei jedem Aufruf neu.
+- Konservative Vorabsperren für frische rote Anthropic-5h/7d-Signale und
+  `sparmodus mode=notaus`; fehlende/veraltete Schattenwerte lösen keine neue
+  Sperre aus. 429-/Quota-/Rate-Limit-Fehler und agy Exit 0 ohne Ausgabe setzen
+  eine zeitlich begrenzte Provider-Sperre.
+- Update-festes Nutzer-Overlay `~/.clutch/user_overrides.json` mit
+  `disabled_models`, `preferred_models`, `preferred_providers`,
+  `model_max_gang`, `aliases` und optionalem `model_cost_override`.
+- CLI-Verwaltung: `clutch models disable|enable <name>`, `clutch models
+  --status` und `clutch config prefer <gang|provider>`.
+- Routing-Wünsche pro Aufruf: `clutch route --prefer ... --exclude/--skip ...
+  --zweck ... --effort ...` sowie `Fahrer.kuppeln(..., ausschluss=[...],
+  praeferenz=[...])`.
+- Route-JSON und `FahrtConfig.to_dict()` enthalten immer zwei gerankte
+  Fallback-Gänge im Feld `alternativen` (soweit mindestens zwei verfügbar sind).
+- 11 fokussierte W195-Regressionstests; Gesamtsuite 367 Tests.
+
+### Safety boundary
+- Keine EMA-basierte Boost-/Drossel-Migration: Das in
+  `docs/STAGED-MIGRATION.md` definierte 14-Tage-/90%-Reifekriterium war mangels
+  `clutch_shadow_protocol.jsonl` nicht belegbar. Aktiviert wurde nur die im
+  Ticket verlangte harte rote Verfügbarkeitssperre; sparmodus/notaus bleibt
+  unverändert.
+
 ## [0.5.0] - 2026-08-25 - Stufe 1 Schattenmodus: Anthropic-5h/7d als zweite Tankuhr-Dimension
 
 T-20260825-939511775 (T1E, User-Entscheidung, Stufenplan siehe [`docs/STAGED-MIGRATION.md`](docs/STAGED-MIGRATION.md)).
@@ -73,7 +105,8 @@ T-20260825-939511775 (T1E, User-Entscheidung, Stufenplan siehe [`docs/STAGED-MIG
   das Routing explizit vor der Modellauswahl.
 - Vier Vertragstests sichern Standardwerte, benutzerdefinierte Konfiguration,
   Phantomdatei-Ignorierung und die harte Rot-Sperre ab.
-- Verifikation: 355/355 Pytests, Ruff, Compileall, JSON- und Diff-Check grün.
+- Verifikation nach Merge mit Version 0.6.0: 371/371 Pytests, Ruff, Compileall,
+  JSON- und Diff-Check grün.
 
 ### GPT-5.6 cost and empirical routing (2026-08-20)
 

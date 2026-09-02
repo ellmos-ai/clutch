@@ -10,8 +10,8 @@
 
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Version 0.5.0](https://img.shields.io/badge/Version-0.5.0-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
-[![Pytest](https://img.shields.io/badge/Pytest-355%20passed-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
+[![Version 0.6.0](https://img.shields.io/badge/Version-0.6.0-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
+[![Pytest](https://img.shields.io/badge/Pytest-371%20passed-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
 [![Providers](https://img.shields.io/badge/Providers-Anthropic%20%7C%20Gemini%20%7C%20OpenAI%20%7C%20Ollama%20%7C%20Kimi-purple.svg)](https://github.com/ellmos-ai/clutch)
 [![Security: Local-First](https://img.shields.io/badge/Security-Local--First-green.svg)](SECURITY.md)
 [![Ecosystem: ellmos-ai](https://img.shields.io/badge/Ecosystem-ellmos--ai-blue.svg)](https://github.com/ellmos-ai)
@@ -34,7 +34,10 @@
 - **Budget tracking** -- four-zone fuel gauge (green/yellow/orange/red) with daily and monthly limits
 - **Learning engine** -- fitness scoring and epsilon-greedy exploration that improves routing over time
 - **Execution patterns** -- single tasks, chains (convoy), parallel teams, and swarm processing
-- **Health monitoring** -- circuit breakers, latency tracking, overkill/token-explosion alerts, provider failover
+- **Persistent availability** -- circuit breakers and quota blocks survive one-shot processes; red Anthropic 5h/7d windows, `notaus`, and provider rate-limit failures are routed around until reset
+- **Update-safe user overlay** -- disable models, prefer models/providers, cap model tiers, define aliases, and override model costs in `~/.clutch/user_overrides.json`
+- **Per-call routing wishes** -- prefer or exclude gears, override purpose/effort, and receive two ranked fallback alternatives
+- **Health monitoring** -- persistent circuit breakers, latency tracking, overkill/token-explosion alerts, provider failover
 - **SQLite metrics** -- persistent trip log, chat sessions, prompt library, and profiles
 
 ## Architecture
@@ -172,10 +175,14 @@ After `pip install -e .` the `clutch` command is available:
 
 ```bash
 clutch route "Fix the auth bug"      # show the routing decision (dry-run, no LLM call)
+clutch route "..." --prefer codex --exclude claude-sonnet --zweck coding --effort high
 clutch "Explain quantum computing"    # one-shot: route + execute, print the answer
 clutch run "..." --json               # machine-readable output (for other agents)
 clutch chat                           # interactive REPL
-clutch models [--json]                # list all gears (models)
+clutch models [--status] [--json]     # models plus optional availability/reset reason
+clutch models disable claude-sonnet   # persistent, update-safe user override
+clutch models enable claude-sonnet
+clutch config prefer openai           # prefer a model or provider persistently
 clutch stats                          # usage / budget / health dashboard
 clutch config <key> [value]           # read/set CLI settings
 clutch keys set MOONSHOT_API_KEY      # store an API key (hidden input; values never shown)
@@ -208,6 +215,49 @@ folder to `Fahrer` if you want project-specific overrides.
 | `getriebe.json` | All gears + provider mappings |
 | `strecken.json` | Road type to gear/throttle/effort mapping |
 | `fitness_criteria.json` | Learning engine thresholds |
+
+Bundled files remain immutable defaults. User choices are layered over them
+from `~/.clutch/user_overrides.json` with these fields:
+
+```json
+{
+  "disabled_models": ["claude-sonnet"],
+  "preferred_models": ["openai-codex"],
+  "preferred_providers": ["openai"],
+  "model_max_gang": {"openai-codex": 4},
+  "aliases": {"codex": "openai-codex"},
+  "model_cost_override": {
+    "ollama-kimi-k2": {"kosten_input_1k": 0.001, "kosten_output_1k": 0.004}
+  }
+}
+```
+
+`~/.clutch/availability.json` is runtime-owned state. It persists model circuit
+states and provider quota blocks with `until`/`resets_at`; every
+`Bordcomputer.pruefe()` reloads it, so separate CLI processes share the same
+availability decision. Missing or stale token-budget input never creates a new
+block, while a previously evidenced red block remains active until its reset.
+
+### Per-call routing wishes
+
+The library accepts the same routing wishes as the CLI:
+
+```python
+profile = fahrer.strecke_analysieren("Implement the parser")
+config = fahrer.kuppeln(
+    profile,
+    zweck="coding",
+    effort_override="high",
+    ausschluss=["claude-sonnet"],
+    praeferenz=["codex", "openai"],
+)
+print(config.gang.name)
+print(config.alternativen)  # two ranked fallback gears
+```
+
+Hard constraints (disabled/unavailable/excluded gears, budget, trust, and
+required vision capability) are applied before preferences. Route JSON always
+contains `alternativen`.
 
 ### Reasoning Effort
 

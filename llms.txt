@@ -1,11 +1,11 @@
 # clutch - Provider-Neutral LLM Orchestration Engine
 
-Last-checked: 2026-08-26
-Test-suite: 355 passing unit tests (pytest verified 100% green)
+Last-checked: 2026-09-02
+Test-suite: 371 passing unit tests (pytest verified 100% green)
 
 > clutch (German: Kupplung) uses a driving metaphor to intelligently route tasks to optimal LLM models across providers. It analyzes task complexity, selects the right model and reasoning level, tracks budgets with a four-zone fuel gauge, and learns from experience via fitness scoring and epsilon-greedy exploration.
 
-clutch is the routing layer of the ellmos family (Extra Large Language Model Operating Systems): a provider-neutral orchestration engine that sits in front of Anthropic (Claude), Google (Gemini), Ollama (local), Claude Code, agy through companion-for-agy, and Kimi/Moonshot. Every concept is mapped onto a car metaphor -- Fahrer (driver/orchestrator), Getriebe (gearbox/model registry, gears G1-G5 from Haiku to Opus), Gas/Bremse (throttle, reasoning level 0-100%), Kupplung (clutch, model switching), Tankuhr (fuel gauge, budget tracking), Fahrtenbuch (trip log, SQLite metrics), Fahrschule (learning engine). Current version v0.5.0 (library + CLI + optional FastAPI web UI; purpose- and vision-aware routing; model discovery; credential store; i18n en/de/es/zh/ja/ru). Python 3.10+, MIT. Verified 355/355 passing unit tests.
+clutch is the routing layer of the ellmos family (Extra Large Language Model Operating Systems): a provider-neutral orchestration engine that sits in front of Anthropic (Claude), Google (Gemini), Ollama (local), Claude Code, agy through companion-for-agy, and Kimi/Moonshot. Every concept is mapped onto a car metaphor -- Fahrer (driver/orchestrator), Getriebe (gearbox/model registry, gears G1-G5 from Haiku to Opus), Gas/Bremse (throttle, reasoning level 0-100%), Kupplung (clutch, model switching), Tankuhr (fuel gauge, budget tracking), Fahrtenbuch (trip log, SQLite metrics), Fahrschule (learning engine). Current version v0.6.0 (library + CLI + optional FastAPI web UI; persistent availability/quota blocks; update-safe user overrides; per-call preferences, exclusions and ranked alternatives; purpose- and vision-aware routing; model discovery; credential store; i18n en/de/es/zh/ja/ru). Python 3.10+, MIT. Verified 371/371 passing unit tests.
 
 Gemini flash tier (2026-08-13): the preferred Google gear is `gemini-3.7-flash` (G2, 1M context, thinking levels low/medium/high recorded in the catalog); the older `gemini-3.5-flash` gear stays available as fallback. Gemini 3.7 is a Google-API gear only -- the agy/companion-for-agy rail still tops out at `gemini-3.6-flash`, which that CLI build offers.
 

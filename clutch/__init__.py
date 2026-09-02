@@ -12,7 +12,7 @@ Auto-Metapher:
   Tankuhr  = Budget-Tracking
 """
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 
 from clutch.fahrer import Fahrer
 from clutch.strecke import StreckenAnalyse, StreckenTyp
@@ -20,9 +20,11 @@ from clutch.getriebe import Getriebe, Gang
 from clutch.kupplung import Kupplung
 from clutch.budget_policy import BudgetErschoepftError
 from clutch.motorblock import MotorBlock, MotorErgebnis
+from clutch.execution import ExecutionRegistryError, resolve_execution_selector
 
 __all__ = [
     "Fahrer", "StreckenAnalyse", "StreckenTyp",
     "Getriebe", "Gang", "Kupplung", "BudgetErschoepftError",
     "MotorBlock", "MotorErgebnis",
+    "ExecutionRegistryError", "resolve_execution_selector",
 ]

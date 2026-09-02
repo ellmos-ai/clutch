@@ -19,6 +19,11 @@ provider-neutral LLM orchestration library.
 
 ## Current
 
+- [x] **W195 / T-20260830-195164348 (U1-U3):** Persistente Modell-/Provider-
+  Verfügbarkeit, update-festes Nutzer-Overlay und Routing-Wünsche/Ausschlüsse
+  pro Aufruf einschließlich zweier JSON-Alternativen. DONE 2026-08-30 in
+  Version 0.6.0. U4+ (Discovery/Probe/Katalogpflege) bleibt separat offen.
+
 - [x] **M6 Web-UI: CLI- + Env-/Key-Verwaltung spiegeln** — Settings-Panel in der
   Web-Oberfläche, das `clutch keys` (set/list/remove, Werte nie anzeigen) und
   `clutch config` spiegelt und erkannte Env-Keys anzeigt. Endpunkte
@@ -36,8 +41,10 @@ provider-neutral LLM orchestration library.
   provider smoke scripts; keep them out of normal `pytest` collection.
   (Erledigt: `pyproject.toml` begrenzt `testpaths` auf `tests/`; README
   dokumentiert die Smoke-Scripts als manuelle Provider-Checks.)
-- [ ] Add focused tests for provider availability checks without requiring live
+- [x] Add focused tests for provider availability checks without requiring live
   Anthropic, Google, Ollama, or Claude Code credentials.
+  DONE 2026-08-30: persistente Circuit-/Kontingentpfade, rote 5h/7d-Signale,
+  `notaus`, 429-/Rate-Limit und agy-Leerausgabe werden offline getestet.
 - [ ] Decide whether `clutch/config/` display strings should stay German or gain parallel
   English descriptions.
 - [ ] Verify current provider model IDs before the next release.
@@ -163,10 +170,12 @@ Drei Zugangswege, aufsteigend nach Komfort:
 
 ### Architektur-Entscheidungen
 
-- [ ] **Getrennte Schichten:** `getriebe.json` (mitgelieferte Defaults) vs.
+- [x] **Getrennte Schichten:** `getriebe.json` (mitgelieferte Defaults) vs.
   `custom_models.txt` / `user_getriebe.json` (Nutzer-Overrides) vs.
   Discovery-Cache (auto-generiert). Merge-Reihenfolge:
   Defaults < Discovery < User-Overrides.
+  DONE 2026-08-30 für die Nutzer-Schicht als
+  `~/.clutch/user_overrides.json`; Discovery bleibt on-demand und U4 separat.
 - [ ] **Fallback bei unbekanntem Modell:** Wenn ein Task ein Modell erfordert
   das nicht registriert ist → Discovery-Lauf triggern → wenn gefunden,
   automatisch registrieren → wenn nicht, Nutzer informieren.

@@ -10,8 +10,8 @@
 
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Lizenz: MIT](https://img.shields.io/badge/Lizenz-MIT-green.svg)](LICENSE)
-[![Version 0.5.0](https://img.shields.io/badge/Version-0.5.0-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
-[![Pytest](https://img.shields.io/badge/Pytest-355%20bestanden-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
+[![Version 0.6.0](https://img.shields.io/badge/Version-0.6.0-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
+[![Pytest](https://img.shields.io/badge/Pytest-371%20bestanden-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
 [![Provider](https://img.shields.io/badge/Provider-Anthropic%20%7C%20Gemini%20%7C%20OpenAI%20%7C%20Ollama%20%7C%20Kimi-purple.svg)](https://github.com/ellmos-ai/clutch)
 [![Sicherheit: Local-First](https://img.shields.io/badge/Sicherheit-Local--First-green.svg)](SECURITY.md)
 [![Ökosystem: ellmos-ai](https://img.shields.io/badge/%C3%96kosystem-ellmos--ai-blue.svg)](https://github.com/ellmos-ai)
@@ -34,7 +34,10 @@
 - **Budget-Tracking** -- Tankuhr mit vier Zonen (grün/gelb/orange/rot) mit täglichen und monatlichen Limits
 - **Lernengine** -- Fitness-Scoring und Epsilon-Greedy-Exploration, die das Routing im Laufe der Zeit verbessert
 - **Ausführungsmuster** -- Einzelaufgaben, Ketten (Kolonne), parallele Teams und Schwarm-Verarbeitung
-- **Gesundheitsüberwachung** -- Circuit-Breaker, Latenz-Tracking, Overkill/Token-Explosion-Alarme, Provider-Failover
+- **Persistente Verfügbarkeit** -- Circuit-Breaker und Kontingentsperren überleben One-Shot-Prozesse; rote Anthropic-5h/7d-Fenster, `notaus` und Provider-Rate-Limits werden bis zum Reset umgangen
+- **Update-festes Nutzer-Overlay** -- Modelle deaktivieren, Modelle/Provider bevorzugen, Gangstufen begrenzen, Aliase und Modellkosten in `~/.clutch/user_overrides.json` pflegen
+- **Routing-Wünsche pro Aufruf** -- Gänge bevorzugen oder ausschließen, Zweck/Effort überschreiben und zwei gerankte Fallback-Alternativen erhalten
+- **Gesundheitsüberwachung** -- persistente Circuit-Breaker, Latenz-Tracking, Overkill/Token-Explosion-Alarme, Provider-Failover
 - **SQLite-Metriken** -- persistentes Fahrtenbuch, Chat-Sitzungen, Prompt-Bibliothek und Profile
 
 ## Architektur
@@ -172,10 +175,14 @@ Nach `pip install -e .` ist der Befehl `clutch` verfügbar:
 
 ```bash
 clutch route "Fix the auth bug"      # show the routing decision (dry-run, no LLM call)
+clutch route "..." --prefer codex --exclude claude-sonnet --zweck coding --effort high
 clutch "Explain quantum computing"    # one-shot: route + execute, print the answer
 clutch run "..." --json               # machine-readable output (for other agents)
 clutch chat                           # interactive REPL
-clutch models [--json]                # list all gears (models)
+clutch models [--status] [--json]     # Modelle plus Verfügbarkeit/Reset-Grund
+clutch models disable claude-sonnet   # persistentes, update-festes Nutzer-Override
+clutch models enable claude-sonnet
+clutch config prefer openai           # Modell oder Provider dauerhaft bevorzugen
 clutch stats                          # usage / budget / health dashboard
 clutch config <key> [value]           # read/set CLI settings
 clutch keys set MOONSHOT_API_KEY      # store an API key (hidden input; values never shown)
@@ -206,6 +213,50 @@ Die Standardkonfiguration liegt in `clutch/config/`, sodass bearbeitbare Install
 | `getriebe.json` | Alle Gänge + Provider-Zuordnungen |
 | `strecken.json` | Streckentyp-zu-Gang/Gas/Effort-Zuordnung |
 | `fitness_criteria.json` | Schwellenwerte der Lernengine |
+
+Die gebündelten Dateien bleiben unveränderte Standardwerte. Nutzerwünsche
+werden aus `~/.clutch/user_overrides.json` darübergelegt:
+
+```json
+{
+  "disabled_models": ["claude-sonnet"],
+  "preferred_models": ["openai-codex"],
+  "preferred_providers": ["openai"],
+  "model_max_gang": {"openai-codex": 4},
+  "aliases": {"codex": "openai-codex"},
+  "model_cost_override": {
+    "ollama-kimi-k2": {"kosten_input_1k": 0.001, "kosten_output_1k": 0.004}
+  }
+}
+```
+
+`~/.clutch/availability.json` ist laufzeiteigener Zustand. Die Datei hält
+Modell-Circuits und Provider-Kontingentsperren mit `until`/`resets_at`
+prozessübergreifend fest. Jeder Aufruf von `Bordcomputer.pruefe()` liest sie
+neu, sodass getrennte CLI-Prozesse dieselbe Verfügbarkeitsentscheidung teilen.
+Fehlende oder veraltete Token-Budget-Daten erzeugen keine neue Sperre; eine
+zuvor belegte rote Sperre bleibt jedoch bis zu ihrem Reset aktiv.
+
+### Routing-Wünsche pro Aufruf
+
+Die Bibliothek akzeptiert dieselben Wünsche wie die CLI:
+
+```python
+profil = fahrer.strecke_analysieren("Implementiere den Parser")
+config = fahrer.kuppeln(
+    profil,
+    zweck="coding",
+    effort_override="high",
+    ausschluss=["claude-sonnet"],
+    praeferenz=["codex", "openai"],
+)
+print(config.gang.name)
+print(config.alternativen)  # zwei gerankte Fallback-Gänge
+```
+
+Harte Grenzen (deaktivierte/nicht verfügbare/ausgeschlossene Gänge, Budget,
+Vertrauen und erforderliche Vision-Fähigkeit) gelten vor Präferenzen. Das
+Route-JSON enthält immer `alternativen`.
 
 ### Reasoning-Effort
 
