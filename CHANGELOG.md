@@ -96,6 +96,18 @@ T-20260825-939511775 (T1E, User-Entscheidung, Stufenplan siehe [`docs/STAGED-MIG
 
 ## [Unreleased]
 
+### Budget policy single source of truth (2026-08-26)
+
+- Die dokumentierten Ganglimits Grün G1–G5, Gelb G1–G3, Orange G1–G2 und Rot
+  ohne LLM sind jetzt kanonisch in `fitness_criteria.json` hinterlegt.
+- `Bordcomputer` und `Kupplung` verwenden dieselbe validierte Policy; die
+  undokumentierte Phantomquelle `fitness.json` wurde entfernt und Rot beendet
+  das Routing explizit vor der Modellauswahl.
+- Vier Vertragstests sichern Standardwerte, benutzerdefinierte Konfiguration,
+  Phantomdatei-Ignorierung und die harte Rot-Sperre ab.
+- Verifikation nach Merge mit Version 0.6.0: 371/371 Pytests, Ruff, Compileall,
+  JSON- und Diff-Check grün.
+
 ### GPT-5.6 cost and empirical routing (2026-08-20)
 
 - GPT-5.6 Luna, Terra und Sol mit sechs Effort-Stufen, aktuellen
