@@ -803,9 +803,16 @@ class AgyCompanionMotor(Motor):
         )
 
     def ist_verfuegbar(self) -> bool:
+        # ponytail: companion-for-agy has no --version flag (exits 1, "Unknown
+        # option") -- that made this probe report False even when agy itself
+        # runs fine (T-20260902-665621838). --doctor is the wrapper's own
+        # preflight: it confirms the agy binary specifically ("agy executable:
+        # PASS") and exits 0 only when there are no blockers, so it checks the
+        # whole path ausfuehren() actually needs, not just this wrapper's
+        # presence.
         try:
             result = subprocess.run(
-                [self.binary, "--version"],
+                [self.binary, "--doctor"],
                 capture_output=True, text=True, timeout=10,
             )
             return result.returncode == 0

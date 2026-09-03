@@ -1,8 +1,11 @@
 """Tests fuer die agy-Registry und den companion-for-agy-Motor."""
 
 import json
+import shutil
 import subprocess
 from types import SimpleNamespace
+
+import pytest
 
 from clutch.gas_bremse import GasBremse
 from clutch.getriebe import Getriebe
@@ -94,3 +97,36 @@ def test_agy_motor_selects_thinking_and_reports_errors(monkeypatch):
     result = motor.ausfuehren(config, "x")
     assert not result.erfolg
     assert "model unavailable" in (result.fehler or "")
+
+
+def test_agy_motor_probes_doctor_not_version(monkeypatch):
+    """Regression for T-20260902-665621838: companion-for-agy has no
+    --version flag (exits 1), which made ist_verfuegbar() report False even
+    when agy itself works fine. --doctor is the flag that actually exits 0
+    only when the wrapper confirms agy is executable."""
+    captured = {}
+
+    def fake_run(argv, **kwargs):
+        captured["argv"] = argv
+        return SimpleNamespace(returncode=0, stdout="", stderr="")
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    assert AgyCompanionMotor(binary="companion-for-agy").ist_verfuegbar() is True
+    assert captured["argv"] == ["companion-for-agy", "--doctor"]
+
+
+def test_agy_motor_unavailable_when_doctor_reports_blockers(monkeypatch):
+    monkeypatch.setattr(
+        subprocess, "run",
+        lambda *a, **k: SimpleNamespace(returncode=2, stdout="", stderr=""),
+    )
+    assert AgyCompanionMotor(binary="companion-for-agy").ist_verfuegbar() is False
+
+
+def test_agy_motor_ist_verfuegbar_against_real_host():
+    """Live probe, no mocks -- catches the class of bug the mocked tests
+    above cannot: a probe that is internally consistent but checks the
+    wrong thing against the real binary/wrapper on this host."""
+    if not shutil.which("companion-for-agy"):
+        pytest.skip("companion-for-agy not installed on this host")
+    assert AgyCompanionMotor().ist_verfuegbar() is True
