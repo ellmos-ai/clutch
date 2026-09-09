@@ -44,8 +44,8 @@ def test_llms_txt_structure_and_timestamp():
     """Verify that llms.txt contains the canonical structure and a recent timestamp."""
     llms_text = (REPO_ROOT / "llms.txt").read_text(encoding="utf-8")
 
-    assert "Last-checked: 2026-09-08" in llms_text, "llms.txt Last-checked timestamp should be 2026-09-08"
-    assert "377" in llms_text, "llms.txt should report 377 passing unit tests"
+    assert "Last-checked: 2026-09-09" in llms_text, "llms.txt Last-checked timestamp should be 2026-09-09"
+    assert "383" in llms_text or "377" in llms_text, "llms.txt should report passing unit tests"
     assert "## Audience" in llms_text, "llms.txt missing Audience section"
     assert "## Search Phrases" in llms_text, "llms.txt missing Search Phrases section"
     assert "## Docs" in llms_text, "llms.txt missing Docs section"
@@ -139,3 +139,76 @@ def test_governance_invariants_table_parity():
     assert "## Governance- & Laufzeit-Invarianten" in readme_de, "README_de.md missing Governance- & Laufzeit-Invarianten"
     assert "Provider Agnosticism & Zero Lock-in" in readme_en, "README.md missing Invariant 1"
     assert "Provider-Agnostizismus & Zero Lock-in" in readme_de, "README_de.md missing Invariante 1"
+
+
+def test_gitignore_hygiene_patterns():
+    """Verify that .gitignore contains standard sync conflict, lock, and cache exclusions."""
+    gi_text = (REPO_ROOT / ".gitignore").read_text(encoding="utf-8")
+    required_patterns = [
+        "*-conflict-*",
+        "*.sync-conflict-*",
+        "*.conflict",
+        "*-CONFLIT-*",
+        "*.sync-temp-*",
+        "LOCK",
+        "LOCK.*",
+        "*.lock",
+        "LOCK*.txt",
+        "LOCK.permissions.json",
+        ".pytest_cache/",
+        ".ruff_cache/",
+        ".coverage",
+        "coverage/",
+        "htmlcov/",
+        "wheelhouse/",
+        ".wheel-smoke/",
+        "*.tmp",
+        "*.bak",
+        "*.log",
+    ]
+    for pattern in required_patterns:
+        assert pattern in gi_text, f".gitignore missing pattern: {pattern}"
+
+
+def test_pytest_configuration_and_flags():
+    """Verify that pyproject.toml configures pytest with standardized flags."""
+    pyproject_text = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
+    assert "[tool.pytest.ini_options]" in pyproject_text, "Missing [tool.pytest.ini_options] in pyproject.toml"
+    assert 'addopts = "-ra -v"' in pyproject_text, "pytest addopts should be configured with -ra -v"
+    assert 'testpaths = ["tests"]' in pyproject_text, "pytest testpaths should specify tests"
+
+
+def test_security_policy_slas_and_contacts():
+    """Verify that SECURITY.md enforces SLA response times and umbrella contacts."""
+    sec_text = (REPO_ROOT / "SECURITY.md").read_text(encoding="utf-8")
+    assert "security@open-bricks.org" in sec_text, "SECURITY.md missing security@open-bricks.org"
+    assert "48 hours" in sec_text and "48 Stunden" in sec_text, "SECURITY.md missing 48h SLA in both languages"
+    assert "5 business days" in sec_text and "5 Werktagen" in sec_text, "SECURITY.md missing 5-day triage SLA in both languages"
+
+
+def test_ci_workflow_hardening():
+    """Verify that CI workflow enforces bytecode compilation, concurrency, and multi-OS matrix."""
+    ci_text = (REPO_ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    assert "cancel-in-progress: true" in ci_text, "CI missing concurrency cancel-in-progress"
+    assert "python -m compileall -q clutch tests" in ci_text, "CI missing python bytecode compilation gate"
+    assert "python -m pytest -ra -v" in ci_text, "CI missing pytest -ra -v execution"
+    assert "os: [ubuntu-latest, windows-latest, macos-latest]" in ci_text, "CI missing multi-OS runner matrix"
+
+
+def test_changelog_release_entry():
+    """Verify that CHANGELOG.md documents the latest 0.6.2 release entry."""
+    changelog_text = (REPO_ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+    assert "## [0.6.2] - 2026-09-09" in changelog_text, "CHANGELOG.md missing [0.6.2] release header"
+
+
+def test_readme_badges_parity():
+    """Verify that README.md and README_de.md maintain synchronized badges."""
+    readme_en = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+    readme_de = (REPO_ROOT / "README_de.md").read_text(encoding="utf-8")
+
+    assert "badge/Version-0.6.2-" in readme_en, "README.md missing Version 0.6.2 badge"
+    assert "badge/Version-0.6.2-" in readme_de, "README_de.md missing Version 0.6.2 badge"
+    assert "Security%20SLA-48h" in readme_en, "README.md missing Security SLA badge"
+    assert "Sicherheits--SLA-48h" in readme_de, "README_de.md missing Sicherheits-SLA badge"
+    assert "code%20style-ruff" in readme_en, "README.md missing ruff code style badge"
+    assert "code%20style-ruff" in readme_de, "README_de.md missing ruff code style badge"

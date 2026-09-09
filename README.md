@@ -8,13 +8,15 @@
 
 > Provider-neutral LLM orchestration engine and model router with auto-learning
 
-[![Version 0.6.1](https://img.shields.io/badge/Version-0.6.1-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
+[![Version 0.6.2](https://img.shields.io/badge/Version-0.6.2-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
 [![CI](https://img.shields.io/badge/CI-passing-brightgreen.svg)](https://github.com/ellmos-ai/clutch/actions)
-[![Pytest](https://img.shields.io/badge/Pytest-374%20passed-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
+[![Pytest](https://img.shields.io/badge/Pytest-383%20passed-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![Platforms](https://img.shields.io/badge/Platforms-Linux%20%7C%20Windows%20%7C%20macOS-blue.svg)](https://github.com/ellmos-ai/clutch)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Providers](https://img.shields.io/badge/Providers-Anthropic%20%7C%20Gemini%20%7C%20OpenAI%20%7C%20Ollama%20%7C%20Kimi-purple.svg)](https://github.com/ellmos-ai/clutch)
+[![Security SLA: 48h](https://img.shields.io/badge/Security%20SLA-48h%20Response%20%7C%205d%20Triage-blue.svg)](SECURITY.md)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![Security: Local-First](https://img.shields.io/badge/Security-Local--First-green.svg)](SECURITY.md)
 [![Privacy: Zero-Egress](https://img.shields.io/badge/Privacy-Zero--Egress-success.svg)](SECURITY.md)
 [![Non-Elevation](https://img.shields.io/badge/Elevation-User--Mode-informational.svg)](SECURITY.md)
