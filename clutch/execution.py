@@ -3,8 +3,10 @@
 ``Getriebe`` remains the single source of concrete model records.  This
 module adds the missing contract layer that classifies a selector as a runner,
 family, exact model, or alias and returns a deterministic registry
-fingerprint.  It deliberately does not probe credentials or host readiness;
-those observations belong to the executing host.
+fingerprint.  It probes credential and host readiness on the executing host
+(T-20260902-665621838, via the same ``Motor.ist_verfuegbar()`` checks
+``motorblock`` already trusts) rather than leaving them permanently ``None`` --
+a ``required`` execution binding depends on both being confirmed.
 """
 
 from __future__ import annotations
@@ -15,6 +17,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from clutch.getriebe import Gang, Getriebe
+from clutch.motorblock import MotorBlock
 
 
 class ExecutionRegistryError(RuntimeError):
@@ -99,15 +102,64 @@ def _registry_fingerprint(registry: Getriebe) -> str:
     return f"sha256:{hashlib.sha256(encoded).hexdigest()}"
 
 
-def _availability(*, registered: bool, compatible: bool | None) -> dict[str, bool | None]:
+# Providers whose Motor.ist_verfuegbar() checks a credential (API key
+# presence) rather than a local binary/endpoint. Every provider named in
+# _RUNNER_PROVIDERS has a Motor in motorblock.MotorBlock; this set just
+# decides which readiness axis its check result answers -- the axis it
+# does NOT answer stays None (not checked), never guessed as unavailable.
+_CREDENTIAL_PROVIDERS = frozenset({"anthropic", "google", "openai", "kimi-api"})
+
+
+def _probe_provider(provider: str) -> tuple[bool | None, bool | None]:
+    """(host_ready, account_accessible) for one provider's Motor.
+
+    Reuses the readiness checks the execution layer already trusts (CLI
+    ``--version`` probes, local Ollama ``/api/tags``, credential lookups)
+    instead of re-implementing them here.
+    """
+    try:
+        motor = MotorBlock().motor_fuer(provider)
+    except ValueError:
+        return None, None
+    # ponytail: probes live on every call (subprocess/network for CLI and
+    # Ollama motors) -- fine at binding time, not a per-token hot path. Add
+    # a short-TTL cache here if that assumption stops holding.
+    ready = motor.ist_verfuegbar()
+    if provider in _CREDENTIAL_PROVIDERS:
+        return None, ready
+    return ready, None
+
+
+def _aggregate_readiness(providers: frozenset[str]) -> tuple[bool | None, bool | None]:
+    """Combines per-provider readiness for a selector that may resolve to
+    several providers (a runner or family selector). None stays None unless
+    at least one provider in the set actually answered that axis; among
+    those that did, one working provider is enough."""
+    host_results: list[bool] = []
+    account_results: list[bool] = []
+    for provider in providers:
+        host, account = _probe_provider(provider)
+        if host is not None:
+            host_results.append(host)
+        if account is not None:
+            account_results.append(account)
+    host_ready = any(host_results) if host_results else None
+    account_accessible = any(account_results) if account_results else None
+    return host_ready, account_accessible
+
+
+def _availability(
+    *, registered: bool, compatible: bool | None,
+    host_ready: bool | None = None, account_accessible: bool | None = None,
+) -> dict[str, bool | None]:
     return {
         "registry_loaded": True,
         "selector_registered": registered,
         "provider_documented": registered,
         "provider_api_listed": registered,
-        "account_accessible": None,
+        "account_accessible": account_accessible,
         "runner_compatible": compatible,
-        "host_ready": None,
+        "host_ready": host_ready,
     }
 
 
@@ -132,8 +184,9 @@ def resolve_execution_selector(
 
     ``resolved`` answers whether the selector exists.  ``claimable`` also
     requires a compatible runner and at least one eligible concrete model.
-    Missing account access and host readiness remain explicitly unmeasured in
-    ``availability`` rather than being inferred from registry presence.
+    ``availability.host_ready``/``account_accessible`` are probed per
+    candidate provider and stay ``None`` only where no Motor answered that
+    axis -- never inferred from registry presence alone.
     """
     if not isinstance(selector, str):
         raise TypeError("execution selector must be a string")
@@ -157,19 +210,22 @@ def resolve_execution_selector(
     provider: str | None = None
     registry_name: str | None = None
     model_id: str | None = None
+    provider_candidates: frozenset[str]
 
     if canonical in _RUNNER_PROVIDERS:
         selector_type = "runner"
         model_selection = "self"
         selected_runner = canonical
+        provider_candidates = _RUNNER_PROVIDERS[selected_runner]
         models = [
             gang for gang in model_registry.alle_gaenge()
-            if gang.provider in _RUNNER_PROVIDERS[selected_runner]
+            if gang.provider in provider_candidates
         ]
     elif canonical in _FAMILY_POLICIES:
         selector_type = "family"
         model_selection = "family"
         selected_runner = str(_FAMILY_POLICIES[canonical]["runner"])
+        provider_candidates = frozenset(_FAMILY_POLICIES[canonical]["providers"])
         models = _family_models(model_registry, canonical)
     else:
         exact_by_name = {gang.name.casefold(): gang for gang in model_registry.alle_gaenge()}
@@ -203,6 +259,7 @@ def resolve_execution_selector(
         canonical = exact.name
         models = [exact]
         provider = exact.provider
+        provider_candidates = frozenset({provider})
         registry_name = exact.name
         model_id = exact.model_id
 
@@ -215,6 +272,7 @@ def resolve_execution_selector(
         reason = "selector-has-no-eligible-models"
     else:
         reason = None
+    host_ready, account_accessible = _aggregate_readiness(provider_candidates)
 
     return {
         "requested_selector": requested,
@@ -229,7 +287,10 @@ def resolve_execution_selector(
         "model_id": model_id,
         "allowed_runners": [selected_runner],
         "eligible_models": eligible_models,
-        "availability": _availability(registered=True, compatible=compatible),
+        "availability": _availability(
+            registered=True, compatible=compatible,
+            host_ready=host_ready, account_accessible=account_accessible,
+        ),
         "reason": reason,
         "registry_fingerprint": fingerprint,
         "resolved_at": timestamp,

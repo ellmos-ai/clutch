@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 # Import-Name bleibt `clutch`; PyPI-Distributionsname ist `clutch-router`,
 # weil `clutch` auf PyPI bereits vergeben ist (altes GAE-Framework).
 name = "clutch-router"
-version = "0.6.0"
+version = "0.6.1"
 description = "Provider-neutral LLM orchestration engine and router (CLI/Web/API) with auto-learning"
 readme = "README.md"
 license = "MIT"
@@ -46,9 +46,13 @@ web = [
 
 [project.urls]
 Homepage = "https://github.com/ellmos-ai/clutch"
+Documentation = "https://github.com/ellmos-ai/clutch#readme"
 Repository = "https://github.com/ellmos-ai/clutch"
 Issues = "https://github.com/ellmos-ai/clutch/issues"
 Changelog = "https://github.com/ellmos-ai/clutch/blob/master/CHANGELOG.md"
+Security = "https://github.com/ellmos-ai/clutch/blob/master/SECURITY.md"
+"Parent Organization" = "https://github.com/ellmos-ai"
+"Umbrella Ecosystem" = "https://github.com/open-bricks"
 
 [project.scripts]
 clutch = "clutch.cli:main"

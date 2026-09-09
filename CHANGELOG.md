@@ -4,6 +4,23 @@ Alle wesentlichen Änderungen an **clutch** werden hier dokumentiert.
 
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.6.1] - 2026-09-08 - Discoverability, Dual-Mermaid, Invariants & Multi-OS CI Parity
+
+Pfad B ("Marketing & Design / Discoverability") Wartungs- und Standardisierungslauf im GitHubBot-Flottenverbund.
+
+### Added
+- **Multi-OS CI Matrix (`.github/workflows/ci.yml`)**: Umfassender GitHub Actions CI-Workflow mit Matrix über `ubuntu-latest`, `windows-latest` und `macos-latest` sowie Python `3.10`, `3.11`, `3.12`, `3.13`, automatischer Pip-Cache-Nutzung, `ruff check .`, `python -m compileall -q` Bytecode-Prüfung und `pytest -q`.
+- **Duale Mermaid-Diagramme**: Architektur-Topologie (`flowchart TD` mit semantischen Subgraphen für Clients, Orchestrierung, Registry, Motoren und Telemetrie) sowie sequentieller Task- und Routing-Lebenszyklus (`sequenceDiagram`) in `README.md` und `README_de.md`.
+- **Governance- und Laufzeit-Invarianten**: Formalisierte 10-Punkte-Tabelle mit verbindlichen Garantien (Provider-Agnostizismus, 100% Local-First & Zero Egress, Non-Elevation User-Mode, Fail-Closed Circuit Breaker, Update-feste Nutzer-Overlays, Dual-Alternative Fallbacks, 2D-Telemetrie, Zweck-/Vision-Passgenauigkeit, transaktionales SQLite-Ledger, Multi-OS Parität).
+- **Schnellnavigation (Quick Navigation)**: 14-Punkte-Ankerleiste in `README.md` und `README_de.md`.
+- **Erweiterte Ökosystem-Matrix**: 12 Partner-Repositories über `ellmos-ai`, `dev-bricks`, `file-bricks` und `open-bricks`.
+- **PEP 621 Metadaten**: `[project.urls]` in `pyproject.toml` um `Documentation`, `Security`, `Parent Organization` (`ellmos-ai`) und `Umbrella Ecosystem` (`open-bricks`) erweitert.
+- **Sicherheitsrichtlinie (`SECURITY.md`)**: Unterstützte Versionen (`0.6.x`), verbindliche Reaktions-SLA (48h Erstreaktion / 5 Werktage Triage), offizielle Sicherheitskontakte und Laufzeit-Invarianten.
+- **Automatisierte Paritäts- und Kontrakt-Tests (`tests/test_metadata.py`)**: 11 automatisierte Pytest-Prüfungen zur Sicherstellung von README-Navigation, Diagrammen, Invarianten, Security-Kontakten, PEP 621-URLs und Multi-OS CI.
+
+### Fixed
+- **Code-Hygiene**: Linter-Warnungen `E741 Ambiguous variable name: l` in `tests/test_m13_token_throughput.py` behoben.
+
 ---
 
 ## [0.6.0] - 2026-08-30 - Persistente Verfügbarkeit, Nutzer-Overlay und Routing-Wünsche
@@ -105,7 +122,7 @@ T-20260825-939511775 (T1E, User-Entscheidung, Stufenplan siehe [`docs/STAGED-MIG
   das Routing explizit vor der Modellauswahl.
 - Vier Vertragstests sichern Standardwerte, benutzerdefinierte Konfiguration,
   Phantomdatei-Ignorierung und die harte Rot-Sperre ab.
-- Verifikation nach Merge mit Version 0.6.0: 371/371 Pytests, Ruff, Compileall,
+- Verifikation nach Merge mit Version 0.6.1: 381/381 Pytests, Ruff, Compileall,
   JSON- und Diff-Check grün.
 
 ### GPT-5.6 cost and empirical routing (2026-08-20)

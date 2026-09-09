@@ -1,20 +1,36 @@
 # clutch - Provider-Neutral LLM Orchestration Engine
 
-Last-checked: 2026-09-02
-Test-suite: 371 passing unit tests (pytest verified 100% green)
+Last-checked: 2026-09-09
+Test-suite: 381 passing unit tests (pytest verified 100% green)
 
-> clutch (German: Kupplung) uses a driving metaphor to intelligently route tasks to optimal LLM models across providers. It analyzes task complexity, selects the right model and reasoning level, tracks budgets with a four-zone fuel gauge, and learns from experience via fitness scoring and epsilon-greedy exploration.
+> clutch (German: Kupplung) uses a driving metaphor to intelligently route tasks to optimal LLM models across providers. It analyzes task complexity and purpose, selects the right model and reasoning level, tracks budgets with a four-zone fuel gauge, enforces persistent circuit breakers, and learns from experience via fitness scoring and epsilon-greedy exploration.
 
-clutch is the routing layer of the ellmos family (Extra Large Language Model Operating Systems): a provider-neutral orchestration engine that sits in front of Anthropic (Claude), Google (Gemini), Ollama (local), Claude Code, agy through companion-for-agy, and Kimi/Moonshot. Every concept is mapped onto a car metaphor -- Fahrer (driver/orchestrator), Getriebe (gearbox/model registry, gears G1-G5 from Haiku to Opus), Gas/Bremse (throttle, reasoning level 0-100%), Kupplung (clutch, model switching), Tankuhr (fuel gauge, budget tracking), Fahrtenbuch (trip log, SQLite metrics), Fahrschule (learning engine). Current version v0.6.0 (library + CLI + optional FastAPI web UI; persistent availability/quota blocks; update-safe user overrides; per-call preferences, exclusions and ranked alternatives; purpose- and vision-aware routing; model discovery; credential store; i18n en/de/es/zh/ja/ru). Python 3.10+, MIT. Verified 371/371 passing unit tests.
+clutch is the routing layer of the ellmos family (Extra Large Language Model Operating Systems): a provider-neutral orchestration engine that sits in front of Anthropic (Claude), Google (Gemini), OpenAI (GPT/Codex), Ollama (local & remote), Claude Code, agy through companion-for-agy, and Kimi/Moonshot. Every concept is mapped onto a car metaphor -- Fahrer (driver/orchestrator), Getriebe (gearbox/model registry, gears G1-G5 from Haiku to Opus), Gas/Bremse (throttle, reasoning level 0-100%), Kupplung (clutch, model switching), Tankuhr (fuel gauge, budget tracking), Fahrtenbuch (trip log, SQLite metrics), Fahrschule (learning engine). Current version v0.6.1 (library + CLI + optional FastAPI web UI; persistent availability/quota blocks; update-safe user overrides; per-call preferences, exclusions and ranked alternatives; purpose- and vision-aware routing; model discovery; credential store; i18n en/de/es/zh/ja/ru; multi-OS CI across Linux, Windows, macOS). Python 3.10+, MIT. Verified 381/381 passing unit tests.
 
 Gemini flash tier (2026-08-13): the preferred Google gear is `gemini-3.7-flash` (G2, 1M context, thinking levels low/medium/high recorded in the catalog); the older `gemini-3.5-flash` gear stays available as fallback. Gemini 3.7 is a Google-API gear only -- the agy/companion-for-agy rail still tops out at `gemini-3.6-flash`, which that CLI build offers.
 
 Execution patterns: single (one task), convoy (chain), team (parallel workers), swarm (bulk). Road types classify tasks by difficulty: Feldweg (trivial, Haiku), Landstrasse (standard, Sonnet), Autobahn (architecture, Opus), Rallye (bulk, Haiku swarm), Konvoi (pipeline, Sonnet chain), Langstrecke (complex, Opus hybrid). Budget tracking uses four zones: green / yellow / orange / red with daily and monthly limits. Circuit breakers, latency tracking, and provider failover are built in (Bordcomputer).
 
+## Core Governance & Runtime Invariants
+
+1. Provider Agnosticism & Zero Lock-in: seamless hot-swapping between Anthropic, Google Gemini, OpenAI, Ollama, and Kimi.
+2. 100% Local-First & Zero Egress: no analytics, tracking, or telemetry egress; network calls connect strictly to user-configured LLM provider endpoints.
+3. Non-Elevation User Mode: all CLI commands, background processes, and FastAPI web servers execute within unprivileged user-space permissions.
+4. Fail-Closed Circuit Breaker: quota blocks, red windows, and API failures trigger persistent circuit breakers in `~/.clutch/availability.json` rather than looping.
+5. Update-Safe User Overlays: user preferences, model exclusions, aliases, and cost overrides live in `~/.clutch/user_overrides.json` and persist across package updates.
+6. Dual-Alternative Ranked Fallbacks: every routing resolution produces a primary gear plus two ranked alternative fallbacks.
+7. Two-Dimensional Telemetry: combines financial USD consumption zones (Tankuhr) with real-time token throughput burn rates (token_throughput.py).
+8. Purpose & Vision Alignment: multimodal and vision inputs are strictly routed to vision-capable models; code tasks match specialized coding gears.
+9. Transactional SQLite Audit Ledger: all trips, execution records, chat sessions, and prompt library entries are safely stored in local SQLite databases with ACID guarantees.
+10. Cross-Platform Multi-OS Parity: identical behavior, CLI ergonomics, test coverage, and routing semantics across Linux, Windows, and macOS.
+
 ## Docs
 
 - [README](https://github.com/ellmos-ai/clutch/blob/master/README.md): Overview, architecture, road types, installation, quickstart
+- [README_de](https://github.com/ellmos-ai/clutch/blob/master/README_de.md): Deutsche Dokumentation
 - [GLOSSARY](https://github.com/ellmos-ai/clutch/blob/master/GLOSSARY.md): German automotive code terms mapped to English
+- [CHANGELOG](https://github.com/ellmos-ai/clutch/blob/master/CHANGELOG.md): Release notes and version history
+- [SECURITY](https://github.com/ellmos-ai/clutch/blob/master/SECURITY.md): Security policy, response SLAs, and vulnerability reporting
 - [LICENSE](https://github.com/ellmos-ai/clutch/blob/master/LICENSE): MIT license text
 
 ## Audience
@@ -41,6 +57,8 @@ Execution patterns: single (one task), convoy (chain), team (parallel workers), 
 - [Gardener](https://github.com/ellmos-ai/gardener): Database-based OS counterpart
 - [MarbleRun / llmauto](https://github.com/ellmos-ai/MarbleRun): Chain-execution framework
 - [Skills](https://github.com/ellmos-ai/skills): Portable skill library
+- [agent-ops-stack](https://github.com/ellmos-ai/agent-ops-stack): Composed operational sidecar stack
+- [convergence-reconciler](https://github.com/ellmos-ai/convergence-reconciler): Cross-model convergence validation
 
 ## Optional
 

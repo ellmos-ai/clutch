@@ -44,11 +44,12 @@ def test_llms_txt_structure_and_timestamp():
     """Verify that llms.txt contains the canonical structure and a recent timestamp."""
     llms_text = (REPO_ROOT / "llms.txt").read_text(encoding="utf-8")
 
-    assert "Last-checked: 2026-09-02" in llms_text, "llms.txt Last-checked timestamp should be 2026-09-02"
-    assert "371" in llms_text, "llms.txt should report 371 passing unit tests"
+    assert "Last-checked: 2026-09-09" in llms_text, "llms.txt Last-checked timestamp should be 2026-09-09"
+    assert "381" in llms_text, "llms.txt should report 381 passing unit tests"
     assert "## Audience" in llms_text, "llms.txt missing Audience section"
     assert "## Search Phrases" in llms_text, "llms.txt missing Search Phrases section"
     assert "## Docs" in llms_text, "llms.txt missing Docs section"
+    assert "Core Governance & Runtime Invariants" in llms_text, "llms.txt missing Governance Invariants section"
 
 
 def test_security_and_ecosystem_sections():
@@ -61,16 +62,19 @@ def test_security_and_ecosystem_sections():
     assert "Ecosystem & Sibling Tools" in readme_en, "README.md missing Ecosystem matrix"
     assert "Verwandte Tools & Ökosystem" in readme_de, "README_de.md missing Ecosystem matrix"
     assert "open-bricks" in readme_en and "open-bricks" in readme_de, "Ecosystem umbrella missing"
+    assert "agent-ops-stack" in readme_en and "convergence-reconciler" in readme_en, "Missing partner tools"
 
 
 def test_github_actions_workflow_ci_matrix_and_lint():
     """Verify that GitHub Actions CI workflow tests across Python 3.10-3.13 and includes ruff linting."""
-    ci_file = REPO_ROOT / ".github" / "workflows" / "tests.yml"
-    assert ci_file.is_file(), "CI workflow .github/workflows/tests.yml missing"
+    ci_file = REPO_ROOT / ".github" / "workflows" / "ci.yml"
+    assert ci_file.is_file(), "CI workflow .github/workflows/ci.yml missing"
     ci_text = ci_file.read_text(encoding="utf-8")
 
+    assert 'os: [ubuntu-latest, windows-latest, macos-latest]' in ci_text, "CI matrix must cover multi-OS"
     assert 'python-version: ["3.10", "3.11", "3.12", "3.13"]' in ci_text, "CI matrix must cover Python 3.10 through 3.13"
     assert "ruff check ." in ci_text, "CI workflow must include automated ruff check linting step"
+    assert "cancel-in-progress: true" in ci_text, "CI workflow must include concurrency cancel-in-progress"
 
 
 def test_pyproject_configuration_and_classifiers():
@@ -80,6 +84,8 @@ def test_pyproject_configuration_and_classifiers():
     assert "Programming Language :: Python :: 3.13" in pyproject_text, "pyproject.toml must include Python 3.13 classifier"
     assert "[tool.ruff]" in pyproject_text, "pyproject.toml must include [tool.ruff] section"
     assert "[tool.ruff.lint]" in pyproject_text, "pyproject.toml must include [tool.ruff.lint] section"
+    assert "Parent Organization" in pyproject_text, "pyproject.toml missing Parent Organization url"
+    assert "Umbrella Ecosystem" in pyproject_text, "pyproject.toml missing Umbrella Ecosystem url"
 
 
 def test_readme_google_model_table_matches_catalog():
@@ -94,7 +100,42 @@ def test_readme_google_model_table_matches_catalog():
 
 
 def test_security_contact_email():
-    """Verify that SECURITY.md contains dedicated security contact email addresses."""
+    """Verify that SECURITY.md contains dedicated security contact email addresses and SLA."""
     sec_text = (REPO_ROOT / "SECURITY.md").read_text(encoding="utf-8")
     assert "security@ellmos.ai" in sec_text, "SECURITY.md must provide security@ellmos.ai"
     assert "support@lukasgeiger.com" in sec_text, "SECURITY.md must provide support@lukasgeiger.com"
+    assert "lukas@open-bricks.org" in sec_text, "SECURITY.md must provide lukas@open-bricks.org"
+    assert "48 hours" in sec_text or "48 Stunden" in sec_text, "SECURITY.md must provide 48h response SLA"
+
+
+def test_quick_navigation_anchors_parity():
+    """Verify that both READMEs contain the 14-point Quick Navigation anchor list."""
+    readme_en = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+    readme_de = (REPO_ROOT / "README_de.md").read_text(encoding="utf-8")
+
+    assert "## Quick Navigation" in readme_en, "README.md missing Quick Navigation"
+    assert "## Schnellnavigation" in readme_de, "README_de.md missing Schnellnavigation"
+    assert "14. [Security Policy & Liability]" in readme_en or "14. [Security" in readme_en
+    assert "14. [Sicherheitsrichtlinie & Haftung]" in readme_de or "14. [Sicherheitsrichtlinie" in readme_de
+
+
+def test_dual_mermaid_diagrams_parity():
+    """Verify that both READMEs contain dual Mermaid diagrams: flowchart TD and sequenceDiagram."""
+    readme_en = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+    readme_de = (REPO_ROOT / "README_de.md").read_text(encoding="utf-8")
+
+    assert "flowchart TD" in readme_en, "README.md missing architecture flowchart TD diagram"
+    assert "sequenceDiagram" in readme_en, "README.md missing lifecycle sequenceDiagram"
+    assert "flowchart TD" in readme_de, "README_de.md missing architecture flowchart TD diagram"
+    assert "sequenceDiagram" in readme_de, "README_de.md missing lifecycle sequenceDiagram"
+
+
+def test_governance_invariants_table_parity():
+    """Verify that both READMEs document the 10 Governance & Runtime Invariants."""
+    readme_en = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+    readme_de = (REPO_ROOT / "README_de.md").read_text(encoding="utf-8")
+
+    assert "## Governance & Runtime Invariants" in readme_en, "README.md missing Governance & Runtime Invariants"
+    assert "## Governance- & Laufzeit-Invarianten" in readme_de, "README_de.md missing Governance- & Laufzeit-Invarianten"
+    assert "Provider Agnosticism & Zero Lock-in" in readme_en, "README.md missing Invariant 1"
+    assert "Provider-Agnostizismus & Zero Lock-in" in readme_de, "README_de.md missing Invariante 1"
