@@ -1,0 +1,58 @@
+name: ellmos review gate
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, ready_for_review]
+  repository_dispatch:
+    types: [ellmos-review-gate]
+
+permissions:
+  contents: read
+  pull-requests: read
+  statuses: write
+
+concurrency:
+  group: ellmos-review-gate-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  pending:
+    if: github.event_name == 'pull_request_target'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out trusted default-branch verifier
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - name: Mark the exact pull-request head pending
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ELLMOS_REPOSITORY: ${{ github.repository }}
+          ELLMOS_PR_NUMBER: ${{ github.event.pull_request.number }}
+          ELLMOS_PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: >-
+          python .github/review-gate/review_gate.py workflow-pending
+          --repo "$ELLMOS_REPOSITORY"
+          --pr "$ELLMOS_PR_NUMBER"
+          --head-sha "$ELLMOS_PR_HEAD_SHA"
+
+  dispatch:
+    if: github.event_name == 'repository_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out trusted default-branch verifier
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - name: Verify signed receipt and publish the exact-SHA gate status
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ELLMOS_REPOSITORY: ${{ github.repository }}
+          ELLMOS_RECEIPT_B64: ${{ github.event.client_payload.receipt_b64 }}
+          ELLMOS_SIGNATURE_B64: ${{ github.event.client_payload.signature_b64 }}
+          ELLMOS_ALLOWED_SIGNERS_B64: ${{ vars.ELLMOS_REVIEW_GATE_ALLOWED_SIGNERS_B64 }}
+        run: >-
+          python .github/review-gate/review_gate.py workflow-dispatch
+          --repo "$ELLMOS_REPOSITORY"
