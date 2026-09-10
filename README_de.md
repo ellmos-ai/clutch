@@ -10,7 +10,7 @@
 
 [![Version 0.6.2](https://img.shields.io/badge/Version-0.6.2-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
 [![CI](https://img.shields.io/badge/CI-bestanden-brightgreen.svg)](https://github.com/ellmos-ai/clutch/actions)
-[![Pytest](https://img.shields.io/badge/Pytest-383%20bestanden-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
+[![Pytest](https://img.shields.io/badge/Pytest-387%20bestanden-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![Plattformen](https://img.shields.io/badge/Plattformen-Linux%20%7C%20Windows%20%7C%20macOS-blue.svg)](https://github.com/ellmos-ai/clutch)
 [![Lizenz: MIT](https://img.shields.io/badge/Lizenz-MIT-green.svg)](LICENSE)
@@ -361,6 +361,60 @@ Standardkonfigurationen liegen in `clutch/config/`. Eigene Overlays werden in `~
   }
 }
 ```
+
+---
+
+Die Bibliothek akzeptiert dieselben Wünsche wie die CLI:
+
+```python
+profil = fahrer.strecke_analysieren("Implementiere den Parser")
+config = fahrer.kuppeln(
+    profil,
+    zweck="coding",
+    effort_override="high",
+    ausschluss=["claude-sonnet"],
+    praeferenz=["codex", "openai"],
+)
+print(config.gang.name)
+print(config.alternativen)  # zwei gerankte Fallback-Gänge
+```
+
+Harte Grenzen (deaktivierte/nicht verfügbare/ausgeschlossene Gänge, Budget,
+Vertrauen und erforderliche Vision-Fähigkeit) gelten vor Präferenzen. Das
+Route-JSON enthält immer `alternativen`.
+
+### Reasoning-Effort
+
+Modellwahl und Reasoning-Effort sind orthogonal: clutch entscheidet **welches
+Modell** (Gang) und hält im optionalen Feld `effort` fest, **wie tief** ein
+kompatibler Agent arbeiten soll. Aufgabenklassen in `strecken.json` können
+verwenden:
+
+- `high` für routinemäßige, klar begrenzte Arbeit
+- `xhigh` als reguläres gründliches Session-Level
+- `max-delegate` für einen transparent angekündigten, gezielten Max-Worker beim
+  härtesten Einzelschritt; dadurch entsteht kein dauerhafter Max-Modus
+
+Aufrufer können die Empfehlung für genau einen Aufruf mit
+`kontext={"effort": "high"}` überschreiben. `ultracode` ist bewusst kein
+Effort-Wert: Es beschreibt Breite (Team-/Schwarm-Fan-out), nicht tiefere
+Analyse; teure Fan-outs brauchen weiterhin eine ausdrückliche Bestätigung.
+Lange Rechenarbeit wird in beobachtbare Schritte zerlegt. Dauert ein einzelner
+Schritt voraussichtlich etwa 10--15 Minuten oder länger, gehört dieser Schritt
+auf den Mac-Studio-Compute-Pfad.
+
+### Budget-Zonen
+
+| Zone | Auslastung | Erlaubte Gänge |
+|------|-------|--------------|
+| Grün | 0--30 % | Alle (G1--G5) |
+| Gelb | 30--60 % | G1--G3 |
+| Orange | 60--80 % | Nur G1--G2 |
+| Rot | 80--100 % | Keine (Budget erschöpft) |
+
+`clutch/config/fitness_criteria.json` ist die einzige Laufzeitquelle für diese
+Grenzen. Bordcomputer und Kupplung lesen dieselbe Policy; bei Rot stoppt das
+Routing, bevor ein LLM ausgewählt wird.
 
 ---
 

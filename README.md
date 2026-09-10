@@ -10,7 +10,7 @@
 
 [![Version 0.6.2](https://img.shields.io/badge/Version-0.6.2-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
 [![CI](https://img.shields.io/badge/CI-passing-brightgreen.svg)](https://github.com/ellmos-ai/clutch/actions)
-[![Pytest](https://img.shields.io/badge/Pytest-383%20passed-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
+[![Pytest](https://img.shields.io/badge/Pytest-387%20passed-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![Platforms](https://img.shields.io/badge/Platforms-Linux%20%7C%20Windows%20%7C%20macOS-blue.svg)](https://github.com/ellmos-ai/clutch)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -430,6 +430,10 @@ more, route that step to the Mac Studio compute path.
 | Yellow | 30--60% | G1--G3 |
 | Orange | 60--80% | G1--G2 only |
 | Red | 80--100% | None (budget exhausted) |
+
+`clutch/config/fitness_criteria.json` is the single runtime source for these
+limits. Both the onboard computer and the clutch read the same policy; a red
+zone stops routing before an LLM is selected.
 
 ---
 
