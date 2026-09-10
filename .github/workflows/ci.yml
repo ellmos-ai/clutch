@@ -48,4 +48,4 @@ jobs:
 
       - name: Run pytest test suite
         run: |
-          python -m pytest -q
+          python -m pytest -ra -v

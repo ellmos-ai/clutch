@@ -35,8 +35,11 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e . pytest ruff
 
+      - name: Bytecode compilation check
+        run: python -m compileall -q clutch tests
+
       - name: Lint with ruff
         run: ruff check .
 
       - name: Run tests
-        run: python -m pytest -q
+        run: python -m pytest -ra -v

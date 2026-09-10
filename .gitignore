@@ -48,5 +48,30 @@ docs/BACH_MIGRATION.md
 *.tar.gz
 *.zip
 
-# Interne Multi-Agenten-Koordination (LOCK-System)
+# Multi-Host-Synchronisationskonflikte
+*-conflict-*
+*.sync-conflict-*
+*.conflict
+*-CONFLIT-*
+*.sync-temp-*
+
+# Interne Multi-Agenten-Koordination & Locks
+LOCK
+LOCK.*
+*.lock
 LOCK*.txt
+LOCK.permissions.json
+
+# Test-, Coverage- und Packaging-Caches
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage/
+htmlcov/
+wheelhouse/
+.wheel-smoke/
+
+# Temporäre Editor- und Log-Dateien
+*.tmp
+*.bak
+*.log

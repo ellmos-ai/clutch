@@ -4,6 +4,20 @@ Alle wesentlichen Änderungen an **clutch** werden hier dokumentiert.
 
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.6.2] - 2026-09-09 - Repository Hygiene, CI Hardening & Contract Tests
+
+Pfad A ("Technische Hygiene") Wartungs- und Standardisierungslauf im GitHubBot-Flottenverbund.
+
+### Added
+- **.gitignore-Härtung**: Erweiterung um Multi-Host-Synchronisationskonflikte (`*-conflict-*`, `*.sync-conflict-*`, `*.conflict`, `*-CONFLIT-*`, `*.sync-temp-*`), Multi-Agent-Locks (`LOCK`, `LOCK.*`, `*.lock`, `LOCK*.txt`, `LOCK.permissions.json`), Test-, Coverage- und Packaging-Caches (`.pytest_cache/`, `.ruff_cache/`, `.coverage`, `coverage/`, `htmlcov/`, `wheelhouse/`, `.wheel-smoke/`) sowie temporäre Editor- und Log-Dateien (`*.tmp`, `*.bak`, `*.log`).
+- **PEP 621 Standardisierung (`pyproject.toml`)**: Standardisierte pytest-Optionen (`addopts = "-ra -v"`), Betriebssystem-Classifiers (`Operating System :: Microsoft :: Windows`, `Operating System :: POSIX :: Linux`, `Operating System :: MacOS`) und Versionsharmonisierung auf `0.6.2`.
+- **CI-Workflow-Härtung (`.github/workflows/ci.yml` & `tests.yml`)**: Vereinheitlichter Aufruf `python -m pytest -ra -v` und Bytecode-Kompilierungsgate (`python -m compileall -q clutch tests`).
+- **Sicherheitsrichtlinie (`SECURITY.md`)**: Dachorganisations-Kontakt `security@open-bricks.org` in deutscher und englischer Richtlinie ergänzt.
+- **Automatisierte Vertragstestsuite (`tests/test_metadata.py`)**: 6 neue Contract-Tests (`test_gitignore_hygiene_patterns`, `test_pytest_configuration_and_flags`, `test_security_policy_slas_and_contacts`, `test_ci_workflow_hardening`, `test_changelog_release_entry`, `test_readme_badges_parity`; Gesamt-Suite auf 383 Tests erweitert | 100% grün).
+- **Shields.io Badges & llms.txt**: Badges in `README.md` & `README_de.md` auf Version 0.6.2, 383 bestandene Tests, 48h/5d Security-SLA und Ruff-Codestil synchronisiert; maschinenlesbarer Kontext in `llms.txt` auf Stand 2026-09-09 aktualisiert.
+
+---
+
 ## [0.6.1] - 2026-09-08 - Discoverability, Dual-Mermaid, Invariants & Multi-OS CI Parity
 
 Pfad B ("Marketing & Design / Discoverability") Wartungs- und Standardisierungslauf im GitHubBot-Flottenverbund.
