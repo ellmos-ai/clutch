@@ -47,9 +47,9 @@ provider-neutral LLM orchestration library.
   `notaus`, 429-/Rate-Limit und agy-Leerausgabe werden offline getestet.
 - [ ] Decide whether `clutch/config/` display strings should stay German or gain parallel
   English descriptions.
-- [ ] Verify current provider model IDs before the next release.
+- [ ] Verify current provider model IDs before the next release. (Task 183)
 
-## Routing- und Lern-Governance nach ArenaOS/HarnessRanger [2026-08-15]
+## Routing- und Lern-Governance nach ArenaOS/HarnessRanger [2026-08-15] (Tasks 184–185)
 
 - [ ] Einen versionierten, redigierten Event-Vertrag für Routingläufe
   definieren: Eingabe-Fingerprint, gewählter Provider/Modus, beobachtete Kosten,
@@ -113,7 +113,7 @@ Modelle müssen **entdeckbar**, **aktualisierbar** und **nutzeranpassbar** sein.
   `discovery.REMOTE_OLLAMA`. Grössere lokale Modelle automatisch höher einstufen.
   DONE 2026-08-11: Laufzeit-Hostliste, normalisierte `/api/tags`-Abfrage und
   Endpoint-Weitergabe an den Gang.
-- [ ] **Advisor-Pairing-Konzept fehlt:** Keine Möglichkeit, ein Modell als
+- [ ] **Advisor-Pairing-Konzept fehlt (Task 185):** Keine Möglichkeit, ein Modell als
   Reviewer/Advisor einem anderen Modell zuzuordnen. Mindestens als
   Metadaten-Feld in FahrtConfig (`reviewer_gang: Optional[Gang]`).
 
@@ -125,15 +125,15 @@ Modelle müssen **entdeckbar**, **aktualisierbar** und **nutzeranpassbar** sein.
   Sollte sowohl localhost als auch Remote-Endpoints (Mac Studio) unterstützen.
   DONE 2026-08-11: CLI `models` und Web `/api/models` lösen die Discovery
   on-demand aus; Name-Fallback, Parametergröße und Quantisierung werden geführt.
-- [ ] **Provider-API-Discovery:** Anthropic und OpenAI bieten `/v1/models`
+- [ ] **Provider-API-Discovery (Task 183):** Anthropic und OpenAI bieten `/v1/models`
   Endpoints. Verfügbare Modelle periodisch oder on-demand abfragen und
   mit getriebe.json abgleichen. Neue Modelle als "unbewertet" markieren,
   bis Fitness-Daten vorliegen.
-- [ ] **Web-basierte Modell-Suche:** Optionaler Mechanismus (z.B. via
+- [ ] **Web-basierte Modell-Suche (Task 183):** Optionaler Mechanismus (z.B. via
   WebSearch oder eine kuratierte Modell-Registry-URL) um neue Modell-
   Releases zu entdecken. Ergebnis: Vorschlagsliste, die der Nutzer
   bestätigen oder verwerfen kann.
-- [ ] **Versions-Tracking:** Zu jedem Gang ein `discovered_at` und
+- [ ] **Versions-Tracking (Task 183):** Zu jedem Gang ein `discovered_at` und
   `last_verified` Timestamp speichern. Warnung wenn Modell-Info älter
   als N Tage (konfigurierbar, Default: 30).
 
@@ -176,13 +176,105 @@ Drei Zugangswege, aufsteigend nach Komfort:
   Defaults < Discovery < User-Overrides.
   DONE 2026-08-30 für die Nutzer-Schicht als
   `~/.clutch/user_overrides.json`; Discovery bleibt on-demand und U4 separat.
-- [ ] **Fallback bei unbekanntem Modell:** Wenn ein Task ein Modell erfordert
+- [ ] **Fallback bei unbekanntem Modell (Task 183/185):** Wenn ein Task ein Modell erfordert
   das nicht registriert ist → Discovery-Lauf triggern → wenn gefunden,
   automatisch registrieren → wenn nicht, Nutzer informieren.
-- [ ] **Offline-Fähigkeit:** Discovery ist optional. Ohne Netz oder API-Keys
+- [ ] **Offline-Fähigkeit (Task 183):** Discovery ist optional. Ohne Netz oder API-Keys
   muss clutch mit dem statischen Katalog + custom_models.txt funktionieren.
 
-## Audit 2026-06-12
+## Audit-Abgleich 2026-09-05 — aktueller v0.6.0-Stand
+
+Dieser Abschnitt ist die aktuelle Steuerungsebene für den Audit vom 2026-06-12.
+Geprüft wurden der Quellstand `bcd1805`, die 0.6.0-Einträge im Changelog, die
+aktuelle CI-/Paketkonfiguration und `374` gesammelte Tests. Der historische
+Originaltext bleibt darunter inhaltlich nachvollziehbar, ist aber keine
+aktuelle Aufgabenliste mehr.
+
+### Behoben und am 2026-09-05 erneut belegt
+
+- [x] **Token-/Kostenfluss im Fahrer:** `_verbuchen()` schreibt Token- und
+  Kostendaten über `Tacho.update()` ins Fahrtenbuch; die Regressionstests
+  `test_fahrer_verbucht_tokens_und_kosten` und
+  `test_sqlite_migration_and_usage_cost_persistence` decken den Pfad ab.
+- [x] **Tankuhr-Persistenz im regulären Fahrer-Flow:** `Fahrer` injiziert sein
+  SQLite-Fahrtenbuch in `Tankuhr`; `stand()` aggregiert daraus Tages- und
+  Monatskosten. Die In-Memory-Liste bleibt nur der bewusste Standalone-Fallback.
+- [x] **Fahrer-DB-Pfad:** `Fahrer(db_path=...)` ist verdrahtet; der Default liegt
+  unter `clutch_home()` statt im Repository. Die fokussierten Regressionstests
+  verwenden temporäre Datenbanken; der ältere Integrationstest nutzt den
+  User-Home-Default.
+- [x] **Ungenutzte Importe:** Der aktuelle Quellbaum ist nach Abschluss von
+  Task 174 Ruff-grün; die alten `asdict`-/`StreckenTyp`-/`Optional`-Treffer sind
+  nicht mehr vorhanden.
+- [x] **Python 3.13 und Ruff-CI:** Python 3.13 steht in CI-Matrix und
+  `pyproject.toml`; Ruff ist konfiguriert und läuft vor Pytest. Die letzten zwei
+  E741-Testtreffer wurden mit Task 174 behoben. Python 3.14 ist separat geparkt.
+- [x] **Leeres Top-Level-`config/`:** Das historische Verzeichnis existiert im
+  aktuellen Checkout nicht mehr; `clutch/config/` bleibt die Paketquelle.
+- [x] **CHANGELOG-Reihenfolge/Testdatei:** Die Korrektur vom 2026-07-03 bleibt
+  belegt. Die dort genannten `280` Tests sind ausdrücklich ein historischer
+  Snapshot; aktueller Stand sind `374` gesammelte Tests.
+
+### Noch offen — mit bestehendem TASKPLAN-Folgeauftrag
+
+- [ ] **Budget-Zonen-SSOT (Task 175, geprüft 2026-09-05):** README,
+  `kupplung.py` und `fitness_criteria.json` bleiben widersprüchlich.
+- [ ] **Fahrtenbuch-Defaultpfad (Task 179, geprüft 2026-09-05):** Der direkte
+  Aufruf `Fahrtenbuch()` verwendet weiterhin einen Pfad im Paketbaum.
+- [ ] **ClaudeCodeMotor (Task 180, geprüft 2026-09-05):** Der Aufruf übergibt
+  weiterhin kein `--model` und löst den Windows-CMD-Shim nicht explizit auf.
+- [ ] **`Fahrtenbuch.statistik(gang=None)` (Task 181, geprüft 2026-09-05):**
+  `GROUP BY gang` plus `fetchone()` liefert weiterhin nur eine Gruppe.
+- [ ] **Persistentes Nutzerfeedback (Task 182, geprüft 2026-09-05):** Freitext
+  und Bewertung werden weiterhin nur geloggt; nur explizite Eval-Labels werden
+  bei vollständig gesetztem `quality_score`/`passed` gespeichert.
+- [ ] **MotorBlock-Testvertrag (Task 186, geprüft 2026-09-05):** Es gibt heute
+  Provider- und Availability-Tests, aber noch keine vollständige
+  credential-freie Mock-Abdeckung aller Provider-Motoren.
+- [ ] **Dependency-/requirements-Vertrag (Task 187, geprüft 2026-09-05):**
+  `requirements.txt` dupliziert Paketabhängigkeiten; optionale Provider-SDKs
+  sind weiterhin als harte Dependencies deklariert.
+
+### Bewusst geparkt — am 2026-09-05 weiterhin reproduzierbar, kein eigener Task
+
+- [ ] **Listen-Regex:** Die Zeichenklasse in `strecke.py` erkennt nummerierte
+  Einträge wie `1. Schritt` weiterhin nicht zuverlässig.
+- [ ] **Redundanter Gesperrt-Fallback:** `Fahrer.kuppeln()` prüft nach
+  `Kupplung.einlegen()` weiterhin ein zweites Mal auf gesperrte Modelle.
+- [ ] **Mutable-Default-Annotation:** `FahrtErgebnis.warnungen` nutzt weiterhin
+  `None` plus `__post_init__` statt `field(default_factory=list)`.
+- [ ] **Fitness-Gewichte:** `FitnessBewerter` lädt die Gewichte aus
+  `fitness_criteria.json` weiterhin nicht automatisch.
+- [ ] **Phantom-`fitness.json`:** Der Bordcomputer prüft weiterhin zuerst eine
+  nicht ausgelieferte `fitness.json` und fällt dann auf die echte Datei zurück.
+- [ ] **Gas/Bremse-Tabellenwerte:** Token- und Timeoutwerte aus `_STELLUNGEN`
+  werden weiterhin direkt danach durch lineare Formeln ersetzt.
+- [ ] **Future-Timeouts:** `future.result(timeout=...)` wird in Team und Schwarm
+  weiterhin erst nach `as_completed()` aufgerufen.
+- [ ] **Schwarm-Config:** `Schwarm` übernimmt weiterhin nicht automatisch
+  `max_parallele_worker` und `worker_timeout_sekunden` aus `kupplung.json`.
+- [ ] **Tote Fahrer-/Bridge-Config:** Mehrere historische Schlüssel bleiben
+  ohne belegten Laufzeitkonsumenten beziehungsweise widersprüchlich.
+- [ ] **Python 3.14:** Nicht in Matrix oder Classifier aufgenommen und ohne
+  eigenständigen Kompatibilitätsnachweis bewusst nicht behauptet.
+- [ ] **Statischer Typecheck:** Ruff ist aktiv; mypy/pyright bleibt eine
+  separate, derzeit nicht priorisierte Tooling-Entscheidung.
+- [ ] **Coverage-Reporting:** CI erzeugt weiterhin keinen Coverage-Bericht.
+- [ ] **Lokale ignorierte Artefakte:** Cache-/DB-Artefakte sind kein
+  Repositoryinhalt; ihre lokale Bereinigung bleibt außerhalb dieses Audits.
+- [ ] **README-Streckentyp-Tabelle:** Die kompakte Haupttabelle führt
+  `Prüfstrecke` und `Testfahrt` weiterhin nicht auf; die ausführliche Tabelle
+  weiter unten enthält beide.
+- [ ] **`sys.path.insert` in Tests:** Die historischen Repo-Root-Injektionen
+  bestehen weiterhin und bleiben bis zu einer eigenen Test-Hygiene-Aufgabe.
+
+## Audit 2026-06-12 — historischer Originalbefund
+
+<details>
+<summary>Originalaudit mit damaligen Zeilenangaben und Prioritäten</summary>
+
+Der folgende Block ist ausschließlich historische Herkunftsevidenz. Sein
+Checkbox-Status wird nicht mehr zur aktuellen Arbeitssteuerung verwendet.
 
 Vollständiger Code-Audit (Paket `clutch/`, `config/`, `tests/`, Smoke-Scripts,
 CI, Doku). Prioritäten: **hoch** = funktionaler Defekt, **mittel** = spürbare
@@ -207,11 +299,11 @@ Einschränkung, **niedrig** = Hygiene/Konsistenz.
   In-Memory-Liste (`clutch/tankuhr.py:43`). Tages-/Monatslimits sind über
   Prozessgrenzen hinweg wirkungslos — jeder Neustart setzt das Budget auf 0.
   Kosten ins Fahrtenbuch (SQLite) schreiben und `stand()` daraus aggregieren.
-- [ ] **(mittel) Fahrtenbuch-Default-Pfad bricht bei Wheel-Installation:**
+- [ ] **(mittel, Task 179) Fahrtenbuch-Default-Pfad bricht bei Wheel-Installation:**
   `Path(__file__).parent.parent / "data" / "clutch.db"` (`clutch/fahrtenbuch.py:109`)
   zeigt bei installiertem Paket nach `site-packages/data/`. Auf `platformdirs`
   (user_data_dir) oder ein konfigurierbares `db_path` mit cwd-Fallback umstellen.
-- [ ] **(mittel) ClaudeCodeMotor ignoriert die Modellwahl:** Der CLI-Aufruf
+- [ ] **(mittel, Task 180) ClaudeCodeMotor ignoriert die Modellwahl:** Der CLI-Aufruf
   `["claude", "-p", ...]` (`clutch/motorblock.py:336`) übergibt kein
   `--model` — `config.model_id` ist wirkungslos, es läuft immer das
   Default-Modell der Session. Zusätzlich Windows-Problem: `claude` ist dort
@@ -259,7 +351,7 @@ Einschränkung, **niedrig** = Hygiene/Konsistenz.
   `schwarm.max_parallele_worker`/`worker_timeout_sekunden` wird von der
   `Schwarm`-Klasse (`clutch/patterns/schwarm.py:35–45`) nicht gelesen
   (Defaults 10/60 statt 10/120).
-- [ ] **(niedrig) `Fahrtenbuch.statistik()` mit `gang=None` liefert
+- [ ] **(niedrig, Task 181) `Fahrtenbuch.statistik()` mit `gang=None` liefert
   willkürliche Gruppe:** GROUP BY gang + `fetchone()`
   (`clutch/fahrtenbuch.py:176–179`) gibt nur die erste Gruppierung zurück.
   Entweder über alle Gänge aggregieren oder `gang` verpflichtend machen.
@@ -273,20 +365,20 @@ Einschränkung, **niedrig** = Hygiene/Konsistenz.
 
 ### Upgrades
 
-- [ ] **(mittel) Python 3.13/3.14 unterstützen:** CI-Matrix
+- [ ] **(mittel, Task 178) Python 3.13/3.14 unterstützen:** CI-Matrix
   (`.github/workflows/tests.yml:19`) endet bei 3.12; `pyproject.toml`-Classifiers
   ebenso. 3.13 (und nach Verifikation 3.14) ergänzen.
-- [ ] **(mittel) Lint-/Typecheck-Tooling einführen:** Kein ruff/flake8/mypy
+- [ ] **(mittel, Task 174/178) Lint-/Typecheck-Tooling einführen:** Kein ruff/flake8/mypy
   konfiguriert. `[tool.ruff]` in `pyproject.toml` + Lint-Step in
   `.github/workflows/tests.yml` würde u. a. die oben gelisteten toten Importe
   automatisch finden.
-- [ ] **(mittel) Tests für MotorBlock ergänzen:** `clutch/motorblock.py`
+- [ ] **(mittel, Task 186) Tests für MotorBlock ergänzen:** `clutch/motorblock.py`
   (468 Zeilen, 4 Provider-Motoren) hat keinerlei Testabdeckung. Mit gemockten
   SDK-Clients/`requests` testbar ohne Credentials — deckt zugleich den
   bestehenden TODO-Punkt "provider availability checks" ab.
 - [ ] **(niedrig) Coverage-Reporting in CI:** `pytest --cov=clutch` +
   Coverage-Artefakt im Workflow.
-- [ ] **(niedrig) `requirements.txt` konsolidieren:** Dupliziert die
+- [ ] **(niedrig, Task 187) `requirements.txt` konsolidieren:** Dupliziert die
   Dependencies aus `pyproject.toml`. Entweder löschen (pip install -e . reicht)
   oder als generierte Lock-Datei kennzeichnen.
 - [ ] **(niedrig) `dependencies` prüfen:** `anthropic`/`google-genai` sind
@@ -315,13 +407,15 @@ Einschränkung, **niedrig** = Hygiene/Konsistenz.
   `strecken.json`/`StreckenTyp` kennen 10 (+ `pruefstrecke`, `testfahrt`,
   `unbekannt`). Englische Tabelle um die fehlenden Typen ergänzen (die
   deutsche Tabelle hat sie bereits).
-- [ ] **(niedrig) `Fahrer.feedback()` ist ein Stub:** Loggt nur
+- [ ] **(niedrig, Task 182) `Fahrer.feedback()` ist ein Stub:** Loggt nur
   (`clutch/fahrer.py:238–243`), persistiert aber nichts — `user_korrekturen`
   im Fahrtenbuch bleibt ungenutzt. Entweder ins Fahrtenbuch schreiben
   (Anschluss an Fahrschule-Qualitätsscore) oder als experimentell markieren.
 - [ ] **(niedrig) `sys.path.insert`-Hacks in Tests entfernen:**
   `tests/test_*.py` patchen sich den Repo-Root in den Pfad — bei
   `pip install -e .` (wie in CI) unnötig.
+
+</details>
 
 ## STATUS
 
@@ -344,3 +438,44 @@ Einschränkung, **niedrig** = Hygiene/Konsistenz.
 - [x] Published public repository under `ellmos-ai/clutch`.
 - [x] Added `llms.txt` for LLM crawler discovery.
 - [x] Added `GLOSSARY.md` for contributor orientation.
+
+## TASKWRITER-REVIEW-LOG — 2026-09-05
+
+Dieser Readback dokumentiert den unveränderten Ausgangsstand vor TASKSOLVER
+#174/#178. Aktuelle Abschlussbelege stehen im nachfolgenden Closeout.
+
+- Der Checkout `master` steht sauber auf `bcd1805` und ist exakt zu
+  `origin/master` synchron. Das öffentliche Repository hat keine offenen
+  Issues, aber PR #5 (Budget-SSOT, BLOCKED), PR #6 (Provider-Resolver,
+  CONFLICTING) und PR #7 (Signed Review Gate, BLOCKED) offen; der aktuelle
+  PyPI-Release `v0.4.0` bleibt vom lokalen Source-Stand `0.6.0` getrennt.
+- Read-only-Verifikation: `python -m pytest -q` ergibt **374 passed**;
+  `compileall` ist grün. `ruff check .` meldet genau zwei E741-Fehler in
+  `tests/test_m13_token_throughput.py:66,147`; deshalb ist der CI-Testjob trotz
+  bestandener Tests rot. Es wurden keine Provider-APIs, Credentials oder
+  Live-Modelle angesprochen.
+- Die Tasks 174–187 erfassen den E741-CI-Blocker, die drei offenen PR-/Review-
+  Gates, veraltete Auditbefunde, direkte Paket-/SQLite-Risiken, Provider-
+  Discovery/Governance, MotorBlock-Tests und den Dependency-Vertrag. Die
+  bereits im aktuellen Code belegten Tankuhr-/Fahrer-/Discovery-Funktionen
+  bleiben als historische TODO-Korrektur in Task 178, nicht als Duplikat.
+
+## TASKSOLVER-Closeout — 2026-09-05 — Tasks 174 und 178
+
+- Task 174: Ausschließlich die beiden mehrdeutigen Comprehension-Variablen in
+  `tests/test_m13_token_throughput.py` wurden umbenannt; Testsemantik und
+  Fixture-Daten blieben unverändert (`f6ba73d`).
+- Task 178: Der Audit von 2026-06-12 ist nun in 7 live belegte Erledigungen,
+  7 offene Befunde mit bestehenden TASKPLAN-Aufträgen und 15 bewusst geparkte
+  Befunde gegliedert. Der vom TASKWRITER übergebene Originalaudit bleibt
+  eingeklappt als historische Herkunftsevidenz erhalten.
+- Verifikation: `374 passed` (eine externe StarletteDeprecationWarning),
+  `374 tests collected`, Ruff, Compileall, Diff-Check, Auditstruktur und
+  UTF-8-/Umlautprüfung sind grün.
+- Live-Readback: PR #5 und #7 stehen auf `BLOCKED`, PR #6 auf `DIRTY`. Der
+  jüngste `tests.yml`-Lauf für `bcd1805` scheiterte in der Ruff-Stufe exakt an
+  den beiden nun lokal behobenen E741-Treffern; ohne Push gibt es noch keinen
+  Remote-Nachweis für `f6ba73d`.
+- Offen bleiben insbesondere Tasks 175, 179–187 sowie die getrennten PR-/
+  Review-Gates 176/177. Es erfolgten keine Provider-Aufrufe, Credential-Zugriffe,
+  PR-Änderungen, Releases oder Pushes.
