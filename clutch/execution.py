@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 from typing import Any, Mapping, Protocol
 
 from clutch.getriebe import Gang, Getriebe
+from clutch.motorblock import MotorBlock
 
 
 AVAILABILITY_STAGES = (
@@ -132,6 +133,72 @@ class ExecutionResolution:
             "registry_fingerprint": self.registry_fingerprint,
             "resolved_at": self.resolved_at,
         }
+
+
+# Providers whose Motor.ist_verfuegbar() checks a credential (API key
+# presence) rather than a local binary/endpoint. This set just decides which
+# readiness axis its check result answers -- the axis it does NOT answer stays
+# None (not checked), never guessed as unavailable.
+_CREDENTIAL_PROVIDERS = frozenset({"anthropic", "google", "openai", "kimi-api"})
+
+
+def _probe_provider(provider: str) -> tuple[bool | None, bool | None]:
+    """(host_ready, account_accessible) for one provider's Motor.
+
+    Reuses the readiness checks the execution layer already trusts (CLI
+    ``--version`` probes, local Ollama ``/api/tags``, credential lookups)
+    instead of re-implementing them here.
+    """
+    try:
+        motor = MotorBlock().motor_fuer(provider)
+    except ValueError:
+        return None, None
+    # ponytail: probes live on every call (subprocess/network for CLI and
+    # Ollama motors) -- fine at binding time, not a per-token hot path. Add
+    # a short-TTL cache here if that assumption stops holding.
+    ready = motor.ist_verfuegbar()
+    if provider in _CREDENTIAL_PROVIDERS:
+        return None, ready
+    return ready, None
+
+
+def _aggregate_readiness(providers: frozenset[str]) -> tuple[bool | None, bool | None]:
+    """Combines per-provider readiness for a selector that may resolve to
+    several providers (a runner or family selector). None stays None unless
+    at least one provider in the set actually answered that axis; among
+    those that did, one working provider is enough."""
+    host_results: list[bool] = []
+    account_results: list[bool] = []
+    for provider in providers:
+        host, account = _probe_provider(provider)
+        if host is not None:
+            host_results.append(host)
+        if account is not None:
+            account_results.append(account)
+    host_ready = any(host_results) if host_results else None
+    account_accessible = any(account_results) if account_results else None
+    return host_ready, account_accessible
+
+
+def _with_probed_readiness(
+    availability: ModelAvailability, providers: frozenset[str]
+) -> ModelAvailability:
+    """Fill the two host-local evidence stages the curated registry leaves open.
+
+    Curated registry evidence wins where it exists; the live Motor probe only
+    answers stages that are still ``None``, so a ``required`` binding can be
+    confirmed on the executing host instead of staying permanently unproven
+    (T-20260902-665621838).
+    """
+    if availability.host_ready is not None and availability.account_accessible is not None:
+        return availability
+    host_ready, account_accessible = _aggregate_readiness(providers)
+    evidence = availability.to_dict()
+    if evidence["host_ready"] is None:
+        evidence["host_ready"] = host_ready
+    if evidence["account_accessible"] is None:
+        evidence["account_accessible"] = account_accessible
+    return ModelAvailability.from_mapping(evidence)
 
 
 class ExecutionRegistry:
@@ -290,7 +357,10 @@ class ExecutionRegistry:
             )
 
         gang = matches[0]
-        availability = ModelAvailability.from_mapping(gang.availability)
+        availability = _with_probed_readiness(
+            ModelAvailability.from_mapping(gang.availability),
+            frozenset({gang.provider}),
+        )
         allowed_runners = tuple(sorted(set(gang.runners)))
         runner_compatible = requested_runner is None or requested_runner in allowed_runners
         if not runner_compatible:
@@ -361,9 +431,11 @@ class ExecutionRegistry:
                 resolved_at,
             )
         candidates = []
+        providers: set[str] = set()
         for gang in self.getriebe.alle_gaenge():
             if not self._profile_matches(profile, gang):
                 continue
+            providers.add(gang.provider)
             availability = ModelAvailability.from_mapping(gang.availability)
             if (
                 availability.claimable
@@ -371,6 +443,9 @@ class ExecutionRegistry:
                 and gang.lifecycle in _ELIGIBLE_LIFECYCLES
             ):
                 candidates.append(gang.name)
+        profile_availability = _with_probed_readiness(
+            ModelAvailability(), frozenset(providers)
+        )
         resolved_type = selector_type or str(kind)
         return ExecutionResolution(
             requested_selector=requested,
@@ -388,7 +463,7 @@ class ExecutionRegistry:
             lifecycle="profile",
             catalog_source=None,
             catalog_checked_at=None,
-            availability=ModelAvailability(),
+            availability=profile_availability,
             claimable=bool(candidates),
             reason=None if candidates else "no-eligible-models",
             registry_fingerprint=fingerprint,

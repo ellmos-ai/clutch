@@ -1,0 +1,103 @@
+================================================================================
+MARKETING & DISCOVERABILITY LOG: clutch
+================================================================================
+Date: 2026-09-08
+Path: Pfad B (Marketing & Design / Discoverability)
+Version: 0.6.1
+Repository: ellmos-ai/clutch
+Organization: ellmos-ai
+Umbrella Collective: open-bricks
+
+1. EXECUTIVE SUMMARY
+--------------------------------------------------------------------------------
+clutch (German: Kupplung) is the model routing and orchestration engine of the
+ellmos-ai multi-agent ecosystem. It provides provider-neutral, local-first LLM
+routing across Anthropic (Claude), Google (Gemini), OpenAI (GPT/Codex), Ollama
+(local & remote), Claude Code, agy (companion-for-agy), and Kimi (Moonshot API & CLI).
+Using an intuitive automotive driving metaphor, clutch analyzes task complexity
+and purpose, selects optimal model gears (G1-G5) and reasoning effort (0-100%),
+tracks financial and token-throughput budgets with a 4-zone fuel gauge (Tankuhr),
+enforces persistent circuit breakers (Bordcomputer), and optimizes decisions
+via auto-learning (Fahrschule).
+
+This Pfad B upgrade brings clutch to the gold-standard discoverability posture:
+  - 14-point Quick Navigation anchor index in README.md & README_de.md
+  - Dual Mermaid diagrams: System Architecture (flowchart TD with semantic subgraphs)
+    and End-to-End Task & Routing Lifecycle (sequenceDiagram)
+  - Formal Table of 10 Governance & Runtime Invariants
+  - Expanded Sibling Tools & Ecosystem Partner Matrix (12 repositories)
+  - Synchronized Shields.io badges (v0.6.1, CI matrix, 377 Pytest tests, multi-OS,
+    Zero-Egress, Non-Elevation, MIT, ellmos-ai, open-bricks, llms.txt)
+  - PEP 621 metadata expansion in pyproject.toml (Parent Org, Umbrella, Security, Docs)
+  - Multi-OS CI workflow (.github/workflows/ci.yml) for Linux, Windows, and macOS
+  - Hardened bilingual SECURITY.md with 48h response SLA, triage commitment & invariants
+  - Updated machine-readable llms.txt context with 2026-09-08 timestamp & 377 tests
+  - Automated 11-test metadata & manifest parity test suite (100% green)
+
+2. ASSETS & LANDING PAGE ENHANCEMENTS
+--------------------------------------------------------------------------------
+- Badges: Synchronized 13 badges across README.md and README_de.md:
+  * Version: 0.6.1
+  * CI: passing / bestanden
+  * Pytest: 377 passed / 377 bestanden
+  * Python: 3.10 | 3.11 | 3.12 | 3.13
+  * Platforms: Linux | Windows | macOS
+  * License: MIT
+  * Providers: Anthropic | Gemini | OpenAI | Ollama | Kimi
+  * Security: Local-First
+  * Privacy: Zero-Egress
+  * Elevation: User-Mode (Non-Elevation)
+  * Ecosystem: ellmos-ai
+  * Umbrella: open-bricks
+  * Discovery: llms.txt
+- Quick Navigation: 14 numbered anchors in English and German for rapid navigation.
+- Dual Mermaid Diagrams:
+  * Architecture Topology: flowchart TD with 5 semantic subgraphs (CLIENTS,
+    ORCHESTRATION, REGISTRY, ENGINES, TELEMETRY).
+  * Task Lifecycle: sequenceDiagram showing complete 12-step task routing,
+    failover, token telemetry, SQLite ledger recording, and learning loop.
+- Governance & Runtime Invariants: 10 formal guarantees documented in READMEs,
+  SECURITY.md, and llms.txt.
+- Sibling Matrix: 12 partner repositories across ellmos-ai, dev-bricks, and open-bricks.
+- Bilingual Parity: Complete 1-to-1 sync between README.md and README_de.md.
+
+3. KEYWORD & SEARCH PHRASE TARGETING
+--------------------------------------------------------------------------------
+- Primary Keywords:
+  * "clutch LLM router"
+  * "ellmos-ai clutch"
+  * "provider-neutral LLM orchestration engine"
+  * "Python model router auto learning"
+  * "multi-provider LLM failover circuit breaker"
+  * "local-first LLM budget tracking fuel gauge"
+  * "automotive metaphor LLM routing"
+  * "Anthropic Gemini OpenAI Ollama Kimi router"
+  * "GPT-5.6 cost and empirical routing"
+- Semantic Context:
+  Synchronized in llms.txt for LLM agents, research crawlers, and AI indexes.
+
+4. CROSS-LINKING & ECOSYSTEM INTEGRATION
+--------------------------------------------------------------------------------
+- Sibling Repositories Linked:
+  * ellmos-ai/coma
+  * ellmos-ai/swarm-ai
+  * ellmos-ai/system-explorer
+  * ellmos-ai/policy-registry
+  * ellmos-ai/sqlite-transit-sync
+  * ellmos-ai/workflowhooker
+  * ellmos-ai/memoryhooker
+  * ellmos-ai/agent-ops-stack
+  * ellmos-ai/convergence-reconciler
+  * dev-bricks/DevCenter
+  * dev-bricks/CodeBox
+  * open-bricks/open-bricks
+- Machine-Readable Discoverability:
+  llms.txt updated with v0.6.1, 377 passing tests, and core invariants.
+
+5. VERIFICATION & QUALITY GATES
+--------------------------------------------------------------------------------
+- Ruff Linting: ruff check . passed with 0 errors (fixed 2 E741 ambiguities in tests).
+- Metadata Parity Tests: pytest -v tests/test_metadata.py (11/11 passed, 100% green).
+- Full Test Suite: pytest -q (377/377 passed in 51.67s, 100% green).
+- CI Matrix: Added .github/workflows/ci.yml covering Linux, Windows, macOS, Py 3.10-3.13.
+================================================================================

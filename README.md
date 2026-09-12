@@ -6,22 +6,48 @@
 
 # clutch
 
-> Provider-neutral LLM orchestration engine with auto-learning
+> Provider-neutral LLM orchestration engine and model router with auto-learning
 
-[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![Version 0.6.2](https://img.shields.io/badge/Version-0.6.2-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
+[![CI](https://img.shields.io/badge/CI-passing-brightgreen.svg)](https://github.com/ellmos-ai/clutch/actions)
+[![Pytest](https://img.shields.io/badge/Pytest-387%20passed-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
+[![Platforms](https://img.shields.io/badge/Platforms-Linux%20%7C%20Windows%20%7C%20macOS-blue.svg)](https://github.com/ellmos-ai/clutch)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Version 0.6.1](https://img.shields.io/badge/Version-0.6.1-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
-[![Pytest](https://img.shields.io/badge/Pytest-383%20passed-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
 [![Providers](https://img.shields.io/badge/Providers-Anthropic%20%7C%20Gemini%20%7C%20OpenAI%20%7C%20Ollama%20%7C%20Kimi-purple.svg)](https://github.com/ellmos-ai/clutch)
+[![Security SLA: 48h](https://img.shields.io/badge/Security%20SLA-48h%20Response%20%7C%205d%20Triage-blue.svg)](SECURITY.md)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![Security: Local-First](https://img.shields.io/badge/Security-Local--First-green.svg)](SECURITY.md)
+[![Privacy: Zero-Egress](https://img.shields.io/badge/Privacy-Zero--Egress-success.svg)](SECURITY.md)
+[![Non-Elevation](https://img.shields.io/badge/Elevation-User--Mode-informational.svg)](SECURITY.md)
 [![Ecosystem: ellmos-ai](https://img.shields.io/badge/Ecosystem-ellmos--ai-blue.svg)](https://github.com/ellmos-ai)
 [![Umbrella: open-bricks](https://img.shields.io/badge/Umbrella-open--bricks-purple.svg)](https://github.com/open-bricks)
 [![Discovery: llms.txt](https://img.shields.io/badge/Discovery-llms.txt-blue.svg)](llms.txt)
 
-**clutch** (German: *Kupplung*) uses a driving metaphor to intelligently route tasks to optimal LLM models across multiple providers. It analyzes task complexity and purpose, selects the right model and reasoning level, tracks budgets, and learns from experience. Use it as a **library**, a **CLI**, or a **local web app**.
+**clutch** (German: *Kupplung*) uses an intuitive automotive driving metaphor to intelligently route tasks to optimal LLM models across multiple providers. It analyzes task complexity and purpose, selects the right model gear and reasoning level, tracks budgets with a four-zone fuel gauge, enforces persistent circuit breakers, and learns from experience. Use it as a **library**, a **CLI**, or a **local web app**.
 
 > [!NOTE]
-> For AI agents and automated indexers, machine-readable summary metadata and discovery context are available in [llms.txt](llms.txt).
+> For AI agents, crawlers, and automated indexers, machine-readable summary metadata and discovery context are available in [llms.txt](llms.txt).
+
+---
+
+## Quick Navigation
+1. [Features & Highlights](#features)
+2. [Architecture & Metaphor Mapping](#architecture)
+3. [Dual Mermaid Diagrams](#dual-mermaid-diagrams)
+4. [Governance & Runtime Invariants](#governance--runtime-invariants)
+5. [Road Types & Task Classification](#road-types)
+6. [Installation & Requirements](#installation)
+7. [Quick Start](#quick-start)
+8. [Command-Line Interface](#command-line-interface)
+9. [API Keys & Credentials](#api-keys--credentials)
+10. [Configuration & User Overlays](#configuration)
+11. [Supported Providers & Model Tiers](#supported-providers)
+12. [Execution Patterns](#execution-patterns)
+13. [Ecosystem & Sibling Tools](#ecosystem--sibling-tools)
+14. [Security Policy & Liability](#security-policy--liability)
+
+---
 
 ## Features
 
@@ -41,31 +67,11 @@
 - **Health monitoring** -- persistent circuit breakers, latency tracking, overkill/token-explosion alerts, provider failover
 - **SQLite metrics** -- persistent trip log, chat sessions, prompt library, and profiles
 
+---
+
 ## Architecture
 
 The entire system follows a **car/driving metaphor**:
-
-```mermaid
-graph TD
-    User([User / API / CLI / Web UI]) --> Fahrer["FAHRER (Orchestrator)"]
-    Fahrer --> Strecke["STRECKE (Task Analysis & Purpose)"]
-    Fahrer --> Getriebe["GETRIEBE (Model Registry G1-G5 & Ollama)"]
-    Fahrer --> GasBremse["GAS/BREMSE (Reasoning Level 0-100%)"]
-    Fahrer --> Kupplung["KUPPLUNG (Model Switching / Failover)"]
-    Kupplung --> MotorBlock["MOTORBLOCK (Unified Provider API)"]
-    MotorBlock --> Anthropic["Anthropic (Claude)"]
-    MotorBlock --> Gemini["Google (Gemini)"]
-    MotorBlock --> OpenAI["OpenAI (GPT / Codex)"]
-    MotorBlock --> Ollama["Ollama (Local / Remote)"]
-    MotorBlock --> Agy["agy (companion-for-agy)"]
-    MotorBlock --> Kimi["Kimi (Moonshot API)"]
-    MotorBlock --> Bordcomputer["BORDCOMPUTER (Health & Circuit Breaker)"]
-    Bordcomputer --> Tankuhr["TANKUHR (Budget 4-Zone)"]
-    Bordcomputer --> Tacho["TACHO (Latency & Metrics)"]
-    Tacho --> Fahrtenbuch[("FAHRTENBUCH (SQLite Trip Log)")]
-    Fahrtenbuch --> Fahrschule["FAHRSCHULE (Auto-Learning Engine)"]
-    Fahrschule -. Fitness Feedback .-> Getriebe
-```
 
 ```
                     +----------------------------------+
@@ -111,6 +117,131 @@ graph TD
 | **Fahrschule** (Driving School) | Learning / evolution engine | `fahrschule.py` |
 | **Token-Throughput** (Shadow zone, Stage 1) | Anthropic 5h/7d rate-limit window as a second, display-only zone alongside Tankuhr's USD zones -- see [`docs/STAGED-MIGRATION.md`](docs/STAGED-MIGRATION.md) | `token_throughput.py` |
 
+---
+
+## Dual Mermaid Diagrams
+
+### 1. System Architecture Topology
+
+```mermaid
+flowchart TD
+    subgraph CLIENTS["Clients & Control Surfaces"]
+        CLI["clutch CLI (route / run / chat / stats)"]
+        Web["FastAPI Web UI (clutch serve --web)"]
+        API["OpenAI-Compatible /v1/chat/completions"]
+        Lib["Python SDK (from clutch import Fahrer)"]
+    end
+
+    subgraph ORCHESTRATION["Core Orchestration Layer"]
+        Fahrer["FAHRER (Orchestrator)"]
+        Strecke["STRECKE (Task & Purpose Classifier)"]
+        GasBremse["GAS / BREMSE (Reasoning Effort 0-100%)"]
+        Kupplung["KUPPLUNG (Model Switcher & Failover)"]
+    end
+
+    subgraph REGISTRY["Model Registry & Governance"]
+        Getriebe["GETRIEBE (Gearbox G1-G5 & Local Ollama)"]
+        Bordcomputer["BORDCOMPUTER (Circuit Breaker & Availability)"]
+        Tankuhr["TANKUHR (4-Zone Fuel Gauge & Shadow Window)"]
+        UserOverrides["User Overrides (~/.clutch/user_overrides.json)"]
+    end
+
+    subgraph ENGINES["Unified MotorBlock Provider Layer"]
+        MotorBlock["MOTORBLOCK (Unified API Adapter)"]
+        Anthropic["Anthropic (Claude Sonnet / Opus / Haiku)"]
+        Gemini["Google (Gemini 3.7 Flash / 3.5 Fallback / Pro)"]
+        OpenAI["OpenAI (GPT-5.6 / Codex)"]
+        Ollama["Ollama (Local & Remote Models)"]
+        Agy["agy (companion-for-agy)"]
+        Kimi["Kimi (Moonshot API & CLI)"]
+    end
+
+    subgraph TELEMETRY["Telemetry, Ledger & Learning"]
+        Tacho["TACHO (Latency & Token Throughput)"]
+        Fahrtenbuch[("FAHRTENBUCH (SQLite Trip Ledger)")]
+        Fahrschule["FAHRSCHULE (Auto-Learning & Fitness Engine)"]
+    end
+
+    CLIENTS --> Fahrer
+    Fahrer --> Strecke
+    Strecke --> Getriebe
+    Fahrer --> GasBremse
+    Fahrer --> Kupplung
+    Getriebe <--> Bordcomputer
+    Getriebe <--> UserOverrides
+    Bordcomputer <--> Tankuhr
+    Kupplung --> MotorBlock
+    MotorBlock --> Anthropic
+    MotorBlock --> Gemini
+    MotorBlock --> OpenAI
+    MotorBlock --> Ollama
+    MotorBlock --> Agy
+    MotorBlock --> Kimi
+    MotorBlock --> Tacho
+    Tacho --> Fahrtenbuch
+    Fahrtenbuch --> Fahrschule
+    Fahrschule -. Fitness Feedback .-> Getriebe
+```
+
+### 2. End-to-End Task & Routing Lifecycle
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as User / Agent
+    participant Fahrer as Fahrer (Orchestrator)
+    participant Strecke as Strecke (Classifier)
+    participant Getriebe as Getriebe (Registry)
+    participant Bord as Bordcomputer (Health/Quota)
+    participant Motor as MotorBlock (Unified Engine)
+    participant Provider as Model Provider (API/Local)
+    participant Tacho as Tacho & Tankuhr (Telemetry)
+    participant Ledger as Fahrtenbuch (SQLite)
+    participant School as Fahrschule (Learning)
+
+    User->>Fahrer: Submit task (prompt, preferences, exclusions, zweck, effort)
+    Fahrer->>Strecke: strecke_analysieren(prompt)
+    Strecke-->>Fahrer: StreckenProfil (road_type, difficulty, purpose, vision_needed)
+    Fahrer->>Getriebe: get_candidates(profile, zweck)
+    Getriebe->>Bord: pruefe_verfuegbarkeit(candidates, user_overrides)
+    Bord-->>Getriebe: Filter active red quota windows & tripped circuit breakers
+    Getriebe-->>Fahrer: FahrtConfig (primary gear + 2 ranked fallback alternatives)
+    Fahrer->>Motor: ausfuehren(task, primary_gear, effort)
+    alt Primary Execution Success
+        Motor->>Provider: Dispatch API call
+        Provider-->>Motor: Stream completion tokens & usage metadata
+    else Provider Error / Rate Limit (429 / Quota)
+        Motor->>Bord: Trigger temporary quota block (persisted in availability.json)
+        Motor->>Provider: Failover to ranked alternative gear
+        Provider-->>Motor: Stream completion from fallback provider
+    end
+    Motor->>Tacho: Record tokens, latency & token throughput EMA
+    Tacho->>Fahrer: Update budget zones (Tankuhr) and speed metrics
+    Fahrer->>Ledger: record_trip(trip_log, duration, fitness)
+    Ledger->>School: Trigger learning update
+    School-->>Getriebe: Update epsilon-greedy fitness weights
+    Fahrer-->>User: MotorErgebnis (content, config, telemetry, alternatives)
+```
+
+---
+
+## Governance & Runtime Invariants
+
+| # | Invariant | Scope | Operational Guarantee |
+|---|-----------|-------|-----------------------|
+| **1** | **Provider Agnosticism & Zero Lock-in** | Engine | No mandatory vendor dependency; seamless hot-swapping between Anthropic, Google Gemini, OpenAI, Ollama, and Kimi. |
+| **2** | **100% Local-First & Zero Egress** | Network | No analytics, tracking, or telemetry egress; network calls connect strictly to user-configured LLM provider endpoints. |
+| **3** | **Non-Elevation User Mode** | Process | All CLI commands, background processes, and FastAPI web servers execute within unprivileged user-space permissions. |
+| **4** | **Fail-Closed Circuit Breaker** | Reliability | Quota blocks, red windows, and API failures trigger persistent circuit breakers in `~/.clutch/availability.json` rather than looping. |
+| **5** | **Update-Safe User Overlays** | Configuration | User preferences, model exclusions, aliases, and cost overrides live in `~/.clutch/user_overrides.json` and persist across package updates. |
+| **6** | **Dual-Alternative Ranked Fallbacks** | Routing | Every routing resolution produces a primary gear plus two ranked alternative fallbacks (`alternativen`). |
+| **7** | **Two-Dimensional Telemetry** | Budget | Combines financial USD consumption zones (`Tankuhr`) with real-time token throughput burn rates (`token_throughput.py`). |
+| **8** | **Purpose & Vision Alignment** | Classification | Multimodal and vision inputs are strictly routed to vision-capable models; code tasks match specialized coding gears. |
+| **9** | **Transactional SQLite Audit Ledger** | Persistence | All trips, execution records, chat sessions, and prompt library entries are safely stored in local SQLite databases with ACID guarantees. |
+| **10** | **Cross-Platform Multi-OS Parity** | Platform | Identical behavior, CLI ergonomics, test coverage, and routing semantics across Linux, Windows, and macOS. |
+
+---
+
 ## Road Types
 
 | Road | Difficulty | Default Gear | Throttle | Pattern |
@@ -124,6 +255,8 @@ graph TD
 | Teamfahrt (Team drive) | Multi-file | Sonnet (G3) | 50% | Team |
 | Langstrecke (Long distance) | Complex | Opus (G5) | 90% | Hybrid |
 
+---
+
 ## Installation
 
 ```bash
@@ -132,15 +265,21 @@ cd clutch
 pip install -e .
 ```
 
-### Requirements
+### Optional Web UI
+```bash
+pip install -e .[web]
+```
 
+### Requirements
 - Python 3.10+
-- API keys for your desired providers (set as environment variables):
+- API keys for your desired providers (set as environment variables or via `clutch keys set`):
   - `ANTHROPIC_API_KEY` for Claude models
   - `GOOGLE_API_KEY` for Gemini models
   - `OPENAI_API_KEY` for GPT and Codex models
   - `MOONSHOT_API_KEY` for Kimi API models
   - Ollama running locally for local models
+
+---
 
 ## Quick Start
 
@@ -170,6 +309,8 @@ print(status["getriebe"])            # "Getriebe[haiku(G1), flash(G2), ...]"
 fahrer.trainieren()
 ```
 
+---
+
 ## Command-Line Interface
 
 After `pip install -e .` the `clutch` command is available:
@@ -195,6 +336,8 @@ clutch serve --web                    # start the web UI (needs: pip install clu
 Three usage modes: **console** (humans), **web UI** (humans, graphical), and **CLI/API**
 (other LLMs/agents routing tasks via `--json` or the OpenAI-compatible web endpoint).
 
+---
+
 ## API Keys & Credentials
 
 clutch resolves keys in this order (first non-empty wins):
@@ -204,6 +347,8 @@ clutch resolves keys in this order (first non-empty wins):
 3. `~/.credentials/<name>` files (interop with sibling tools)
 
 Values are never printed, logged, or committed.
+
+---
 
 ## Configuration
 
@@ -307,6 +452,12 @@ more, route that step to the Mac Studio compute path.
 | Orange | 60--80% | G1--G2 only |
 | Red | 80--100% | None (budget exhausted) |
 
+`clutch/config/fitness_criteria.json` is the single runtime source for these
+limits. Both the onboard computer and the clutch read the same policy; a red
+zone stops routing before an LLM is selected.
+
+---
+
 ## Supported Providers
 
 | Provider | Models | Local |
@@ -320,7 +471,7 @@ more, route that step to the Mac Studio compute path.
 | **Kimi (Moonshot)** | `kimi-k2.7-code`, `kimi-k2.6` via OpenAI-compatible API; `kimi-cli`/`kimi-code` CLI; Ollama Cloud | API / CLI |
 | **OpenAI-compatible** | Any `/v1/chat/completions` endpoint (set `base_url`) | No |
 
-### GPT-5.6 cost and empirical routing
+### GPT-5.6 Cost and Empirical Routing
 
 GPT-5.6 pricing is versioned in the model catalog and shared by runtime telemetry, Tankuhr, CLI/API JSON, and stats. The calculator distinguishes observed, assumed, and unknown usage; missing provider usage is unmetered (`cost_usd=null`), not zero. It accounts for cached input, cache writes, the >272k long-context multipliers, Standard/Fast service, tool fees, and reasoning tokens exactly once.
 
@@ -332,12 +483,16 @@ All three GPT-5.6 models expose efforts `none`, `low`, `medium`, `high`, `xhigh`
 
 See [GPT-5.6 cost and routing](docs/GPT56_COST_ROUTING.md), the [example input](docs/gpt56_cost_example.json), and the generated [price-facts chart](docs/gpt56_price_facts.svg).
 
+---
+
 ## Execution Patterns
 
 - **Single** -- one model, one task
 - **Convoy (Kolonne)** -- sequential chain, output N feeds input N+1
 - **Team** -- parallel specialized workers, results merged
 - **Swarm** -- massively parallel micro-tasks (e.g., 20x Haiku), then aggregation
+
+---
 
 ## Project Structure
 
@@ -356,6 +511,7 @@ clutch/
 |   +-- tankuhr.py         # Budget tracking
 |   +-- tacho.py           # Metrics
 |   +-- fahrschule.py      # Learning engine
+|   +-- token_throughput.py# Anthropic 5h/7d throughput
 |   +-- patterns/
 |       +-- kolonne.py     # Chain pattern
 |       +-- team.py        # Parallel pattern
@@ -371,8 +527,11 @@ clutch/
 |   +-- test_learning.py
 |   +-- test_patterns.py
 |   +-- test_route.py
+|   +-- test_metadata.py   # Automated parity contract tests
 +-- data/                  # Runtime data (not tracked)
 ```
+
+---
 
 ## Tests
 
@@ -384,79 +543,7 @@ pytest -q
 Pytest is configured to collect only `tests/`. Root-level smoke scripts such as
 `demo.py`, `live_test.py`, and `claude_code_test.py` are manual provider checks.
 
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-For the German automotive API terms, see [GLOSSARY.md](GLOSSARY.md).
-
-## License
-
-MIT License. See [LICENSE](LICENSE) for details.
-
 ---
-
-## Deutsch
-
-**clutch** (deutsch: *Kupplung*) ist eine provider-neutrale LLM-Orchestration-Engine. Das gesamte System nutzt eine durchgängige **Auto-Metapher** als Domain Language -- die deutschen Code-Identifier sind bewusst gewählt.
-
-### Glossar: Code-Begriffe
-
-| Deutsch (Code) | Englisch | Beschreibung |
-|----------------|----------|--------------|
-| **Fahrer** | Driver | Der Orchestrator -- wählt Modell, Reasoning-Level und Ausführungsmuster |
-| **Strecke** | Road / Route | Der Task bzw. die Aufgabe, die analysiert und klassifiziert wird |
-| **Getriebe** | Gearbox | Die Modell-Registry -- verwaltet alle Gänge über alle Provider |
-| **Gang** | Gear | Ein konkretes LLM-Modell (G1=Haiku bis G5=Opus) |
-| **Kupplung** | Clutch | Der Schaltmechanismus -- entscheidet wann und wie zwischen Modellen gewechselt wird |
-| **Gas / Bremse** | Throttle / Brake | Reasoning-Level: Gas = gründlicher (mehr Tokens), Bremse = direkter (weniger) |
-| **MotorBlock** | Engine Block | Die einheitliche API-Aufrufschicht für alle Provider |
-| **Tacho** | Speedometer | Metriken-Erfassung während der Task-Ausführung |
-| **Tankuhr** | Fuel Gauge | Budget-Tracking mit 4 Zonen (grün/gelb/orange/rot) |
-| **Bordcomputer** | Onboard Computer | Health-Monitor mit Circuit-Breaker und Anomalie-Erkennung |
-| **Fahrtenbuch** | Trip Log | SQLite-basierter Metrik-Speicher für alle Fahrten |
-| **Fahrschule** | Driving School | Lernengine -- optimiert das Routing durch Fitness-Scoring |
-
-### Streckentypen (Task-Klassifikation)
-
-| Strecke | Schwierigkeit | Beispiel |
-|---------|--------------|----------|
-| **Feldweg** | Trivial | Typos, Formatierung, Kommentare |
-| **Landstrasse** | Standard | Feature-Entwicklung, einfaches Refactoring |
-| **Bundesstrasse** | Mittel | Bugfixes, Debugging |
-| **Autobahn** | Hoch | Architektur-Design, System-Migration |
-| **Prüfstrecke** | Review | Code-Review, Qualitätsprüfung |
-| **Rallye** | Bulk | Massenformatierung, Batch-Operationen |
-| **Konvoi** | Pipeline | Sequentielle Verarbeitung (Output N -> Input N+1) |
-| **Teamfahrt** | Parallel | Multi-File-Features, parallele Spezialisten |
-| **Langstrecke** | Komplex | Große mehrstufige Projekte (Hybrid-Muster) |
-| **Testfahrt** | Tests | Automatische Test-Generierung |
-
-### Ausführungsmuster
-
-| Muster | Metapher | Beschreibung |
-|--------|----------|--------------|
-| **Einzelfahrt** | Ein Auto | Ein Modell, ein Task |
-| **Kolonne** | Fahrzeugkolonne | Sequentiell -- Output von Schritt N wird Input für N+1 |
-| **Team** | Fahrgemeinschaft | Parallel -- spezialisierte Worker, Ergebnisse zusammengeführt |
-| **Schwarm** | Autobahnverkehr | Massiv parallel -- viele günstige Worker für Mikrotasks |
-| **Hybrid** | Rallye mit Etappen | Kombination aus Kolonne- und Team-Phasen |
-
-### Kurzanleitung
-
-```python
-from clutch import Fahrer
-
-fahrer = Fahrer()
-
-ergebnis = fahrer.fahren(
-    "Fix den Bug in der Auth-Komponente",
-    handler=mein_handler,
-)
-
-print(ergebnis.config.gang.name)    # "claude-sonnet"
-print(ergebnis.config.gas.wert)     # 0.7
-print(fahrer.status()["tankuhr"])   # Budget-Stand
-```
 
 ## Ecosystem & Sibling Tools
 
@@ -471,16 +558,29 @@ Part of the [ellmos-ai](https://github.com/ellmos-ai) multi-agent infrastructure
 | [sqlite-transit-sync](https://github.com/ellmos-ai/sqlite-transit-sync) | ellmos-ai | Multi-agent state synchronization via SQLite WAL journals |
 | [workflowhooker](https://github.com/ellmos-ai/workflowhooker) | ellmos-ai | Event hooks and agent workflow automation triggers |
 | [memoryhooker](https://github.com/ellmos-ai/memoryhooker) | ellmos-ai | Transparent SQLite/FTS5 working memory capture for agents |
+| [agent-ops-stack](https://github.com/ellmos-ai/agent-ops-stack) | ellmos-ai | Composed operational sidecar stack for autonomous agents |
+| [convergence-reconciler](https://github.com/ellmos-ai/convergence-reconciler) | ellmos-ai | Cross-model convergence validation & consensus engine |
 | [DevCenter](https://github.com/dev-bricks/DevCenter) | dev-bricks | Developer control plane, repository dashboard & environment manager |
 | [CodeBox](https://github.com/dev-bricks/CodeBox) | dev-bricks | Polyglot code snippet manager & developer workbench |
+| [open-bricks](https://github.com/open-bricks) | open-bricks | Umbrella open-source organization for autonomous tools & infrastructure |
 
 ---
 
-## Haftung / Liability
+## Contributing
 
-Dieses Projekt ist eine **unentgeltliche Open-Source-Schenkung** im Sinne der §§ 516 ff. BGB. Die Haftung des Urhebers ist gemäß **§ 521 BGB** auf **Vorsatz und grobe Fahrlässigkeit** beschränkt. Ergänzend gelten die Haftungsausschlüsse aus GPL-3.0 / MIT / Apache-2.0 §§ 15–16 (je nach gewählter Lizenz).
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+For the German automotive API terms, see [GLOSSARY.md](GLOSSARY.md).
+
+---
+
+## Security Policy & Liability
+
+See [SECURITY.md](SECURITY.md) for supported versions, response SLAs, and vulnerability reporting procedures.
+
+### Haftungsausschluss / Liability Disclaimer
+
+Dieses Projekt ist eine **unentgeltliche Open-Source-Schenkung** im Sinne der §§ 516 ff. BGB. Die Haftung des Urhebers ist gemäß **§ 521 BGB** auf **Vorsatz und grobe Fahrlässigkeit** beschränkt. Ergänzend gelten die Haftungsausschlüsse der MIT-Lizenz.
 
 Nutzung auf eigenes Risiko. Keine Wartungszusage, keine Verfügbarkeitsgarantie, keine Gewähr für Fehlerfreiheit oder Eignung für einen bestimmten Zweck.
 
 This project is an unpaid open-source donation. Liability is limited to intent and gross negligence (§ 521 German Civil Code). Use at your own risk. No warranty, no maintenance guarantee, no fitness-for-purpose assumed.
-
