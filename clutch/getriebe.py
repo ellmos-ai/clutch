@@ -11,6 +11,7 @@ es stellt nur die Gaenge bereit.
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Optional
@@ -39,6 +40,9 @@ class Gang:
     catalog_source: Optional[str] = None
     quantization: Optional[str] = None
     pricing: Optional[PricingSpec] = None
+    lifecycle: str = "unknown"
+    availability: dict[str, Optional[bool]] = field(default_factory=dict)
+    runners: list[str] = field(default_factory=list)
 
     @property
     def ist_lokal(self) -> bool:
@@ -100,6 +104,7 @@ class Getriebe:
         self._aliases: dict[str, str] = {}
         self._model_max_gang: dict[str, object] = {}
         self._model_cost_overrides: dict[str, object] = {}
+        self._execution_registry: dict = {}
         self._load()
 
     def _load(self) -> None:
@@ -110,8 +115,12 @@ class Getriebe:
         with open(path, encoding="utf-8") as f:
             data = json.load(f)
 
+        self._execution_registry = deepcopy(data.get("execution_registry", {}))
+        provider_evidence = self._execution_registry.get("provider_evidence", {})
+
         # Gaenge laden
         for name, cfg in data.get("gaenge", {}).items():
+            evidence = provider_evidence.get(cfg.get("provider", "unknown"), {})
             pricing = PricingSpec.from_dict(cfg["pricing"]) if cfg.get("pricing") else None
             self._gaenge[name] = Gang(
                 name=name,
@@ -133,10 +142,17 @@ class Getriebe:
                 endpoint=cfg.get("endpoint"),
                 efforts=cfg.get("efforts", []),
                 reasoning_modes=cfg.get("reasoning_modes", []),
-                catalog_checked_at=cfg.get("catalog_checked_at"),
-                catalog_source=cfg.get("catalog_source"),
+                catalog_checked_at=cfg.get(
+                    "catalog_checked_at", evidence.get("catalog_checked_at")
+                ),
+                catalog_source=cfg.get("catalog_source", evidence.get("catalog_source")),
                 quantization=cfg.get("quantization"),
                 pricing=pricing,
+                lifecycle=cfg.get("lifecycle", evidence.get("lifecycle", "unknown")),
+                availability=deepcopy(
+                    cfg.get("availability", evidence.get("availability", {}))
+                ),
+                runners=list(cfg.get("runners", evidence.get("runners", []))),
             )
 
         # Provider laden
@@ -150,6 +166,28 @@ class Getriebe:
 
         self._fahrer_optionen = data.get("fahrer_optionen", {})
         self._apply_user_overrides()
+
+    def execution_registry_config(self) -> dict:
+        """Return an isolated copy of the public selector-profile contract."""
+        return deepcopy(self._execution_registry)
+
+    def registry_fingerprint(self) -> str:
+        """Fingerprint all facts that influence execution resolution."""
+        from clutch.execution import ExecutionRegistry
+
+        return ExecutionRegistry(self).fingerprint()
+
+    def resolve_execution_selector(self, selector: str, runner: Optional[str] = None):
+        """Resolve a runner, self, family or exact execution selector."""
+        from clutch.execution import resolve_execution_selector
+
+        return resolve_execution_selector(selector, runner=runner, registry=self)
+
+    def apply_provider_catalog(self, snapshot):
+        """Overlay validated provider evidence onto curated gears."""
+        from clutch.execution import apply_provider_catalog
+
+        return apply_provider_catalog(self, snapshot)
 
     def _apply_user_overrides(self) -> None:
         overrides = lade_user_overrides(self.overrides_path)
