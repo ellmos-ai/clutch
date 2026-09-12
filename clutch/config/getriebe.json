@@ -229,6 +229,32 @@
       "max_context": 256000,
       "endpoint": "http://localhost:11434"
     },
+    "ollama-kimi-k3": {
+      "provider": "ollama",
+      "model_id": "kimi-k3:cloud",
+      "gang": 5,
+      "leistung": "max",
+      "kosten_input_1k": 0.001,
+      "kosten_output_1k": 0.005,
+      "_doc": "Kimi K3 (2.81T Params MoE, 1M Kontext) ueber Ollama Cloud mit Pro-Abo. Frontiermodell mit Thinking, Agentic Tool-Use und Vision.",
+      "staerken": ["komplexes_reasoning", "coding", "agentisch", "grosse_kontexte", "mathematik", "vision"],
+      "schwaechen": ["cloud_nicht_lokal", "account_login", "internet_noetig"],
+      "max_context": 1000000,
+      "endpoint": "http://localhost:11434"
+    },
+    "ollama-glm-5.3": {
+      "provider": "ollama",
+      "model_id": "glm-5.3:cloud",
+      "gang": 4,
+      "leistung": "hoch",
+      "kosten_input_1k": 0.001,
+      "kosten_output_1k": 0.004,
+      "_doc": "GLM 5.3 ueber Ollama Cloud mit Pro-Abo. Stark in Coding, Code-Review, Analyse und mehrsprachigen Aufgaben.",
+      "staerken": ["coding", "analyse", "grosse_kontexte", "multilingual", "agentisch"],
+      "schwaechen": ["cloud_nicht_lokal", "account_login", "internet_noetig"],
+      "max_context": 128000,
+      "endpoint": "http://localhost:11434"
+    },
     "claude-code": {
       "provider": "claude-code",
       "model_id": "claude-code-session",
