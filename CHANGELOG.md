@@ -23,7 +23,7 @@ Availability-/Preference-/Readiness-Funktionen zu überschreiben.
   Belege und ein zulässiger Lebenszyklus machen ein Modell claimbar.
 - Atomare Kataloganwendung reichert ausschließlich bereits kuratierte Gänge an;
   unbekannte Provider-Modelle werden gemeldet, aber nicht still registriert.
-- 16 neue Resolver-/Katalogtests und fünf Provider-Fixtures; Gesamtsuite 403
+- 16 neue Resolver-/Katalogtests und fünf Provider-Fixtures; Gesamtsuite 404
   Tests.
 
 ### Compatibility

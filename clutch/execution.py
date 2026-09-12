@@ -180,6 +180,20 @@ def _aggregate_readiness(providers: frozenset[str]) -> tuple[bool | None, bool |
     return host_ready, account_accessible
 
 
+def _merge_readiness(
+    availability: ModelAvailability,
+    host_ready: bool | None,
+    account_accessible: bool | None,
+) -> ModelAvailability:
+    """Apply probed readiness to the stages the registry leaves open."""
+    evidence = availability.to_dict()
+    if evidence["host_ready"] is None:
+        evidence["host_ready"] = host_ready
+    if evidence["account_accessible"] is None:
+        evidence["account_accessible"] = account_accessible
+    return ModelAvailability.from_mapping(evidence)
+
+
 def _with_probed_readiness(
     availability: ModelAvailability, providers: frozenset[str]
 ) -> ModelAvailability:
@@ -192,13 +206,7 @@ def _with_probed_readiness(
     """
     if availability.host_ready is not None and availability.account_accessible is not None:
         return availability
-    host_ready, account_accessible = _aggregate_readiness(providers)
-    evidence = availability.to_dict()
-    if evidence["host_ready"] is None:
-        evidence["host_ready"] = host_ready
-    if evidence["account_accessible"] is None:
-        evidence["account_accessible"] = account_accessible
-    return ModelAvailability.from_mapping(evidence)
+    return _merge_readiness(availability, *_aggregate_readiness(providers))
 
 
 class ExecutionRegistry:
@@ -430,22 +438,27 @@ class ExecutionRegistry:
                 fingerprint,
                 resolved_at,
             )
+        matched = [
+            gang for gang in self.getriebe.alle_gaenge()
+            if self._profile_matches(profile, gang)
+        ]
+        # One probe round for the whole profile, not one per model: every
+        # candidate is judged against the same host readiness the exact-selector
+        # path uses, so a model cannot be claimable as an exact selector and
+        # silently ineligible under its family selector.
+        readiness = _aggregate_readiness(frozenset(gang.provider for gang in matched))
+        profile_availability = _merge_readiness(ModelAvailability(), *readiness)
         candidates = []
-        providers: set[str] = set()
-        for gang in self.getriebe.alle_gaenge():
-            if not self._profile_matches(profile, gang):
-                continue
-            providers.add(gang.provider)
-            availability = ModelAvailability.from_mapping(gang.availability)
+        for gang in matched:
+            availability = _merge_readiness(
+                ModelAvailability.from_mapping(gang.availability), *readiness
+            )
             if (
                 availability.claimable
                 and runner in gang.runners
                 and gang.lifecycle in _ELIGIBLE_LIFECYCLES
             ):
                 candidates.append(gang.name)
-        profile_availability = _with_probed_readiness(
-            ModelAvailability(), frozenset(providers)
-        )
         resolved_type = selector_type or str(kind)
         return ExecutionResolution(
             requested_selector=requested,
@@ -727,6 +740,11 @@ def apply_provider_catalog(
         gang.lifecycle = entry.lifecycle
         gang.catalog_source = entry.source
         gang.catalog_checked_at = entry.checked_at
+        # A snapshot is the caller's *proven* observation, not provider
+        # marketing: an adapter that reached the provider API with the local
+        # credentials has evidence for account_accessible that no local probe
+        # can improve on. It may therefore assert the host-local stages, and
+        # _with_probed_readiness leaves proven stages untouched.
         gang.availability = entry.availability.to_dict()
         gang.runners = list(entry.runners)
 

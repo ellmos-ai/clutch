@@ -157,3 +157,38 @@ def test_unresolved_selector_never_probes_a_provider(fake_motors):
     assert result["resolved"] is False
     assert result["availability"]["host_ready"] is None
     assert result["availability"]["account_accessible"] is None
+
+
+def test_family_and_exact_selectors_agree_on_probed_readiness(fake_motors):
+    """A snapshot that proves only the provider stages leaves the host-local
+    ones to the probe. Both resolution paths must then reach the same verdict:
+    a model claimable as an exact selector may not be silently dropped from its
+    own family selector.
+    """
+    import json
+    from pathlib import Path
+
+    from clutch import ProviderCatalogSnapshot, apply_provider_catalog
+
+    fixture = Path(__file__).parent / "fixtures" / "provider_catalogs" / "openai.json"
+    data = json.loads(fixture.read_text(encoding="utf-8"))
+    # The adapter proved everything it could reach, but left the credential
+    # axis open -- exactly the stage a local probe answers. (host_ready must
+    # stay proven here: openai is a credential provider, so its Motor never
+    # answers the host axis and nothing could ever become claimable.)
+    data["entries"][0]["availability"]["account_accessible"] = None
+
+    getriebe = Getriebe()
+    apply_provider_catalog(getriebe, ProviderCatalogSnapshot.from_dict(data))
+    fake_motors({"openai": True})
+
+    exact = resolve_execution_selector(
+        "openai-gpt-5.6-sol", runner="codex", registry=getriebe, resolved_at=NOW
+    )
+    family = resolve_execution_selector(
+        "gpt5", runner="codex", registry=getriebe, resolved_at=NOW
+    )
+
+    assert exact["availability"]["account_accessible"] is True, "probe must answer"
+    assert exact["claimable"] is True
+    assert family["eligible_models"] == ["openai-gpt-5.6-sol"]

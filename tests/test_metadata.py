@@ -45,7 +45,7 @@ def test_llms_txt_structure_and_timestamp():
     llms_text = (REPO_ROOT / "llms.txt").read_text(encoding="utf-8")
 
     assert "Last-checked: 2026-09-12" in llms_text, "llms.txt Last-checked timestamp should be 2026-09-12"
-    assert "403" in llms_text, "llms.txt should report 403 passing unit tests"
+    assert "404" in llms_text, "llms.txt should report 404 passing unit tests"
     assert "## Audience" in llms_text, "llms.txt missing Audience section"
     assert "## Search Phrases" in llms_text, "llms.txt missing Search Phrases section"
     assert "## Docs" in llms_text, "llms.txt missing Docs section"
