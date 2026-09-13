@@ -4,6 +4,20 @@ Alle wesentlichen Änderungen an **clutch** werden hier dokumentiert.
 
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.6.3] - 2026-09-13 - Frontier Ollama Cloud Models, CI Workflow Hardening & Multi-Host Hygiene
+
+Pfad A ("Technische Hygiene") Wartungs- und Standardisierungslauf im GitHubBot-Flottenverbund.
+
+### Added
+- **Frontier Ollama Cloud Models (`clutch/config/getriebe.json`)**: Aufnahme von `ollama-kimi-k3` (Kimi K3 MoE mit 2,81 Billionen Parametern, 1M Kontextfenster, Thinking und multimodaler Vision) und `ollama-glm-5.3` (GLM 5.3 mit 128k Kontextfenster für Coding, Code-Review und mehrsprachige Analyse) via Ollama Cloud.
+- **CI-Workflow-Härtung (`.github/workflows/*.yml`)**: Verbindliche `timeout-minutes`-Schranken für alle GitHub Actions Jobs (`ci.yml` 15 min, `tests.yml` 15 min, `publish.yml` 15 min für build und publish, `stale.yml` 10 min, `welcome.yml` 5 min) zur Vermeidung von Runner-Hängern und verwaisten CI-Prozessen.
+- **Multi-Host- & OneDrive-Gitignore-Härtung (`.gitignore`)**: Schutzregeln gegen OneDrive-Synchronisationskonflikte (`* (kopie)*`, `* (copy)*`, `*-ASUS.*`, `*-LAPTOP.*`, `*-WORKSTATION-LG.*`), Patch- und Merge-Reste (`*.orig`, `*.rej`, `!package-lock.json`) sowie zusätzliche Caches (`.tox/`, `.turbo/`, `.mypy_cache/`).
+- **PEP 621 Standardisierung (`pyproject.toml`)**: `license-files = ["LICENSE"]` deklariert und Paketversion auf `0.6.3` synchronisiert.
+- **Automatisierte Vertragstestsuite (`tests/test_metadata.py` & `tests/test_kimi_motoren.py`)**: Neue Kontrakt- und Regressionstests für CI-Job-Timeouts (`test_ci_workflow_job_timeouts`), OneDrive- und Multi-Host-Gitignore-Regeln (`test_onedrive_multihost_gitignore_patterns`), PEP 621 License-Files (`test_pep621_license_files`) sowie Modell-Katalog-Parität für Ollama Cloud Frontier-Modelle (`test_frontier_ollama_models_in_catalog`, `test_ollama_kimi_k3_cloud_gang`, `test_ollama_glm_cloud_gang`; Gesamt-Suite auf 393 Tests erweitert | 100% grün).
+- **Shields.io Badges & llms.txt**: Badges in `README.md` & `README_de.md` auf Version 0.6.3, 393 bestandene Tests und Ollama Cloud Modellportfolio synchronisiert; Entdeckungskontext in `llms.txt` auf Stand 2026-09-13 aktualisiert.
+
+---
+
 ## [0.6.2] - 2026-09-09 - Repository Hygiene, CI Hardening & Contract Tests
 
 Pfad A ("Technische Hygiene") Wartungs- und Standardisierungslauf im GitHubBot-Flottenverbund.

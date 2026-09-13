@@ -8,9 +8,9 @@
 
 > Provider-neutral LLM orchestration engine and model router with auto-learning
 
-[![Version 0.6.2](https://img.shields.io/badge/Version-0.6.2-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
+[![Version 0.6.3](https://img.shields.io/badge/Version-0.6.3-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
 [![CI](https://img.shields.io/badge/CI-passing-brightgreen.svg)](https://github.com/ellmos-ai/clutch/actions)
-[![Pytest](https://img.shields.io/badge/Pytest-387%20passed-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
+[![Pytest](https://img.shields.io/badge/Pytest-393%20passed-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![Platforms](https://img.shields.io/badge/Platforms-Linux%20%7C%20Windows%20%7C%20macOS-blue.svg)](https://github.com/ellmos-ai/clutch)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -444,7 +444,7 @@ zone stops routing before an LLM is selected.
 | **Anthropic** | Claude Fable 5, Haiku, Sonnet, Opus | No |
 | **Google** | Gemini 3.7 Flash (preferred), Gemini 3.5 Flash fallback, Gemini 3.1 Pro Preview | No |
 | **OpenAI** | GPT-5.6 Luna/Terra/Sol via Responses API, GPT-5.3-Codex | No |
-| **Ollama** | Qwen, Mistral, and more (local & remote) | Yes |
+| **Ollama** | Qwen, Mistral, and more (local & remote); Kimi K3, GLM 5.3, K2.7 Code via Ollama Cloud | Yes / Cloud |
 | **Claude Code** | Via subprocess (CLI session) | Yes |
 | **agy** | Live-discovered Gemini, Claude and GPT-OSS catalog via `companion-for-agy` | CLI session |
 | **Kimi (Moonshot)** | `kimi-k2.7-code`, `kimi-k2.6` via OpenAI-compatible API; `kimi-cli`/`kimi-code` CLI; Ollama Cloud | API / CLI |

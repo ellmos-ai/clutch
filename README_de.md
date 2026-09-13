@@ -8,9 +8,9 @@
 
 > Provider-neutrale LLM-Orchestrierungsengine und Modell-Router mit automatischem Lernen
 
-[![Version 0.6.2](https://img.shields.io/badge/Version-0.6.2-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
+[![Version 0.6.3](https://img.shields.io/badge/Version-0.6.3-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
 [![CI](https://img.shields.io/badge/CI-bestanden-brightgreen.svg)](https://github.com/ellmos-ai/clutch/actions)
-[![Pytest](https://img.shields.io/badge/Pytest-387%20bestanden-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
+[![Pytest](https://img.shields.io/badge/Pytest-393%20bestanden-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![Plattformen](https://img.shields.io/badge/Plattformen-Linux%20%7C%20Windows%20%7C%20macOS-blue.svg)](https://github.com/ellmos-ai/clutch)
 [![Lizenz: MIT](https://img.shields.io/badge/Lizenz-MIT-green.svg)](LICENSE)
@@ -425,7 +425,7 @@ Routing, bevor ein LLM ausgewählt wird.
 | **Anthropic** | Claude Fable 5, Haiku, Sonnet, Opus | Nein |
 | **Google** | Gemini 3.7 Flash (bevorzugt), Gemini 3.5 Flash als Fallback, Gemini 3.1 Pro Preview | Nein |
 | **OpenAI** | GPT-5.6 Luna/Terra/Sol via Responses API, GPT-5.3-Codex | Nein |
-| **Ollama** | Qwen, Mistral und weitere Open-Source-Modelle | Ja |
+| **Ollama** | Qwen, Mistral und weitere (lokal & remote); Kimi K3, GLM 5.3, K2.7 Code via Ollama Cloud | Ja / Cloud |
 | **Claude Code** | Subprozess-CLI-Sitzung | Ja |
 | **agy** | Live erkanntes Gemini-, Claude- und GPT-OSS-Inventar via `companion-for-agy` | CLI-Sitzung |
 | **Kimi (Moonshot)** | `kimi-k2.7-code`, `kimi-k2.6` via OpenAI-kompatible API; `kimi-cli`/`kimi-code` CLI; Ollama Cloud | API / CLI |
