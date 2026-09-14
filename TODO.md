@@ -22,7 +22,12 @@ provider-neutral LLM orchestration library.
 - [x] **W195 / T-20260830-195164348 (U1-U3):** Persistente Modell-/Provider-
   Verfügbarkeit, update-festes Nutzer-Overlay und Routing-Wünsche/Ausschlüsse
   pro Aufruf einschließlich zweier JSON-Alternativen. DONE 2026-08-30 in
-  Version 0.6.0. U4+ (Discovery/Probe/Katalogpflege) bleibt separat offen.
+  Version 0.6.0. U4+ bleibt separat offen; der nachfolgende Katalogvertrag
+  ersetzt keine echten Provider-I/O-Adapter oder Account-/Host-Probes.
+- [x] **T-20260822-230246761 (Provider-Katalogvertrag):** Validierte,
+  injizierbare Provider-Snapshots, deterministischer Diff und fünf getrennte
+  Evidenzstufen für fail-closed Ausführungsauflösung. Implementiert auf PR #6;
+  fehlende Live-Evidenz wird nicht als Verfügbarkeit ausgegeben.
 
 - [x] **M6 Web-UI: CLI- + Env-/Key-Verwaltung spiegeln** — Settings-Panel in der
   Web-Oberfläche, das `clutch keys` (set/list/remove, Werte nie anzeigen) und
