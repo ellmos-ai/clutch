@@ -6,10 +6,9 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1
 
 ## [Unreleased] - Beleggestützter Ausführungsresolver
 
-T-20260822-230246761. Vereinigt den in 0.6.0 eingeführten öffentlichen
-Resolver mit dem Provider-Katalogvertrag und hält ihn gegen den aktuellen
-0.6.2-Stand aktuell, ohne die zwischenzeitlich hinzugekommenen
-Availability-/Preference-/Readiness-Funktionen zu überschreiben.
+T-20260822-230246761 ergänzt den aktuellen 0.6.3-Stand um einen
+Provider-Katalogvertrag, ohne zwischenzeitliche Modell-, CI- oder
+Multi-Host-Änderungen zu überschreiben.
 
 ### Added
 - Öffentliche, JSON-fähige Auflösung für Runner, `self`, Familien, exakte
@@ -23,8 +22,6 @@ Availability-/Preference-/Readiness-Funktionen zu überschreiben.
   Belege und ein zulässiger Lebenszyklus machen ein Modell claimbar.
 - Atomare Kataloganwendung reichert ausschließlich bereits kuratierte Gänge an;
   unbekannte Provider-Modelle werden gemeldet, aber nicht still registriert.
-- 16 neue Resolver-/Katalogtests und fünf Provider-Fixtures; Gesamtsuite 404
-  Tests.
 
 ### Compatibility
 - `resolve_execution_selector()` behält die in 0.6.0 veröffentlichte
@@ -33,6 +30,20 @@ Availability-/Preference-/Readiness-Funktionen zu überschreiben.
 - Statische Katalogeinträge beweisen bewusst weder Accountzugriff noch
   Hostbereitschaft. Bestehende Selektoren bleiben auflösbar, aber ohne injizierte
   Laufzeitevidenz fail-closed und nicht claimbar.
+
+---
+
+## [0.6.3] - 2026-09-13 - Frontier Ollama Cloud Models, CI Workflow Hardening & Multi-Host Hygiene
+
+Pfad A ("Technische Hygiene") Wartungs- und Standardisierungslauf im GitHubBot-Flottenverbund.
+
+### Added
+- **Frontier Ollama Cloud Models (`clutch/config/getriebe.json`)**: Aufnahme von `ollama-kimi-k3` (Kimi K3 MoE mit 2,81 Billionen Parametern, 1M Kontextfenster, Thinking und multimodaler Vision) und `ollama-glm-5.3` (GLM 5.3 mit 128k Kontextfenster für Coding, Code-Review und mehrsprachige Analyse) via Ollama Cloud.
+- **CI-Workflow-Härtung (`.github/workflows/*.yml`)**: Verbindliche `timeout-minutes`-Schranken für alle GitHub Actions Jobs (`ci.yml` 15 min, `tests.yml` 15 min, `publish.yml` 15 min für build und publish, `stale.yml` 10 min, `welcome.yml` 5 min) zur Vermeidung von Runner-Hängern und verwaisten CI-Prozessen.
+- **Multi-Host- & OneDrive-Gitignore-Härtung (`.gitignore`)**: Schutzregeln gegen OneDrive-Synchronisationskonflikte (`* (kopie)*`, `* (copy)*`, `*-ASUS.*`, `*-LAPTOP.*`, `*-WORKSTATION-LG.*`), Patch- und Merge-Reste (`*.orig`, `*.rej`, `!package-lock.json`) sowie zusätzliche Caches (`.tox/`, `.turbo/`, `.mypy_cache/`).
+- **PEP 621 Standardisierung (`pyproject.toml`)**: `license-files = ["LICENSE"]` deklariert und Paketversion auf `0.6.3` synchronisiert.
+- **Automatisierte Vertragstestsuite (`tests/test_metadata.py` & `tests/test_kimi_motoren.py`)**: Neue Kontrakt- und Regressionstests für CI-Job-Timeouts (`test_ci_workflow_job_timeouts`), OneDrive- und Multi-Host-Gitignore-Regeln (`test_onedrive_multihost_gitignore_patterns`), PEP 621 License-Files (`test_pep621_license_files`) sowie Modell-Katalog-Parität für Ollama Cloud Frontier-Modelle (`test_frontier_ollama_models_in_catalog`, `test_ollama_kimi_k3_cloud_gang`, `test_ollama_glm_cloud_gang`; Gesamt-Suite auf 393 Tests erweitert | 100% grün).
+- **Shields.io Badges & llms.txt**: Badges in `README.md` & `README_de.md` auf Version 0.6.3, 393 bestandene Tests und Ollama Cloud Modellportfolio synchronisiert; Entdeckungskontext in `llms.txt` auf Stand 2026-09-13 aktualisiert.
 
 ---
 

@@ -61,6 +61,32 @@ def test_ollama_kimi_cloud_gang():
     print("[OK] Ollama-Kimi-Cloud-Gang")
 
 
+def test_ollama_kimi_k3_cloud_gang():
+    """Kimi K3 (2.81T MoE, 1M Kontext) via Ollama Cloud."""
+    g = Getriebe()
+    gang = g.gang("ollama-kimi-k3")
+    assert gang is not None
+    assert gang.provider == "ollama"
+    assert gang.model_id == "kimi-k3:cloud"
+    assert gang.gang == 5
+    assert gang.max_context == 1_000_000
+    assert not gang.ist_kostenlos
+    print("[OK] Ollama-Kimi-K3-Cloud-Gang")
+
+
+def test_ollama_glm_cloud_gang():
+    """GLM 5.3 (128k Kontext) via Ollama Cloud."""
+    g = Getriebe()
+    gang = g.gang("ollama-glm-5.3")
+    assert gang is not None
+    assert gang.provider == "ollama"
+    assert gang.model_id == "glm-5.3:cloud"
+    assert gang.gang == 4
+    assert gang.max_context == 128_000
+    assert not gang.ist_kostenlos
+    print("[OK] Ollama-GLM-5.3-Cloud-Gang")
+
+
 def test_factory_liefert_kimi_motoren():
     """MotorBlock kennt beide Kimi-Provider und liefert die passenden Klassen."""
     block = MotorBlock()

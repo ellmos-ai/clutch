@@ -101,3 +101,29 @@ This Pfad B upgrade brings clutch to the gold-standard discoverability posture:
 - Full Test Suite: pytest -q (377/377 passed in 51.67s, 100% green).
 - CI Matrix: Added .github/workflows/ci.yml covering Linux, Windows, macOS, Py 3.10-3.13.
 ================================================================================
+
+================================================================================
+PFAD A (HYGIENE & METADATA CONTRACTS) LOG: clutch
+================================================================================
+Date: 2026-09-13
+Path: Pfad A (Repository Hygiene & Standardization)
+Version: 0.6.3
+Repository: ellmos-ai/clutch
+Organization: ellmos-ai
+Umbrella Collective: open-bricks
+
+1. HIGHLIGHTS & CHANGES
+--------------------------------------------------------------------------------
+- Frontier Models: Integrated ollama-kimi-k3 (Kimi K3 MoE 2.81T / 1M context / vision / reasoning)
+  and ollama-glm-5.3 (GLM 5.3 128k context / coding / multilingual) via Ollama Cloud in getriebe.json.
+- CI Workflow Hardening: Added explicit timeout-minutes across all 5 GitHub Actions workflows
+  (ci.yml 15 min, tests.yml 15 min, publish.yml 15 min, stale.yml 10 min, welcome.yml 5 min)
+  preventing zombie runner hangs.
+- Multi-Host Gitignore Hardening: Added OneDrive sync conflict copies (* (kopie)*, * (copy)*,
+  *-ASUS.*, *-LAPTOP.*, *-WORKSTATION-LG.*), patch residue (*.orig, *.rej), and extra caches.
+- PEP 621 Standard: Added license-files = ["LICENSE"] and synchronized version to 0.6.3.
+- Contract Test Expansion: Added 6 new contract and regression tests in tests/test_metadata.py
+  and tests/test_kimi_motoren.py.
+- Test Suite: 393/393 unit tests passing 100% green.
+- Multi-OS Parity: Verified bytecode compilation and ruff clean.
+================================================================================

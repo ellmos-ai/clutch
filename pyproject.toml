@@ -6,10 +6,11 @@ build-backend = "setuptools.build_meta"
 # Import-Name bleibt `clutch`; PyPI-Distributionsname ist `clutch-router`,
 # weil `clutch` auf PyPI bereits vergeben ist (altes GAE-Framework).
 name = "clutch-router"
-version = "0.6.2"
+version = "0.6.3"
 description = "Provider-neutral LLM orchestration engine and router (CLI/Web/API) with auto-learning"
 readme = "README.md"
 license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.10"
 authors = [
     {name = "Lukas Geiger"},

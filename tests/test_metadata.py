@@ -44,8 +44,8 @@ def test_llms_txt_structure_and_timestamp():
     """Verify that llms.txt contains the canonical structure and a recent timestamp."""
     llms_text = (REPO_ROOT / "llms.txt").read_text(encoding="utf-8")
 
-    assert "Last-checked: 2026-09-12" in llms_text, "llms.txt Last-checked timestamp should be 2026-09-12"
-    assert "404" in llms_text, "llms.txt should report 404 passing unit tests"
+    assert "Last-checked: 2026-09-14" in llms_text, "llms.txt Last-checked timestamp should be 2026-09-14"
+    assert "410" in llms_text, "llms.txt should report 410 passing unit tests"
     assert "## Audience" in llms_text, "llms.txt missing Audience section"
     assert "## Search Phrases" in llms_text, "llms.txt missing Search Phrases section"
     assert "## Docs" in llms_text, "llms.txt missing Docs section"
@@ -198,9 +198,9 @@ def test_ci_workflow_hardening():
 
 
 def test_changelog_release_entry():
-    """Verify that CHANGELOG.md documents the latest 0.6.2 release entry."""
+    """Verify that CHANGELOG.md documents the latest 0.6.3 release entry."""
     changelog_text = (REPO_ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
-    assert "## [0.6.2] - 2026-09-09" in changelog_text, "CHANGELOG.md missing [0.6.2] release header"
+    assert "## [0.6.3] - 2026-09-13" in changelog_text, "CHANGELOG.md missing [0.6.3] release header"
 
 
 def test_readme_badges_parity():
@@ -208,9 +208,56 @@ def test_readme_badges_parity():
     readme_en = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
     readme_de = (REPO_ROOT / "README_de.md").read_text(encoding="utf-8")
 
-    assert "badge/Version-0.6.2-" in readme_en, "README.md missing Version 0.6.2 badge"
-    assert "badge/Version-0.6.2-" in readme_de, "README_de.md missing Version 0.6.2 badge"
+    assert "badge/Version-0.6.3-" in readme_en, "README.md missing Version 0.6.3 badge"
+    assert "badge/Version-0.6.3-" in readme_de, "README_de.md missing Version 0.6.3 badge"
+    assert "Pytest-410%20passed" in readme_en, "README.md missing current pytest badge"
+    assert "Pytest-410%20bestanden" in readme_de, "README_de.md missing current pytest badge"
     assert "Security%20SLA-48h" in readme_en, "README.md missing Security SLA badge"
     assert "Sicherheits--SLA-48h" in readme_de, "README_de.md missing Sicherheits-SLA badge"
     assert "code%20style-ruff" in readme_en, "README.md missing ruff code style badge"
     assert "code%20style-ruff" in readme_de, "README_de.md missing ruff code style badge"
+
+
+def test_ci_workflow_job_timeouts():
+    """Verify that CI workflows specify timeout-minutes on all jobs to prevent runaway runners."""
+    workflows_dir = REPO_ROOT / ".github" / "workflows"
+    for wf in ["ci.yml", "tests.yml", "publish.yml", "stale.yml", "welcome.yml"]:
+        content = (workflows_dir / wf).read_text(encoding="utf-8")
+        assert "timeout-minutes:" in content, f"Workflow {wf} missing timeout-minutes on jobs"
+
+
+def test_onedrive_multihost_gitignore_patterns():
+    """Verify that .gitignore blocks OneDrive sync conflict patterns and build caches."""
+    gi_text = (REPO_ROOT / ".gitignore").read_text(encoding="utf-8")
+    patterns = [
+        "* (kopie)*",
+        "* (copy)*",
+        "*-ASUS.*",
+        "*-LAPTOP.*",
+        "*-WORKSTATION-LG.*",
+        "*.orig",
+        "*.rej",
+        ".tox/",
+        ".turbo/",
+        ".mypy_cache/",
+    ]
+    for pattern in patterns:
+        assert pattern in gi_text, f".gitignore missing multi-host pattern: {pattern}"
+
+
+def test_frontier_ollama_models_in_catalog():
+    """Verify that new frontier Ollama Cloud models exist in getriebe.json catalog."""
+    import json
+    getriebe_path = REPO_ROOT / "clutch" / "config" / "getriebe.json"
+    data = json.loads(getriebe_path.read_text(encoding="utf-8"))
+    gaenge = data.get("gaenge", {})
+    assert "ollama-kimi-k3" in gaenge, "Missing ollama-kimi-k3 in getriebe.json"
+    assert "ollama-glm-5.3" in gaenge, "Missing ollama-glm-5.3 in getriebe.json"
+    assert gaenge["ollama-kimi-k3"]["model_id"] == "kimi-k3:cloud"
+    assert gaenge["ollama-glm-5.3"]["model_id"] == "glm-5.3:cloud"
+
+
+def test_pep621_license_files():
+    """Verify that pyproject.toml defines license-files for packaging compliance."""
+    pyproject_text = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
+    assert 'license-files = ["LICENSE"]' in pyproject_text, "Missing license-files in pyproject.toml"
