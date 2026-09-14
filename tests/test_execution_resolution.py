@@ -54,8 +54,9 @@ def test_runner_alias_reuses_getriebe_models():
     assert result["model_selection"] == "self"
     assert result["runner"] == "codex"
     assert result["resolved"] is True
-    assert result["claimable"] is True
-    assert "openai-gpt-5.6-sol" in result["eligible_models"]
+    assert result["claimable"] is False
+    assert result["eligible_models"] == []
+    assert result["reason"] == "no-eligible-models"
     assert result["registry_fingerprint"].startswith("sha256:")
     assert result["resolved_at"] == NOW
 
@@ -67,9 +68,9 @@ def test_family_resolution_is_runner_compatible_and_deterministic():
     assert first["selector_type"] == "family"
     assert first["model_selection"] == "family"
     assert first["allowed_runners"] == ["codex"]
-    assert first["claimable"] is True
+    assert first["claimable"] is False
     assert first["eligible_models"] == sorted(first["eligible_models"])
-    assert "openai-gpt-5.6-sol" in first["eligible_models"]
+    assert first["eligible_models"] == []
     assert first["registry_fingerprint"] == second["registry_fingerprint"]
 
 
@@ -83,8 +84,17 @@ def test_exact_model_resolution_exposes_getriebe_identity():
     assert result["provider"] == "openai"
     assert result["registry_name"] == "openai-gpt-5.6-sol"
     assert result["model_id"] == "gpt-5.6-sol"
-    assert result["eligible_models"] == ["openai-gpt-5.6-sol"]
-    assert result["reason"] is None
+    assert result["eligible_models"] == []
+    assert result["claimable"] is False
+    assert result["reason"] == "availability-unproven"
+    assert result["availability"]["provider_documented"] is True
+    # Bundled catalog data proves nothing beyond registry presence: the stages a
+    # provider snapshot must supply stay unproven here. host_ready and
+    # account_accessible are deliberately not asserted -- they are probed on the
+    # executing host and therefore environment-dependent; the fake_motors tests
+    # below pin that behaviour deterministically.
+    assert result["availability"]["provider_api_listed"] is None
+    assert result["availability"]["runner_compatible"] is True
 
 
 def test_incompatible_runner_and_unknown_selector_are_distinguishable():
@@ -147,3 +157,38 @@ def test_unresolved_selector_never_probes_a_provider(fake_motors):
     assert result["resolved"] is False
     assert result["availability"]["host_ready"] is None
     assert result["availability"]["account_accessible"] is None
+
+
+def test_family_and_exact_selectors_agree_on_probed_readiness(fake_motors):
+    """A snapshot that proves only the provider stages leaves the host-local
+    ones to the probe. Both resolution paths must then reach the same verdict:
+    a model claimable as an exact selector may not be silently dropped from its
+    own family selector.
+    """
+    import json
+    from pathlib import Path
+
+    from clutch import ProviderCatalogSnapshot, apply_provider_catalog
+
+    fixture = Path(__file__).parent / "fixtures" / "provider_catalogs" / "openai.json"
+    data = json.loads(fixture.read_text(encoding="utf-8"))
+    # The adapter proved everything it could reach, but left the credential
+    # axis open -- exactly the stage a local probe answers. (host_ready must
+    # stay proven here: openai is a credential provider, so its Motor never
+    # answers the host axis and nothing could ever become claimable.)
+    data["entries"][0]["availability"]["account_accessible"] = None
+
+    getriebe = Getriebe()
+    apply_provider_catalog(getriebe, ProviderCatalogSnapshot.from_dict(data))
+    fake_motors({"openai": True})
+
+    exact = resolve_execution_selector(
+        "openai-gpt-5.6-sol", runner="codex", registry=getriebe, resolved_at=NOW
+    )
+    family = resolve_execution_selector(
+        "gpt5", runner="codex", registry=getriebe, resolved_at=NOW
+    )
+
+    assert exact["availability"]["account_accessible"] is True, "probe must answer"
+    assert exact["claimable"] is True
+    assert family["eligible_models"] == ["openai-gpt-5.6-sol"]

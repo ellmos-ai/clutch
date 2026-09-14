@@ -299,9 +299,15 @@ def test_schwarm():
     print("[OK] Schwarm")
 
 
-def test_fahrer_integration():
+def test_fahrer_integration(tmp_path):
     """Integration: Kompletter Durchlauf."""
-    fahrer = Fahrer()
+    fahrer = Fahrer(
+        db_path=tmp_path / "clutch.db",
+        overrides_path=tmp_path / "user_overrides.json",
+        availability_path=tmp_path / "availability.json",
+        token_budget_path=tmp_path / "token_budget.json",
+        sparmodus_path=tmp_path / "sparmodus_status.json",
+    )
 
     def mock_handler(config: FahrtConfig, task: str):
         return f"Erledigt mit {config.gang.name} (G{config.gang.gang}) / Gas {config.gas.wert:.0%}"
@@ -324,7 +330,7 @@ def test_fahrer_integration():
     assert "bordcomputer" in status
     assert "tankuhr" in status
     assert "getriebe" in status
-    assert status["bordcomputer"]["gesund"]
+    assert status["bordcomputer"]["gesund"], status["bordcomputer"]
 
     print("[OK] Fahrer Integration")
     print(f"     Fahrt 1: {ergebnis.output}")

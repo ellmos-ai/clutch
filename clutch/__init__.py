@@ -20,11 +20,33 @@ from clutch.getriebe import Getriebe, Gang
 from clutch.kupplung import Kupplung
 from clutch.budget_policy import BudgetErschoepftError
 from clutch.motorblock import MotorBlock, MotorErgebnis
-from clutch.execution import ExecutionRegistryError, resolve_execution_selector
+from clutch.execution import (
+    AVAILABILITY_STAGES,
+    LIFECYCLES,
+    ExecutionRegistry,
+    ExecutionRegistryError,
+    ExecutionResolution,
+    ModelAvailability,
+    ProviderCatalogAdapter,
+    ProviderCatalogApplyResult,
+    ProviderCatalogDiff,
+    ProviderCatalogEntry,
+    ProviderCatalogSnapshot,
+    ProviderRefreshResult,
+    apply_provider_catalog,
+    normalize_selector_token,
+    refresh_provider_catalog,
+    resolve_execution_selector,
+)
 
 __all__ = [
     "Fahrer", "StreckenAnalyse", "StreckenTyp",
     "Getriebe", "Gang", "Kupplung", "BudgetErschoepftError",
     "MotorBlock", "MotorErgebnis",
-    "ExecutionRegistryError", "resolve_execution_selector",
+    "AVAILABILITY_STAGES", "LIFECYCLES",
+    "ExecutionRegistry", "ExecutionRegistryError", "ExecutionResolution",
+    "ModelAvailability", "ProviderCatalogAdapter", "ProviderCatalogApplyResult",
+    "ProviderCatalogDiff", "ProviderCatalogEntry", "ProviderCatalogSnapshot",
+    "ProviderRefreshResult", "apply_provider_catalog", "normalize_selector_token",
+    "refresh_provider_catalog", "resolve_execution_selector",
 ]
