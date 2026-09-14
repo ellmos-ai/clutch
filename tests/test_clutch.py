@@ -330,7 +330,7 @@ def test_fahrer_integration(tmp_path):
     assert "bordcomputer" in status
     assert "tankuhr" in status
     assert "getriebe" in status
-    assert status["bordcomputer"]["gesund"]
+    assert status["bordcomputer"]["gesund"], status["bordcomputer"]
 
     print("[OK] Fahrer Integration")
     print(f"     Fahrt 1: {ergebnis.output}")
