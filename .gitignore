@@ -48,5 +48,43 @@ docs/BACH_MIGRATION.md
 *.tar.gz
 *.zip
 
-# Interne Multi-Agenten-Koordination (LOCK-System)
+# Multi-Host-Synchronisationskonflikte & OneDrive-Kopien
+*-conflict-*
+*.sync-conflict-*
+*.conflict
+*-CONFLIT-*
+*.sync-temp-*
+* (kopie)*
+* (copy)*
+*-ASUS.*
+*-LAPTOP.*
+*-WORKSTATION-LG.*
+
+# Patch- und Merge-Artefakte
+*.orig
+*.rej
+!package-lock.json
+
+# Interne Multi-Agenten-Koordination & Locks
+LOCK
+LOCK.*
+*.lock
 LOCK*.txt
+LOCK.permissions.json
+
+# Test-, Coverage- und Packaging-Caches
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage/
+htmlcov/
+wheelhouse/
+.wheel-smoke/
+.tox/
+.turbo/
+.mypy_cache/
+
+# Temporäre Editor- und Log-Dateien
+*.tmp
+*.bak
+*.log

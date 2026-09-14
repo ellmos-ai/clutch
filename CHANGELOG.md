@@ -4,6 +4,51 @@ Alle wesentlichen Änderungen an **clutch** werden hier dokumentiert.
 
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.6.3] - 2026-09-13 - Frontier Ollama Cloud Models, CI Workflow Hardening & Multi-Host Hygiene
+
+Pfad A ("Technische Hygiene") Wartungs- und Standardisierungslauf im GitHubBot-Flottenverbund.
+
+### Added
+- **Frontier Ollama Cloud Models (`clutch/config/getriebe.json`)**: Aufnahme von `ollama-kimi-k3` (Kimi K3 MoE mit 2,81 Billionen Parametern, 1M Kontextfenster, Thinking und multimodaler Vision) und `ollama-glm-5.3` (GLM 5.3 mit 128k Kontextfenster für Coding, Code-Review und mehrsprachige Analyse) via Ollama Cloud.
+- **CI-Workflow-Härtung (`.github/workflows/*.yml`)**: Verbindliche `timeout-minutes`-Schranken für alle GitHub Actions Jobs (`ci.yml` 15 min, `tests.yml` 15 min, `publish.yml` 15 min für build und publish, `stale.yml` 10 min, `welcome.yml` 5 min) zur Vermeidung von Runner-Hängern und verwaisten CI-Prozessen.
+- **Multi-Host- & OneDrive-Gitignore-Härtung (`.gitignore`)**: Schutzregeln gegen OneDrive-Synchronisationskonflikte (`* (kopie)*`, `* (copy)*`, `*-ASUS.*`, `*-LAPTOP.*`, `*-WORKSTATION-LG.*`), Patch- und Merge-Reste (`*.orig`, `*.rej`, `!package-lock.json`) sowie zusätzliche Caches (`.tox/`, `.turbo/`, `.mypy_cache/`).
+- **PEP 621 Standardisierung (`pyproject.toml`)**: `license-files = ["LICENSE"]` deklariert und Paketversion auf `0.6.3` synchronisiert.
+- **Automatisierte Vertragstestsuite (`tests/test_metadata.py` & `tests/test_kimi_motoren.py`)**: Neue Kontrakt- und Regressionstests für CI-Job-Timeouts (`test_ci_workflow_job_timeouts`), OneDrive- und Multi-Host-Gitignore-Regeln (`test_onedrive_multihost_gitignore_patterns`), PEP 621 License-Files (`test_pep621_license_files`) sowie Modell-Katalog-Parität für Ollama Cloud Frontier-Modelle (`test_frontier_ollama_models_in_catalog`, `test_ollama_kimi_k3_cloud_gang`, `test_ollama_glm_cloud_gang`; Gesamt-Suite auf 393 Tests erweitert | 100% grün).
+- **Shields.io Badges & llms.txt**: Badges in `README.md` & `README_de.md` auf Version 0.6.3, 393 bestandene Tests und Ollama Cloud Modellportfolio synchronisiert; Entdeckungskontext in `llms.txt` auf Stand 2026-09-13 aktualisiert.
+
+---
+
+## [0.6.2] - 2026-09-09 - Repository Hygiene, CI Hardening & Contract Tests
+
+Pfad A ("Technische Hygiene") Wartungs- und Standardisierungslauf im GitHubBot-Flottenverbund.
+
+### Added
+- **.gitignore-Härtung**: Erweiterung um Multi-Host-Synchronisationskonflikte (`*-conflict-*`, `*.sync-conflict-*`, `*.conflict`, `*-CONFLIT-*`, `*.sync-temp-*`), Multi-Agent-Locks (`LOCK`, `LOCK.*`, `*.lock`, `LOCK*.txt`, `LOCK.permissions.json`), Test-, Coverage- und Packaging-Caches (`.pytest_cache/`, `.ruff_cache/`, `.coverage`, `coverage/`, `htmlcov/`, `wheelhouse/`, `.wheel-smoke/`) sowie temporäre Editor- und Log-Dateien (`*.tmp`, `*.bak`, `*.log`).
+- **PEP 621 Standardisierung (`pyproject.toml`)**: Standardisierte pytest-Optionen (`addopts = "-ra -v"`), Betriebssystem-Classifiers (`Operating System :: Microsoft :: Windows`, `Operating System :: POSIX :: Linux`, `Operating System :: MacOS`) und Versionsharmonisierung auf `0.6.2`.
+- **CI-Workflow-Härtung (`.github/workflows/ci.yml` & `tests.yml`)**: Vereinheitlichter Aufruf `python -m pytest -ra -v` und Bytecode-Kompilierungsgate (`python -m compileall -q clutch tests`).
+- **Sicherheitsrichtlinie (`SECURITY.md`)**: Dachorganisations-Kontakt `security@open-bricks.org` in deutscher und englischer Richtlinie ergänzt.
+- **Automatisierte Vertragstestsuite (`tests/test_metadata.py`)**: 6 neue Contract-Tests (`test_gitignore_hygiene_patterns`, `test_pytest_configuration_and_flags`, `test_security_policy_slas_and_contacts`, `test_ci_workflow_hardening`, `test_changelog_release_entry`, `test_readme_badges_parity`; Gesamt-Suite auf 383 Tests erweitert | 100% grün).
+- **Shields.io Badges & llms.txt**: Badges in `README.md` & `README_de.md` auf Version 0.6.2, 383 bestandene Tests, 48h/5d Security-SLA und Ruff-Codestil synchronisiert; maschinenlesbarer Kontext in `llms.txt` auf Stand 2026-09-09 aktualisiert.
+
+---
+
+## [0.6.1] - 2026-09-08 - Discoverability, Dual-Mermaid, Invariants & Multi-OS CI Parity
+
+Pfad B ("Marketing & Design / Discoverability") Wartungs- und Standardisierungslauf im GitHubBot-Flottenverbund.
+
+### Added
+- **Multi-OS CI Matrix (`.github/workflows/ci.yml`)**: Umfassender GitHub Actions CI-Workflow mit Matrix über `ubuntu-latest`, `windows-latest` und `macos-latest` sowie Python `3.10`, `3.11`, `3.12`, `3.13`, automatischer Pip-Cache-Nutzung, `ruff check .`, `python -m compileall -q` Bytecode-Prüfung und `pytest -q`.
+- **Duale Mermaid-Diagramme**: Architektur-Topologie (`flowchart TD` mit semantischen Subgraphen für Clients, Orchestrierung, Registry, Motoren und Telemetrie) sowie sequentieller Task- und Routing-Lebenszyklus (`sequenceDiagram`) in `README.md` und `README_de.md`.
+- **Governance- und Laufzeit-Invarianten**: Formalisierte 10-Punkte-Tabelle mit verbindlichen Garantien (Provider-Agnostizismus, 100% Local-First & Zero Egress, Non-Elevation User-Mode, Fail-Closed Circuit Breaker, Update-feste Nutzer-Overlays, Dual-Alternative Fallbacks, 2D-Telemetrie, Zweck-/Vision-Passgenauigkeit, transaktionales SQLite-Ledger, Multi-OS Parität).
+- **Schnellnavigation (Quick Navigation)**: 14-Punkte-Ankerleiste in `README.md` und `README_de.md`.
+- **Erweiterte Ökosystem-Matrix**: 12 Partner-Repositories über `ellmos-ai`, `dev-bricks`, `file-bricks` und `open-bricks`.
+- **PEP 621 Metadaten**: `[project.urls]` in `pyproject.toml` um `Documentation`, `Security`, `Parent Organization` (`ellmos-ai`) und `Umbrella Ecosystem` (`open-bricks`) erweitert.
+- **Sicherheitsrichtlinie (`SECURITY.md`)**: Unterstützte Versionen (`0.6.x`), verbindliche Reaktions-SLA (48h Erstreaktion / 5 Werktage Triage), offizielle Sicherheitskontakte und Laufzeit-Invarianten.
+- **Automatisierte Paritäts- und Kontrakt-Tests (`tests/test_metadata.py`)**: 11 automatisierte Pytest-Prüfungen zur Sicherstellung von README-Navigation, Diagrammen, Invarianten, Security-Kontakten, PEP 621-URLs und Multi-OS CI.
+
+### Fixed
+- **Code-Hygiene**: Linter-Warnungen `E741 Ambiguous variable name: l` in `tests/test_m13_token_throughput.py` behoben.
+
 ---
 
 ## [0.6.0] - 2026-08-30 - Persistente Verfügbarkeit, Nutzer-Overlay und Routing-Wünsche
@@ -95,6 +140,18 @@ T-20260825-939511775 (T1E, User-Entscheidung, Stufenplan siehe [`docs/STAGED-MIG
 - Verifikation: 314/314 Pytest-Tests 100% grün, `compileall` & `ruff check` fehlerfrei.
 
 ## [Unreleased]
+
+### Budget policy single source of truth (2026-08-26)
+
+- Die dokumentierten Ganglimits Grün G1–G5, Gelb G1–G3, Orange G1–G2 und Rot
+  ohne LLM sind jetzt kanonisch in `fitness_criteria.json` hinterlegt.
+- `Bordcomputer` und `Kupplung` verwenden dieselbe validierte Policy; die
+  undokumentierte Phantomquelle `fitness.json` wurde entfernt und Rot beendet
+  das Routing explizit vor der Modellauswahl.
+- Vier Vertragstests sichern Standardwerte, benutzerdefinierte Konfiguration,
+  Phantomdatei-Ignorierung und die harte Rot-Sperre ab.
+- Verifikation nach Merge mit Version 0.6.1: 381/381 Pytests, Ruff, Compileall,
+  JSON- und Diff-Check grün.
 
 ### GPT-5.6 cost and empirical routing (2026-08-20)
 

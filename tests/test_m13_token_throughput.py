@@ -63,7 +63,7 @@ def test_record_point_does_not_duplicate_same_snapshot(tmp_path, monkeypatch):
     _write_bridge(bridge, 10.0, written_at=1000.0)
     tt.record_point()
     tt.record_point()  # gleicher written_at -> darf nicht doppelt geloggt werden
-    lines = [l for l in log.read_text(encoding="utf-8").splitlines() if l.strip()]
+    lines = [line for line in log.read_text(encoding="utf-8").splitlines() if line.strip()]
     assert len(lines) == 1
     print("[OK] identischer Bridge-Snapshot wird nicht doppelt geloggt")
 
@@ -144,7 +144,7 @@ def test_log_is_pruned_to_max_points(tmp_path, monkeypatch):
     for i in range(10):
         _write_bridge(bridge, float(i), written_at=1000.0 + i)
         tt.record_point()
-    lines = [l for l in log.read_text(encoding="utf-8").splitlines() if l.strip()]
+    lines = [line for line in log.read_text(encoding="utf-8").splitlines() if line.strip()]
     assert len(lines) == 5
     print("[OK] Rolling-Log wird auf MAX_LOG_POINTS gekuerzt")
 
