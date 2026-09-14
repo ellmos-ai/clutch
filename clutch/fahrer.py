@@ -278,7 +278,7 @@ class Fahrer:
             warnungen = self.bordcomputer.fahrt_auswerten(
                 eintrag,
                 fehlertext=fehlertext,
-                output_text=getattr(output, "text", None),
+                output_text=output if isinstance(output, str) else getattr(output, "text", None),
             )
 
         return FahrtErgebnis(
@@ -321,7 +321,7 @@ class Fahrer:
         warnungen = self.bordcomputer.fahrt_auswerten(
             eintrag,
             fehlertext=fehlertext,
-            output_text=getattr(output, "text", None),
+            output_text=output if isinstance(output, str) else getattr(output, "text", None),
         ) if eintrag else []
 
         return FahrtErgebnis(

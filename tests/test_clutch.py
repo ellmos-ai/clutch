@@ -299,7 +299,7 @@ def test_schwarm():
     print("[OK] Schwarm")
 
 
-def test_fahrer_integration(tmp_path):
+def test_fahrer_integration(tmp_path, monkeypatch):
     """Integration: Kompletter Durchlauf."""
     fahrer = Fahrer(
         db_path=tmp_path / "clutch.db",
@@ -324,6 +324,16 @@ def test_fahrer_integration(tmp_path):
     )
     assert ergebnis2.erfolg
     assert ergebnis2.config.gang.gang >= 3, "Architektur braucht hohen Gang"
+
+    # Ein generischer Handler darf eine nicht-leere String-Ausgabe eines agy-
+    # Gangs nicht als erfolgreiche CLI-Ausführung ohne Ausgabe fehlklassifizieren.
+    agy_gang = fahrer.getriebe.gang("agy-gemini-3.5-flash")
+    assert agy_gang is not None
+    agy_config = FahrtConfig(agy_gang, GasBremse().stellung(0.5), "einzelfahrt")
+    monkeypatch.setattr(fahrer, "kuppeln", lambda *args, **kwargs: agy_config)
+    ergebnis3 = fahrer.fahren("Simulierter agy-Aufruf", handler=lambda *_: "Simulierte Ausgabe")
+    assert ergebnis3.erfolg
+    assert not ergebnis3.warnungen
 
     # Status (Armaturenbrett)
     status = fahrer.status()
