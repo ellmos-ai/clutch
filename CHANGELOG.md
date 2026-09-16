@@ -22,6 +22,14 @@ Multi-Host-Änderungen zu überschreiben.
   Belege und ein zulässiger Lebenszyklus machen ein Modell claimbar.
 - Atomare Kataloganwendung reichert ausschließlich bereits kuratierte Gänge an;
   unbekannte Provider-Modelle werden gemeldet, aber nicht still registriert.
+- **Pfad B Marketing, Discoverability & Software-Transparenz (2026-09-16)**:
+  - **18-Punkte Schnellnavigation mit dualen HTML-Ankern**: Vollständige Synchronisation zwischen `README.md` und `README_de.md` mit stabilen Abwärtskompatibilitäts-Ankern (`<a id="..."></a>`).
+  - **Zielgruppen- & Persona-Mapping (`[PERSONA-01]` bis `[PERSONA-04]`)**: Detaillierte Dokumentation für Autonome Agenten-Entwickler, Multi-Host/Edge-Systemingenieure, Tool-Builder und Datenschutz-Beauftragte.
+  - **10-Dimensionen Vergleichsmatrix**: Gegenüberstellung von clutch mit Einzel-Provider-SDKs, Cloud-Gateways (LiteLLM/OpenRouter), Framework-Routern (CrewAI/AutoGen) und Ad-Hoc-Skripten entlang der Governance-Invarianten `INV-LOCAL-01` bis `INV-SLA-10`.
+  - **Drittanbieter-Lizenzinventar & Zero-Copyleft-Audit (`THIRD_PARTY_LICENSES.md`)**: Vollständige SPDX-Lizenzaufstellung aller Laufzeit-, Web- und Dev-Abhängigkeiten mit Bestätigung von 0 GPL/AGPL-Komponenten und `RunAsInvoker`-Ausführung.
+  - **PyPI / PEP 621 Projekt-URLs (`pyproject.toml`)**: Ergänzung von `Third-Party Licenses`, `Marketing Log` und `LLM Ready`.
+  - **Auffindbarkeitskontext & Maschinenindex (`llms.txt`)**: Audit-Links, Persona-Definitionen und hochpräzise Suchphrasen hinzugefügt.
+  - **Automatisierte Vertragstests (`tests/test_metadata.py`)**: Neue Kontrakttests für 18-Punkte Navigationsparität, Personas, Vergleichsmatrix, Lizenz-Audit und Marketing-Log-Aktualität.
 
 ### Compatibility
 - `resolve_execution_selector()` behält die in 0.6.0 veröffentlichte

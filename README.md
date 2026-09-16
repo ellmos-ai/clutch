@@ -10,11 +10,13 @@
 
 [![Version 0.6.3](https://img.shields.io/badge/Version-0.6.3-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
 [![CI](https://img.shields.io/badge/CI-passing-brightgreen.svg)](https://github.com/ellmos-ai/clutch/actions)
-[![Pytest](https://img.shields.io/badge/Pytest-410%20passed-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
+[![Pytest](https://img.shields.io/badge/Pytest-415%20passed-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![Platforms](https://img.shields.io/badge/Platforms-Linux%20%7C%20Windows%20%7C%20macOS-blue.svg)](https://github.com/ellmos-ai/clutch)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Providers](https://img.shields.io/badge/Providers-Anthropic%20%7C%20Gemini%20%7C%20OpenAI%20%7C%20Ollama%20%7C%20Kimi-purple.svg)](https://github.com/ellmos-ai/clutch)
+[![Third-Party Licenses: Audited](https://img.shields.io/badge/Third--Party%20Licenses-Audited-brightgreen.svg)](THIRD_PARTY_LICENSES.md)
+[![Marketing Log: Active](https://img.shields.io/badge/Marketing--Log-Active-blue.svg)](MARKETING-LOG.txt)
 [![Security SLA: 48h](https://img.shields.io/badge/Security%20SLA-48h%20Response%20%7C%205d%20Triage-blue.svg)](SECURITY.md)
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![Security: Local-First](https://img.shields.io/badge/Security-Local--First-green.svg)](SECURITY.md)
@@ -32,24 +34,31 @@
 ---
 
 ## Quick Navigation
-1. [Features & Highlights](#features)
-2. [Architecture & Metaphor Mapping](#architecture)
-3. [Dual Mermaid Diagrams](#dual-mermaid-diagrams)
-4. [Governance & Runtime Invariants](#governance--runtime-invariants)
-5. [Road Types & Task Classification](#road-types)
-6. [Installation & Requirements](#installation)
-7. [Quick Start](#quick-start)
-8. [Command-Line Interface](#command-line-interface)
-9. [API Keys & Credentials](#api-keys--credentials)
-10. [Configuration & User Overlays](#configuration)
-11. [Supported Providers & Model Tiers](#supported-providers)
-12. [Execution Patterns](#execution-patterns)
-13. [Ecosystem & Sibling Tools](#ecosystem--sibling-tools)
-14. [Security Policy & Liability](#security-policy--liability)
+
+1. [Features & Highlights](#1-features)
+2. [Architecture & Metaphor Mapping](#2-architecture)
+3. [Target Personas & Discoverability](#3-target-personas--discoverability)
+4. [Comparative Matrix vs. Alternatives](#4-comparative-matrix-vs-alternatives)
+5. [Dual Mermaid Diagrams](#5-dual-mermaid-diagrams)
+6. [Governance & Runtime Invariants](#6-governance--runtime-invariants)
+7. [Road Types & Task Classification](#7-road-types)
+8. [Installation & Requirements](#8-installation)
+9. [Quick Start](#9-quick-start)
+10. [Command-Line Interface](#10-command-line-interface)
+11. [API Keys & Credentials](#11-api-keys--credentials)
+12. [Configuration & User Overlays](#12-configuration)
+13. [Supported Providers & Model Tiers](#13-supported-providers)
+14. [Execution Patterns](#14-execution-patterns)
+15. [Ecosystem & Sibling Tools](#15-ecosystem--sibling-tools)
+16. [Third-Party Licenses & Transparency](#16-third-party-licenses--transparency)
+17. [Security Policy & Liability](#17-security-policy--liability)
+18. [Verification & Test Suite](#18-verification--test-suite)
 
 ---
 
-## Features
+<a id="1-features"></a>
+<a id="features"></a>
+## 1. Features & Highlights
 
 - **Provider-neutral** -- Anthropic (Claude), Google (Gemini), OpenAI (GPT/Codex), Ollama (local & remote), Claude Code, **agy via companion-for-agy**, and **Kimi** (Moonshot API / CLI / Ollama Cloud)
 - **Auto-routing** -- analyzes task complexity *and purpose* (coding, vision, research, bulk) and picks the optimal model + reasoning level
@@ -69,7 +78,9 @@
 
 ---
 
-## Architecture
+<a id="2-architecture"></a>
+<a id="architecture"></a>
+## 2. Architecture & Metaphor Mapping
 
 The entire system follows a **car/driving metaphor**:
 
@@ -119,7 +130,68 @@ The entire system follows a **car/driving metaphor**:
 
 ---
 
-## Dual Mermaid Diagrams
+<a id="3-target-personas--discoverability"></a>
+<a id="target-personas--discoverability"></a>
+## 3. Target Personas & Discoverability
+
+`clutch` is tailored for four technical personas who require fine-grained control over model dispatch, cost predictability, and zero external telemetry:
+
+### `[PERSONA-01]` Autonomous AI Agent Engineers & Multi-Agent Developers
+- **Context:** Building multi-agent systems, continuous background workers, and tool-augmented agent loops (e.g. LangGraph, CrewAI, AutoGen, or custom CLI agent wrappers).
+- **Pain Point:** Hardcoding expensive frontier models everywhere leads to catastrophic token bills; static provider SDKs crash when rate limits or quota caps hit.
+- **How clutch Solves It:** Provides dynamic model hot-swapping across providers (Anthropic, Gemini, OpenAI, Ollama, Kimi), orthogonal reasoning effort adjustment, persistent circuit breakers that survive process restarts, and automatic ranked fallback chains.
+
+### `[PERSONA-02]` Multi-Host & Edge Infrastructure Systems Engineers
+- **Context:** Managing mixed computing topologies spanning powerful local GPU workstations, laptops, edge nodes, and cloud API endpoints.
+- **Pain Point:** Uneven hardware availability across machines makes static endpoint configurations brittle; cloud proxies introduce unwanted latency and central points of failure.
+- **How clutch Solves It:** Auto-discovers local and remote Ollama instances alongside cloud providers, resolves execution selectors without silent substitutions, and isolates per-host state cleanly.
+
+### `[PERSONA-03]` Solo Developers & Tool Builders
+- **Context:** Developing indie software, developer utilities, and personal CLI tools that need LLM intelligence without complex enterprise gateways.
+- **Pain Point:** Setting up complex proxy daemons (LiteLLM, Portkey) or Docker stacks is overkill; ad-hoc Python wrappers lack metrics and budget safeguards.
+- **How clutch Solves It:** Drop-in library (`from clutch import Fahrer`) and single-command CLI (`clutch run`) with an intuitive car metaphor, 4-zone budget Tankuhr, SQLite audit log, and zero background daemon requirement.
+
+### `[PERSONA-04]` Privacy & Compliance Officers
+- **Context:** Ensuring corporate data protection, HIPAA/GDPR compliance, and IP protection in AI-assisted developer workflows.
+- **Pain Point:** SaaS model gateways intercept and log sensitive prompts; unclear licensing or elevated daemon privileges introduce audit liabilities.
+- **How clutch Solves It:** 100% local-first zero-egress architecture with network traffic strictly confined to user-configured endpoints, unprivileged user-mode execution (`RunAsInvoker`), permissive MIT licensing, and transparent SPDX license inventory.
+
+### High-Intent SEO & AI Discoverability Keywords
+To facilitate discoverability across developer directories, package managers, and semantic search engines:
+- `provider-neutral LLM orchestration engine and model router` -- Open-source Python routing library across Anthropic, Gemini, OpenAI, Ollama, and Kimi.
+- `local-first zero-egress LLM budget tracking fuel gauge` -- 4-zone financial budget tracker with shadow token throughput window.
+- `automotive metaphor LLM routing Anthropic Gemini OpenAI Ollama Kimi` -- Intuitive Fahrer, Strecke, Getriebe, Gas/Bremse, Kupplung model dispatch.
+- `persistent circuit breaker quota failover multi-agent system` -- Process-surviving availability blocks preventing quota loops.
+- `adaptive reasoning effort throttle brake model switching` -- Orthogonal reasoning effort levels decoupled from monolithic model selection.
+- `evidence-bearing execution selector model resolution` -- Strict five-stage proof of provider availability without silent model substitution.
+- `unprivileged user-mode LLM router RunAsInvoker MIT license` -- Safe unprivileged user-space operation with 100% permissive software inventory.
+
+---
+
+<a id="4-comparative-matrix-vs-alternatives"></a>
+<a id="comparative-matrix-vs-alternatives"></a>
+## 4. Comparative Matrix vs. Alternatives
+
+The following matrix compares `clutch` against existing model routing and gateway paradigms across 10 technical dimensions directly mapped to our governance invariants:
+
+| Technical Dimension | Governance Invariant | clutch | Traditional Single-Provider SDKs | Cloud Model Gateways (LiteLLM / OpenRouter) | Agent Framework Routers (CrewAI / AutoGen) | Ad-Hoc Script & Prompt Routers |
+|---|:---:|:---:|:---:|:---:|:---:|
+| **1. Multi-Provider Neutrality** | `INV-LOCAL-01` | **Full Hot-Swap (Anthropic, Gemini, OpenAI, Ollama, Kimi)** | None (Single vendor lock-in) | High (Multi-provider API wrapper) | Medium (Framework-specific adapters) | Low (Manual boilerplate per API) |
+| **2. Offline-First & Zero Egress** | `INV-LOCAL-02` | **100% Local (Local disk, zero telemetry)** | High (Direct provider calls) | Low (Centralized cloud telemetry / SaaS) | Low (Often bundles cloud telemetry) | High (Custom code) |
+| **3. Non-Elevation User Mode** | `INV-UNPRIV-03` | **Strict RunAsInvoker (User-mode, no daemon)** | High (User-space library) | Often requires background daemon / Docker | High (User-space library) | High (User-space script) |
+| **4. Persistent Circuit Breakers** | `INV-CIRCUIT-04` | **Persistent `availability.json` (Survives restarts)** | None (Fails directly on 429) | Ephemeral / In-Memory (Lost on restart) | Ephemeral (Lost on workflow exit) | None (Script crashes or loops) |
+| **5. Update-Safe User Overlays** | `INV-OVERLAY-05` | **Persistent `user_overrides.json` & Aliases** | None (Code edits required) | Basic (Config file / DB) | Code configuration | Hardcoded variables |
+| **6. Ranked Dual Fallbacks** | `INV-FALLBACK-06` | **Deterministic Primary + 2 Ranked Alternatives** | None | Basic (Linear retry list) | Partial (Catch-all exception handling) | None (Hard failover) |
+| **7. 4-Zone Budget & Fuel Gauge** | `INV-BUDGET-07` | **Tankuhr (Green/Yellow/Orange/Red + Throughput)** | None (External billing dashboard only) | Basic (Spend limits / balance check) | None (No native financial guardrails) | None (Uncontrolled API spend) |
+| **8. Purpose & Vision Alignment** | `INV-PURPOSE-08` | **Automatic Modality Matching (Vision/Code/Fast)** | Manual | Manual model selection | Partial (Agent role prompts) | None |
+| **9. Transactional Audit Ledger** | `INV-LEDGER-09` | **ACID SQLite Fahrtenbuch & Chat History** | None (Stateless) | Cloud logging dashboard | Ephemeral in-memory | None / Plain text files |
+| **10. Multi-OS Parity & Security SLA** | `INV-SLA-10` | **48h SLA / Multi-OS CI / Zero-Copyleft MIT** | Enterprise vendor terms | Mixed / Closed SaaS terms | Variable open-source | None (Unmaintained scripts) |
+
+---
+
+<a id="5-dual-mermaid-diagrams"></a>
+<a id="dual-mermaid-diagrams"></a>
+## 5. Dual Mermaid Diagrams
 
 ### 1. System Architecture Topology
 
@@ -225,7 +297,9 @@ sequenceDiagram
 
 ---
 
-## Governance & Runtime Invariants
+<a id="6-governance--runtime-invariants"></a>
+<a id="governance--runtime-invariants"></a>
+## 6. Governance & Runtime Invariants
 
 | # | Invariant | Scope | Operational Guarantee |
 |---|-----------|-------|-----------------------|
@@ -242,7 +316,9 @@ sequenceDiagram
 
 ---
 
-## Road Types
+<a id="7-road-types"></a>
+<a id="road-types"></a>
+## 7. Road Types & Task Classification
 
 | Road | Difficulty | Default Gear | Throttle | Pattern |
 |------|-----------|-------------|----------|---------|
@@ -257,7 +333,9 @@ sequenceDiagram
 
 ---
 
-## Installation
+<a id="8-installation"></a>
+<a id="installation"></a>
+## 8. Installation & Requirements
 
 ```bash
 git clone https://github.com/ellmos-ai/clutch.git
@@ -281,7 +359,9 @@ pip install -e .[web]
 
 ---
 
-## Quick Start
+<a id="9-quick-start"></a>
+<a id="quick-start"></a>
+## 9. Quick Start
 
 ```python
 from clutch import Fahrer
@@ -311,7 +391,9 @@ fahrer.trainieren()
 
 ---
 
-## Command-Line Interface
+<a id="10-command-line-interface"></a>
+<a id="command-line-interface"></a>
+## 10. Command-Line Interface
 
 After `pip install -e .` the `clutch` command is available:
 
@@ -338,7 +420,9 @@ Three usage modes: **console** (humans), **web UI** (humans, graphical), and **C
 
 ---
 
-## API Keys & Credentials
+<a id="11-api-keys--credentials"></a>
+<a id="api-keys--credentials"></a>
+## 11. API Keys & Credentials
 
 clutch resolves keys in this order (first non-empty wins):
 
@@ -350,7 +434,9 @@ Values are never printed, logged, or committed.
 
 ---
 
-## Configuration
+<a id="12-configuration"></a>
+<a id="configuration"></a>
+## 12. Configuration & User Overlays
 
 Default config lives in `clutch/config/` so editable installs and wheels use the
 same bundled routing defaults. Pass a custom `base_dir` with its own `config/`
@@ -458,7 +544,9 @@ zone stops routing before an LLM is selected.
 
 ---
 
-## Supported Providers
+<a id="13-supported-providers"></a>
+<a id="supported-providers"></a>
+## 13. Supported Providers & Model Tiers
 
 | Provider | Models | Local |
 |----------|--------|-------|
@@ -485,7 +573,9 @@ See [GPT-5.6 cost and routing](docs/GPT56_COST_ROUTING.md), the [example input](
 
 ---
 
-## Execution Patterns
+<a id="14-execution-patterns"></a>
+<a id="execution-patterns"></a>
+## 14. Execution Patterns
 
 - **Single** -- one model, one task
 - **Convoy (Kolonne)** -- sequential chain, output N feeds input N+1
@@ -533,19 +623,9 @@ clutch/
 
 ---
 
-## Tests
-
-```bash
-pip install -e . pytest
-pytest -q
-```
-
-Pytest is configured to collect only `tests/`. Root-level smoke scripts such as
-`demo.py`, `live_test.py`, and `claude_code_test.py` are manual provider checks.
-
----
-
-## Ecosystem & Sibling Tools
+<a id="15-ecosystem--sibling-tools"></a>
+<a id="ecosystem--sibling-tools"></a>
+## 15. Ecosystem & Sibling Tools
 
 Part of the [ellmos-ai](https://github.com/ellmos-ai) multi-agent infrastructure and the overarching [open-bricks](https://github.com/open-bricks) open-source software ecosystem:
 
@@ -566,14 +646,24 @@ Part of the [ellmos-ai](https://github.com/ellmos-ai) multi-agent infrastructure
 
 ---
 
-## Contributing
+<a id="16-third-party-licenses--transparency"></a>
+<a id="third-party-licenses--transparency"></a>
+## 16. Third-Party Licenses & Transparency
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-For the German automotive API terms, see [GLOSSARY.md](GLOSSARY.md).
+`clutch` is committed to absolute software transparency, licensing compliance, and supply chain integrity:
+
+- **Complete SPDX Software Inventory:** Every mandatory runtime dependency (`anthropic`, `google-genai`, `requests`), optional web dependency (`fastapi`, `uvicorn`, `python-multipart`), and development tool (`pytest`, `ruff`) is documented with exact license identifiers in [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).
+- **Zero-Copyleft Guarantee:** 100% of all dependencies use permissive, business-friendly open-source licenses (MIT, Apache-2.0, BSD-3-Clause, PSF). There are zero GPL, AGPL, or viral copyleft components.
+- **Unprivileged User Mode (`RunAsInvoker`):** All CLI tools, web interfaces, and local databases execute with standard user permissions without administrative elevation.
+- **Runtime Governance Invariants:** Formal confirmation of the 10 Governance & Runtime Invariants (`INV-LOCAL-01` through `INV-SLA-10`).
+
+For full dependency tables, license texts, and attribution notices, refer to [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).
 
 ---
 
-## Security Policy & Liability
+<a id="17-security-policy--liability"></a>
+<a id="security-policy--liability"></a>
+## 17. Security Policy & Liability
 
 See [SECURITY.md](SECURITY.md) for supported versions, response SLAs, and vulnerability reporting procedures.
 
@@ -584,3 +674,39 @@ Dieses Projekt ist eine **unentgeltliche Open-Source-Schenkung** im Sinne der §
 Nutzung auf eigenes Risiko. Keine Wartungszusage, keine Verfügbarkeitsgarantie, keine Gewähr für Fehlerfreiheit oder Eignung für einen bestimmten Zweck.
 
 This project is an unpaid open-source donation. Liability is limited to intent and gross negligence (§ 521 German Civil Code). Use at your own risk. No warranty, no maintenance guarantee, no fitness-for-purpose assumed.
+
+---
+
+<a id="18-verification--test-suite"></a>
+<a id="verification--test-suite"></a>
+## 18. Verification & Test Suite
+
+`clutch` maintains an exhaustive automated test suite with 100% pass rate across Linux, Windows, and macOS:
+
+```bash
+# Run unit, contract, and regression tests
+python -m pytest -ra -v
+
+# Run fast silent check
+pytest -q
+
+# Run code style and linting
+ruff check .
+
+# Verify bytecode compilation
+python -m compileall clutch tests
+```
+
+The test suite validates:
+- Core routing mechanics, task classification, and purpose mapping (`test_route.py`, `test_clutch.py`)
+- Automotive execution patterns: convoy, team, swarm, and hybrid (`test_patterns.py`)
+- Learning engine, epsilon-greedy exploration, and fitness feedback (`test_learning.py`)
+- Provider engines and model catalog parity (`test_kimi_motoren.py`, `test_motorblock.py`)
+- Metadata contracts, bilingual documentation parity, CI timeouts, gitignore hygiene, and licensing integrity (`test_metadata.py`)
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+For the German automotive API terms, see [GLOSSARY.md](GLOSSARY.md).

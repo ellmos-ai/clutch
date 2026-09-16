@@ -15,6 +15,8 @@ def test_core_documentation_files_exist():
         "CHANGELOG.md",
         "llms.txt",
         "pyproject.toml",
+        "THIRD_PARTY_LICENSES.md",
+        "MARKETING-LOG.txt",
     ]
     for filename in required_files:
         filepath = REPO_ROOT / filename
@@ -44,11 +46,13 @@ def test_llms_txt_structure_and_timestamp():
     """Verify that llms.txt contains the canonical structure and a recent timestamp."""
     llms_text = (REPO_ROOT / "llms.txt").read_text(encoding="utf-8")
 
-    assert "Last-checked: 2026-09-14" in llms_text, "llms.txt Last-checked timestamp should be 2026-09-14"
-    assert "410" in llms_text, "llms.txt should report 410 passing unit tests"
+    assert "Last-checked: 2026-09-16" in llms_text, "llms.txt Last-checked timestamp should be 2026-09-16"
+    assert "415" in llms_text, "llms.txt should report 415 passing unit tests"
     assert "## Audience" in llms_text, "llms.txt missing Audience section"
     assert "## Search Phrases" in llms_text, "llms.txt missing Search Phrases section"
     assert "## Docs" in llms_text, "llms.txt missing Docs section"
+    assert "THIRD_PARTY_LICENSES.md" in llms_text, "llms.txt missing THIRD_PARTY_LICENSES.md link"
+    assert "MARKETING-LOG.txt" in llms_text, "llms.txt missing MARKETING-LOG.txt link"
     assert "Core Governance & Runtime Invariants" in llms_text, "llms.txt missing Governance Invariants section"
 
 
@@ -111,14 +115,18 @@ def test_security_contact_email():
 
 
 def test_quick_navigation_anchors_parity():
-    """Verify that both READMEs contain the 14-point Quick Navigation anchor list."""
+    """Verify that both READMEs contain the 18-point Quick Navigation anchor list."""
     readme_en = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
     readme_de = (REPO_ROOT / "README_de.md").read_text(encoding="utf-8")
 
     assert "## Quick Navigation" in readme_en, "README.md missing Quick Navigation"
     assert "## Schnellnavigation" in readme_de, "README_de.md missing Schnellnavigation"
-    assert "14. [Security Policy & Liability]" in readme_en or "14. [Security" in readme_en
-    assert "14. [Sicherheitsrichtlinie & Haftung]" in readme_de or "14. [Sicherheitsrichtlinie" in readme_de
+    assert "18. [Verification & Test Suite](#18-verification--test-suite)" in readme_en
+    assert "18. [Verifikation & Testsuite](#18-verification--test-suite)" in readme_de
+    for i in range(1, 19):
+        assert f"\n{i}. [" in readme_en, f"README.md missing navigation item {i}"
+        assert f"\n{i}. [" in readme_de, f"README_de.md missing navigation item {i}"
+
 
 
 def test_dual_mermaid_diagrams_parity():
@@ -137,8 +145,8 @@ def test_governance_invariants_table_parity():
     readme_en = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
     readme_de = (REPO_ROOT / "README_de.md").read_text(encoding="utf-8")
 
-    assert "## Governance & Runtime Invariants" in readme_en, "README.md missing Governance & Runtime Invariants"
-    assert "## Governance- & Laufzeit-Invarianten" in readme_de, "README_de.md missing Governance- & Laufzeit-Invarianten"
+    assert "Governance & Runtime Invariants" in readme_en, "README.md missing Governance & Runtime Invariants"
+    assert "Governance- & Laufzeit-Invarianten" in readme_de, "README_de.md missing Governance- & Laufzeit-Invarianten"
     assert "Provider Agnosticism & Zero Lock-in" in readme_en, "README.md missing Invariant 1"
     assert "Provider-Agnostizismus & Zero Lock-in" in readme_de, "README_de.md missing Invariante 1"
 
@@ -210,12 +218,16 @@ def test_readme_badges_parity():
 
     assert "badge/Version-0.6.3-" in readme_en, "README.md missing Version 0.6.3 badge"
     assert "badge/Version-0.6.3-" in readme_de, "README_de.md missing Version 0.6.3 badge"
-    assert "Pytest-410%20passed" in readme_en, "README.md missing current pytest badge"
-    assert "Pytest-410%20bestanden" in readme_de, "README_de.md missing current pytest badge"
+    assert "Pytest-415%20passed" in readme_en, "README.md missing current pytest badge"
+    assert "Pytest-415%20bestanden" in readme_de, "README_de.md missing current pytest badge"
     assert "Security%20SLA-48h" in readme_en, "README.md missing Security SLA badge"
     assert "Sicherheits--SLA-48h" in readme_de, "README_de.md missing Sicherheits-SLA badge"
     assert "code%20style-ruff" in readme_en, "README.md missing ruff code style badge"
     assert "code%20style-ruff" in readme_de, "README_de.md missing ruff code style badge"
+    assert "Third--Party%20Licenses-Audited" in readme_en, "README.md missing Third-Party Licenses badge"
+    assert "Drittanbieter--Lizenzen-Gepr%C3%BCft" in readme_de, "README_de.md missing Drittanbieter-Lizenzen badge"
+    assert "Marketing--Log-Active" in readme_en, "README.md missing Marketing Log badge"
+    assert "Marketing--Log-Aktiv" in readme_de, "README_de.md missing Marketing Log badge"
 
 
 def test_ci_workflow_job_timeouts():
@@ -261,3 +273,64 @@ def test_pep621_license_files():
     """Verify that pyproject.toml defines license-files for packaging compliance."""
     pyproject_text = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
     assert 'license-files = ["LICENSE"]' in pyproject_text, "Missing license-files in pyproject.toml"
+
+
+def test_readme_target_personas_and_discoverability():
+    """Verify that both READMEs document the 4 Target Personas."""
+    readme_en = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+    readme_de = (REPO_ROOT / "README_de.md").read_text(encoding="utf-8")
+
+    for persona in ["[PERSONA-01]", "[PERSONA-02]", "[PERSONA-03]", "[PERSONA-04]"]:
+        assert persona in readme_en, f"README.md missing {persona}"
+        assert persona in readme_de, f"README_de.md missing {persona}"
+
+
+def test_comparative_matrix_vs_alternatives_parity():
+    """Verify that both READMEs document the 10-dimension comparative matrix vs alternatives."""
+    readme_en = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+    readme_de = (REPO_ROOT / "README_de.md").read_text(encoding="utf-8")
+
+    assert "Comparative Matrix vs. Alternatives" in readme_en
+    assert "Vergleichsmatrix gegenüber Alternativen" in readme_de
+    canonical_invariants = [
+        "INV-LOCAL-01", "INV-LOCAL-02", "INV-UNPRIV-03", "INV-CIRCUIT-04",
+        "INV-OVERLAY-05", "INV-FALLBACK-06", "INV-BUDGET-07", "INV-PURPOSE-08",
+        "INV-LEDGER-09", "INV-SLA-10"
+    ]
+    for inv in canonical_invariants:
+        assert inv in readme_en, f"README.md missing invariant {inv} in comparison matrix"
+        assert inv in readme_de, f"README_de.md missing invariant {inv} in comparison matrix"
+
+
+def test_third_party_licenses_inventory_and_zero_copyleft():
+    """Verify THIRD_PARTY_LICENSES.md completeness, zero-copyleft guarantee, and RunAsInvoker."""
+    lic_file = REPO_ROOT / "THIRD_PARTY_LICENSES.md"
+    assert lic_file.is_file(), "THIRD_PARTY_LICENSES.md missing"
+    lic_text = lic_file.read_text(encoding="utf-8")
+
+    assert "Zero-Copyleft Guarantee" in lic_text
+    assert "RunAsInvoker" in lic_text
+    for pkg in ["anthropic", "google-genai", "requests", "fastapi", "uvicorn", "pytest", "ruff"]:
+        assert pkg in lic_text, f"THIRD_PARTY_LICENSES.md missing package {pkg}"
+    canonical_invariants = [
+        "INV-LOCAL-01", "INV-LOCAL-02", "INV-UNPRIV-03", "INV-CIRCUIT-04",
+        "INV-OVERLAY-05", "INV-FALLBACK-06", "INV-BUDGET-07", "INV-PURPOSE-08",
+        "INV-LEDGER-09", "INV-SLA-10"
+    ]
+    for inv in canonical_invariants:
+        assert inv in lic_text, f"THIRD_PARTY_LICENSES.md missing invariant {inv}"
+
+
+def test_pyproject_marketing_urls():
+    """Verify that pyproject.toml includes URLs for Third-Party Licenses, Marketing Log, and LLM Ready."""
+    pyproject_text = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
+    assert '"Third-Party Licenses"' in pyproject_text
+    assert '"Marketing Log"' in pyproject_text
+    assert '"LLM Ready"' in pyproject_text
+
+
+def test_marketing_log_recency():
+    """Verify that MARKETING-LOG.txt contains the 2026-09-16 Pfad B entry."""
+    mkt_text = (REPO_ROOT / "MARKETING-LOG.txt").read_text(encoding="utf-8")
+    assert "Date: 2026-09-16" in mkt_text
+    assert "Pfad B (Marketing & Design / Discoverability)" in mkt_text

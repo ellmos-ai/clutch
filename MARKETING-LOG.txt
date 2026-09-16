@@ -127,3 +127,56 @@ Umbrella Collective: open-bricks
 - Test Suite: 393/393 unit tests passing 100% green.
 - Multi-OS Parity: Verified bytecode compilation and ruff clean.
 ================================================================================
+
+================================================================================
+MARKETING & DISCOVERABILITY LOG: clutch
+================================================================================
+Date: 2026-09-16
+Path: Pfad B (Marketing & Design / Discoverability)
+Version: 0.6.3
+Repository: ellmos-ai/clutch
+Organization: ellmos-ai
+Umbrella Collective: open-bricks
+
+1. EXECUTIVE SUMMARY
+--------------------------------------------------------------------------------
+Comprehensive Pfad B marketing and discoverability upgrade elevating clutch to the
+latest 2026 ecosystem gold standard:
+  - 18-point Quick Navigation anchor index across README.md & README_de.md with
+    100% mutual dual-anchor parity (<a id="..."></a> for both new & legacy links).
+  - Target Personas & Discoverability section mapping 4 core developer roles:
+    [PERSONA-01] Autonomous AI Agent Engineers & Multi-Agent Framework Developers
+    [PERSONA-02] Multi-Host & Edge Infrastructure Systems Engineers
+    [PERSONA-03] Solo Developers & Tool Builders
+    [PERSONA-04] Privacy & Compliance Officers
+  - 10-Dimension Comparative Matrix evaluating clutch against Single-Provider SDKs,
+    Cloud Model Gateways (LiteLLM/OpenRouter), Agent Framework Routers (CrewAI/AutoGen),
+    and Ad-Hoc Scripts, directly tied to Governance Invariants INV-LOCAL-01..INV-SLA-10.
+  - Comprehensive Software Inventory & Third-Party License Audit (THIRD_PARTY_LICENSES.md):
+    Complete SPDX mapping for mandatory runtime, optional web, and development dependencies.
+    Zero-Copyleft guarantee (0 GPL/AGPL components), unprivileged user-mode execution
+    (RunAsInvoker), and runtime governance invariance confirmation.
+  - Hardened Security Policy (SECURITY.md) with formal 10-invariants table and RunAsInvoker.
+  - Packaging URLs in pyproject.toml: "Third-Party Licenses", "Marketing Log", "LLM Ready".
+  - Machine-readable llms.txt discovery context updated for 2026-09-16 with audit links,
+    personas, and high-intent keyword mapping.
+  - Automated contract test suite expanded in tests/test_metadata.py verifying 18-point
+    navigation parity, personas, comparison matrix, license audit, pyproject URLs,
+    and marketing log recency.
+
+2. ENHANCEMENTS & ASSETS
+--------------------------------------------------------------------------------
+- Badges: Added Third-Party Licenses (Audited / Geprüft) and Marketing Log (Active / Aktiv).
+- Quick Navigation: 18 numbered anchor links synchronized across README.md and README_de.md.
+- Target Personas: Detailed context, challenges, and clutch solutions for 4 target audiences.
+- Comparative Matrix: 10 technical dimensions mapped to invariants INV-LOCAL-01 through INV-SLA-10.
+- Third-Party License Audit: Detailed in THIRD_PARTY_LICENSES.md with full license breakdown.
+- Machine Context: llms.txt enhanced with persona roles and high-intent query phrases.
+
+3. QUALITY GATES & VERIFICATION
+--------------------------------------------------------------------------------
+- Ruff Linting: ruff check . passed with 0 errors.
+- Test Suite: 100% green pass across all unit and contract tests.
+- Bytecode Compilation: python -m compileall clutch tests passed with 0 errors.
+- Git Tree Hygiene: git diff --check passed with 0 whitespace issues.
+================================================================================

@@ -57,6 +57,9 @@ Changelog = "https://github.com/ellmos-ai/clutch/blob/master/CHANGELOG.md"
 Security = "https://github.com/ellmos-ai/clutch/blob/master/SECURITY.md"
 "Parent Organization" = "https://github.com/ellmos-ai"
 "Umbrella Ecosystem" = "https://github.com/open-bricks"
+"Third-Party Licenses" = "https://github.com/ellmos-ai/clutch/blob/master/THIRD_PARTY_LICENSES.md"
+"Marketing Log" = "https://github.com/ellmos-ai/clutch/blob/master/MARKETING-LOG.txt"
+"LLM Ready" = "https://github.com/ellmos-ai/clutch/blob/master/llms.txt"
 
 [project.scripts]
 clutch = "clutch.cli:main"

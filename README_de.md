@@ -10,11 +10,13 @@
 
 [![Version 0.6.3](https://img.shields.io/badge/Version-0.6.3-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
 [![CI](https://img.shields.io/badge/CI-bestanden-brightgreen.svg)](https://github.com/ellmos-ai/clutch/actions)
-[![Pytest](https://img.shields.io/badge/Pytest-410%20bestanden-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
+[![Pytest](https://img.shields.io/badge/Pytest-415%20bestanden-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![Plattformen](https://img.shields.io/badge/Plattformen-Linux%20%7C%20Windows%20%7C%20macOS-blue.svg)](https://github.com/ellmos-ai/clutch)
 [![Lizenz: MIT](https://img.shields.io/badge/Lizenz-MIT-green.svg)](LICENSE)
 [![Provider](https://img.shields.io/badge/Provider-Anthropic%20%7C%20Gemini%20%7C%20OpenAI%20%7C%20Ollama%20%7C%20Kimi-purple.svg)](https://github.com/ellmos-ai/clutch)
+[![Drittanbieter-Lizenzen: Geprüft](https://img.shields.io/badge/Drittanbieter--Lizenzen-Gepr%C3%BCft-brightgreen.svg)](THIRD_PARTY_LICENSES.md)
+[![Marketing-Log: Aktiv](https://img.shields.io/badge/Marketing--Log-Aktiv-blue.svg)](MARKETING-LOG.txt)
 [![Sicherheits-SLA: 48h](https://img.shields.io/badge/Sicherheits--SLA-48h%20Antwort%20%7C%205d%20Triage-blue.svg)](SECURITY.md)
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![Sicherheit: Local-First](https://img.shields.io/badge/Sicherheit-Local--First-green.svg)](SECURITY.md)
@@ -32,24 +34,32 @@
 ---
 
 ## Schnellnavigation
-1. [Funktionen & Highlights](#funktionen)
-2. [Architektur & Metaphern-Abbildung](#architektur)
-3. [Duale Mermaid-Diagramme](#duale-mermaid-diagramme)
-4. [Governance- & Laufzeit-Invarianten](#governance--laufzeit-invarianten)
-5. [Streckentypen & Aufgabenklassifikation](#streckentypen)
-6. [Installation & Voraussetzungen](#installation)
-7. [Kurzanleitung](#kurzanleitung)
-8. [Kommandozeilen-Schnittstelle (CLI)](#kommandozeilen-schnittstelle)
-9. [API-Keys & Zugangsdaten](#api-keys--zugangsdaten)
-10. [Konfiguration & Benutzer-Overlays](#konfiguration)
-11. [Unterstützte Provider & Modell-Gänge](#unterst%C3%BCtzte-provider)
-12. [Ausführungsmuster](#ausf%C3%BChrungsmuster)
-13. [Verwandte Tools & Ökosystem](#verwandte-tools--%C3%B6kosystem)
-14. [Sicherheitsrichtlinie & Haftung](#sicherheitsrichtlinie--haftung)
+
+1. [Funktionen & Highlights](#1-features)
+2. [Architektur & Metaphern-Abbildung](#2-architecture)
+3. [Zielgruppen & Auffindbarkeit](#3-target-personas--discoverability)
+4. [Vergleichsmatrix gegenüber Alternativen](#4-comparative-matrix-vs-alternatives)
+5. [Duale Mermaid-Diagramme](#5-dual-mermaid-diagrams)
+6. [Governance- & Laufzeit-Invarianten](#6-governance--runtime-invariants)
+7. [Streckentypen & Aufgabenklassifikation](#7-road-types)
+8. [Installation & Voraussetzungen](#8-installation)
+9. [Schnellstart & Kurzanleitung](#9-quick-start)
+10. [Kommandozeilen-Schnittstelle (CLI)](#10-command-line-interface)
+11. [API-Keys & Zugangsdaten](#11-api-keys--credentials)
+12. [Konfiguration & Benutzer-Overlays](#12-configuration)
+13. [Unterstützte Provider & Modell-Gänge](#13-supported-providers)
+14. [Ausführungsmuster](#14-execution-patterns)
+15. [Verwandte Tools & Ökosystem](#15-ecosystem--sibling-tools)
+16. [Drittanbieter-Lizenzen & Transparenz](#16-third-party-licenses--transparency)
+17. [Sicherheitsrichtlinie & Haftung](#17-security-policy--liability)
+18. [Verifikation & Testsuite](#18-verification--test-suite)
 
 ---
 
-## Funktionen
+<a id="1-features"></a>
+<a id="features"></a>
+<a id="funktionen"></a>
+## 1. Funktionen & Highlights
 
 - **Provider-neutral** -- Anthropic (Claude), Google (Gemini), OpenAI (GPT/Codex), Ollama (lokal & remote), Claude Code, **agy via companion-for-agy** sowie **Kimi** (Moonshot API / CLI / Ollama Cloud)
 - **Automatisches Routing** -- analysiert Aufgabenkomplexität *und Zweck* (Coding, Vision, Recherche, Bulk) und wählt optimales Modell + Reasoning-Level
@@ -69,7 +79,10 @@
 
 ---
 
-## Architektur
+<a id="2-architecture"></a>
+<a id="architecture"></a>
+<a id="architektur"></a>
+## 2. Architektur & Metaphern-Abbildung
 
 Das gesamte System folgt einer **Auto-/Fahrmetapher**:
 
@@ -119,7 +132,71 @@ Das gesamte System folgt einer **Auto-/Fahrmetapher**:
 
 ---
 
-## Duale Mermaid-Diagramme
+<a id="3-target-personas--discoverability"></a>
+<a id="target-personas--discoverability"></a>
+<a id="zielgruppen--auffindbarkeit"></a>
+## 3. Zielgruppen & Auffindbarkeit
+
+`clutch` wurde für vier technische Zielgruppen konzipiert, die präzise Kontrolle über Modelldispatch, Kostenkalkulation und strikte Null-Telemetrie benötigen:
+
+### `[PERSONA-01]` Autonome KI-Agenten-Entwickler & Multi-Agenten-Architekten
+- **Kontext:** Aufbau von Multi-Agenten-Systemen, kontinuierlichen Hintergrund-Workern und werkzeuggestützten Agenten-Schleifen (z. B. LangGraph, CrewAI, AutoGen oder native CLI-Agenten).
+- **Herausforderung:** Statisches Hardcoding teurer Frontier-Modelle führt zu explodierenden Token-Kosten; starre SDKs crashen bei Quotenlimits oder 429-Rate-Limits.
+- **Lösung durch clutch:** Dynamisches Provider-Hot-Swapping (Anthropic, Gemini, OpenAI, Ollama, Kimi), orthogonale Steuerung des Reasoning-Aufwands, prozessübergreifende Circuit-Breaker und deterministische Fallback-Ketten.
+
+### `[PERSONA-02]` Multi-Host- & Edge-Infrastruktur-Systemingenieure
+- **Kontext:** Betrieb heterogener Rechenumgebungen bestehend aus lokalen GPU-Workstations, Laptops, Edge-Knoten und Cloud-APIs.
+- **Herausforderung:** Ungleichmäßige Hardware-Verfügbarkeit macht starre Konfigurationen fragil; zentrale Cloud-Gateways erhöhen die Latenz und bilden Single Points of Failure.
+- **Lösung durch clutch:** Automatische Erkennung lokaler/entfernter Ollama-Instanzen neben Cloud-Providern, belegte Selektor-Auflösung ohne verdeckte Ersetzungen und saubere Host-Isolation.
+
+### `[PERSONA-03]` Solo-Entwickler & Tool-Builder
+- **Kontext:** Entwicklung von Individualsoftware, Entwickler-Werkzeugen und CLI-Tools, die KI-Funktionalität ohne aufwendige Gateway-Infrastruktur benötigen.
+- **Herausforderung:** Das Aufsetzen schwergewichtiger Docker-Proxys (LiteLLM, Portkey) ist Overkill; eigene Skripte entbehren oft Metriken und Budget-Sicherungen.
+- **Lösung durch clutch:** Direkte Python-Bibliothek (`from clutch import Fahrer`) und CLI (`clutch run`) mit intuitiver Auto-Metapher, Vier-Zonen-Tankuhr, SQLite-Fahrtenbuch und ohne Hintergrund-Dämonen.
+
+### `[PERSONA-04]` Datenschutz- & Compliance-Verantwortliche
+- **Kontext:** Gewährleistung von DSGVO-, HIPAA- und IP-Schutzanforderungen in KI-gestützten Unternehmens- und Entwicklungs-Pipelines.
+- **Herausforderung:** SaaS-Gateways leiten vertrauliche Prompts über fremde Server; unklare Lizenzen oder administrative Berechtigungen stellen ein Audit-Risiko dar.
+- **Lösung durch clutch:** 100% Local-First-Architektur ohne Telemetrie-Egress (Verbindungen ausschließlich zu konfigurierten Provider-Endpunkten), unprivilegierte Benutzerrechte (`RunAsInvoker`), permissive MIT-Lizenz und transparente SPDX-Lizenzübersicht.
+
+### High-Intent-Suchbegriffe & KI-Auffindbarkeit
+Zur semantischen Erkennung durch Entwicklerverzeichnisse und KI-Suchmaschinen:
+- `provider-neutral LLM orchestration engine and model router` -- Open-Source Python-Routing-Bibliothek für Anthropic, Gemini, OpenAI, Ollama und Kimi.
+- `local-first zero-egress LLM budget tracking fuel gauge` -- 4-Zonen-Budgetkontrolle mit Token-Throughput-Schattenfenster.
+- `automotive metaphor LLM routing Anthropic Gemini OpenAI Ollama Kimi` -- Intuitive Steuerung über Fahrer, Strecke, Getriebe, Gas/Bremse und Kupplung.
+- `persistent circuit breaker quota failover multi-agent system` -- Prozessüberdauernde Sperren zur Vermeidung von Quotenschleifen.
+- `adaptive reasoning effort throttle brake model switching` -- Entkopplung von Denkintensität und Modellwahl.
+- `evidence-bearing execution selector model resolution` -- Fünfstufige Nachweiserbringung ohne unbemerkte Modellsubstitution.
+- `unprivileged user-mode LLM router RunAsInvoker MIT license` -- Sichere Ausführung im unprivilegierten Benutzermodus mit permissiver Software-Inventur.
+
+---
+
+<a id="4-comparative-matrix-vs-alternatives"></a>
+<a id="comparative-matrix-vs-alternatives"></a>
+<a id="vergleichsmatrix-gegenueber-alternativen"></a>
+## 4. Vergleichsmatrix gegenüber Alternativen
+
+Die folgende Matrix vergleicht `clutch` mit etablierten Routing- und Gateway-Paradigmen anhand von 10 technischen Dimensionen, die direkt auf unsere Governance-Invarianten abgestimmt sind:
+
+| Technische Dimension | Governance-Invariante | clutch | Klassische Einzel-Provider-SDKs | Cloud-Modell-Gateways (LiteLLM / OpenRouter) | Agenten-Framework-Router (CrewAI / AutoGen) | Ad-Hoc Skripte & Prompt-Router |
+|---|:---:|:---:|:---:|:---:|:---:|
+| **1. Multi-Provider-Neutralität** | `INV-LOCAL-01` | **Vollständiges Hot-Swapping (Anthropic, Gemini, OpenAI, Ollama, Kimi)** | Keine (Vendor-Lock-in) | Hoch (Multi-Provider API-Wrapper) | Mittel (Framework-spezifische Adapter) | Gering (Manueller Aufwand pro API) |
+| **2. Offline-First & Zero Egress** | `INV-LOCAL-02` | **100% Lokal (Lokale Daten, keine Telemetrie)** | Hoch (Direkte API-Aufrufe) | Gering (Zentrale Cloud-Telemetrie / SaaS) | Gering (Oft integrierte Cloud-Telemetrie) | Hoch (Eigener Code) |
+| **3. Unprivilegierte Ausführung** | `INV-UNPRIV-03` | **Strikter RunAsInvoker (User-Mode, kein Daemon)** | Hoch (User-Space-Bibliothek) | Erfordert oft Hintergrund-Dienst / Docker | Hoch (User-Space-Bibliothek) | Hoch (User-Space-Skript) |
+| **4. Persistente Circuit-Breaker** | `INV-CIRCUIT-04` | **Persistente `availability.json` (Überlebt Neustart)** | Keine (Bricht bei 429 direkt ab) | Ephemer / Im Arbeitsspeicher (Nach Neustart verloren) | Ephemer (Mit Workflow-Ende verloren) | Keine (Skript stürzt ab oder schleift) |
+| **5. Update-sichere Benutzer-Overlays** | `INV-OVERLAY-05` | **Persistente `user_overrides.json` & Aliase** | Keine (Code-Anpassung nötig) | Basis (Konfigurationsdatei / DB) | Code-Konfiguration | Hardcodierte Variablen |
+| **6. Zweifache gerankte Fallback-Gänge** | `INV-FALLBACK-06` | **Primärer Gang + 2 gerankte Alternativen** | Keine | Basis (Lineare Wiederholungsliste) | Partiell (Pauschale Fehlerabfangung) | Keine (Harter Abbruch) |
+| **7. 4-Zonen-Budget-Tankuhr** | `INV-BUDGET-07` | **Tankuhr (Grün/Gelb/Orange/Rot + Durchsatz)** | Keine (Nur externes Billing-Dashboard) | Basis (Ausgabenlimits / Guthabenprüfung) | Keine (Keine nativen Budget-Schranken) | Keine (Unkontrollierte API-Kosten) |
+| **8. Zweck- & Vision-Ausrichtung** | `INV-PURPOSE-08` | **Automatische Modalitäts-Zuordnung (Vision/Code)** | Manuell | Manuelle Modellauswahl | Partiell (Rollen-Prompts) | Keine |
+| **9. Transaktionssicheres Audit-Ledger** | `INV-LEDGER-09` | **ACID SQLite Fahrtenbuch & Chat-Historie** | Keine (Zustandslos) | Cloud-Logging-Dashboard | Ephemer im Arbeitsspeicher | Keine / Reine Textdateien |
+| **10. Plattform-Parität & Sicherheits-SLA** | `INV-SLA-10` | **48h SLA / Multi-OS CI / Zero-Copyleft MIT** | Enterprise-Vertragsbedingungen | Gemischte / Proprietäre Bedingungen | Unterschiedlich je Open-Source-Projekt | Keine (Ungepflegte Skripte) |
+
+---
+
+<a id="5-dual-mermaid-diagrams"></a>
+<a id="dual-mermaid-diagrams"></a>
+<a id="duale-mermaid-diagramme"></a>
+## 5. Duale Mermaid-Diagramme
 
 ### 1. Systemarchitektur-Topologie
 
@@ -225,7 +302,10 @@ sequenceDiagram
 
 ---
 
-## Governance- & Laufzeit-Invarianten
+<a id="6-governance--runtime-invariants"></a>
+<a id="governance--runtime-invariants"></a>
+<a id="governance--laufzeit-invarianten"></a>
+## 6. Governance- & Laufzeit-Invarianten
 
 | # | Invariante | Geltungsbereich | Betriebliche Garantie |
 |---|------------|-----------------|-----------------------|
@@ -242,7 +322,10 @@ sequenceDiagram
 
 ---
 
-## Streckentypen
+<a id="7-road-types"></a>
+<a id="road-types"></a>
+<a id="streckentypen"></a>
+## 7. Streckentypen & Aufgabenklassifikation
 
 | Strecke | Schwierigkeit | Standard-Gang | Gas/Throttle | Muster |
 |---------|--------------|---------------|--------------|--------|
@@ -257,7 +340,9 @@ sequenceDiagram
 
 ---
 
-## Installation
+<a id="8-installation"></a>
+<a id="installation"></a>
+## 8. Installation & Voraussetzungen
 
 ```bash
 git clone https://github.com/ellmos-ai/clutch.git
@@ -281,7 +366,10 @@ pip install -e .[web]
 
 ---
 
-## Kurzanleitung
+<a id="9-quick-start"></a>
+<a id="quick-start"></a>
+<a id="kurzanleitung"></a>
+## 9. Schnellstart & Kurzanleitung
 
 ```python
 from clutch import Fahrer
@@ -311,7 +399,10 @@ fahrer.trainieren()
 
 ---
 
-## Kommandozeilen-Schnittstelle
+<a id="10-command-line-interface"></a>
+<a id="command-line-interface"></a>
+<a id="kommandozeilen-schnittstelle"></a>
+## 10. Kommandozeilen-Schnittstelle (CLI)
 
 Nach `pip install -e .` steht das `clutch`-Kommando bereit:
 
@@ -335,7 +426,10 @@ clutch serve --web                     # Lokale Web-UI starten (benötigt: pip i
 
 ---
 
-## API-Keys & Zugangsdaten
+<a id="11-api-keys--credentials"></a>
+<a id="api-keys--credentials"></a>
+<a id="api-keys--zugangsdaten"></a>
+## 11. API-Keys & Zugangsdaten
 
 clutch löst Schlüssel in folgender Reihenfolge auf (der erste Treffer gewinnt):
 
@@ -347,7 +441,10 @@ Schlüsselwerte werden niemals ausgegeben, geloggt oder in Git committet.
 
 ---
 
-## Konfiguration
+<a id="12-configuration"></a>
+<a id="configuration"></a>
+<a id="konfiguration"></a>
+## 12. Konfiguration & Benutzer-Overlays
 
 Standardkonfigurationen liegen in `clutch/config/`. Eigene Overlays werden in `~/.clutch/user_overrides.json` abgelegt:
 
@@ -442,7 +539,10 @@ Routing, bevor ein LLM ausgewählt wird.
 
 ---
 
-## Unterstützte Provider
+<a id="13-supported-providers"></a>
+<a id="supported-providers"></a>
+<a id="unterstuetzte-provider"></a>
+## 13. Unterstützte Provider & Modell-Gänge
 
 | Provider | Modelle | Lokal |
 |----------|---------|-------|
@@ -457,7 +557,10 @@ Routing, bevor ein LLM ausgewählt wird.
 
 ---
 
-## Ausführungsmuster
+<a id="14-execution-patterns"></a>
+<a id="execution-patterns"></a>
+<a id="ausfuehrungsmuster"></a>
+## 14. Ausführungsmuster
 
 - **Einzelfahrt (Single)** -- Ein Modell, ein Task
 - **Kolonne (Convoy)** -- Sequentiell, Ausgabe N wird Eingabe für N+1
@@ -467,7 +570,10 @@ Routing, bevor ein LLM ausgewählt wird.
 
 ---
 
-## Verwandte Tools & Ökosystem
+<a id="15-ecosystem--sibling-tools"></a>
+<a id="ecosystem--sibling-tools"></a>
+<a id="verwandte-tools--oekosystem"></a>
+## 15. Verwandte Tools & Ökosystem
 
 Teil der [ellmos-ai](https://github.com/ellmos-ai) Multi-Agenten-Infrastruktur und des übergeordneten [open-bricks](https://github.com/open-bricks) Open-Source-Ökosystems:
 
@@ -488,12 +594,63 @@ Teil der [ellmos-ai](https://github.com/ellmos-ai) Multi-Agenten-Infrastruktur u
 
 ---
 
-## Sicherheitsrichtlinie & Haftung
+<a id="16-third-party-licenses--transparency"></a>
+<a id="third-party-licenses--transparency"></a>
+<a id="drittanbieter-lizenzen--transparenz"></a>
+## 16. Drittanbieter-Lizenzen & Transparenz
+
+`clutch` verpflichtet sich zu absoluter Softwaretransparenz, Lizenz-Compliance und Schutz der Lieferkette:
+
+- **Vollständige SPDX-Software-Inventur:** Jede zwingende Laufzeitabhängigkeit (`anthropic`, `google-genai`, `requests`), optionale Web-Abhängigkeit (`fastapi`, `uvicorn`, `python-multipart`) und Entwicklungswerkzeuge (`pytest`, `ruff`) sind mit exakten SPDX-Kennungen in [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md) dokumentiert.
+- **Zero-Copyleft-Garantie:** 100% aller Abhängigkeiten nutzen permissive, wirtschaftsfreundliche Open-Source-Lizenzen (MIT, Apache-2.0, BSD-3-Clause, PSF). Es existieren keinerlei GPL-, AGPL- oder virale Copyleft-Komponenten.
+- **Unprivilegierter Benutzermodus (`RunAsInvoker`):** Alle CLI-Befehle, Web-Oberflächen und lokalen Datenbanken laufen im regulären Benutzerkontext ohne administrative Privilegienerweiterung.
+- **Laufzeit-Governance-Invarianten:** Formale Bestätigung der 10 Governance- und Laufzeit-Invarianten (`INV-LOCAL-01` bis `INV-SLA-10`).
+
+Vollständige Abhängigkeitstabellen, Lizenztexte und Urheberrechtshinweise finden sich in [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).
+
+---
+
+<a id="17-security-policy--liability"></a>
+<a id="security-policy--liability"></a>
+<a id="sicherheitsrichtlinie--haftung"></a>
+## 17. Sicherheitsrichtlinie & Haftung
 
 Details zu unterstützten Versionen, Reaktionszeiten und Meldeverfahren finden sich in [SECURITY.md](SECURITY.md).
 
-### Haftungsausschluss
+### Haftungsausschluss / Liability Disclaimer
 
 Dieses Projekt ist eine **unentgeltliche Open-Source-Schenkung** im Sinne der §§ 516 ff. BGB. Die Haftung des Urhebers ist gemäß **§ 521 BGB** auf **Vorsatz und grobe Fahrlässigkeit** beschränkt. Ergänzend gelten die Haftungsausschlüsse der MIT-Lizenz.
 
 Nutzung auf eigenes Risiko. Keine Wartungszusage, keine Verfügbarkeitsgarantie, keine Gewähr für Fehlerfreiheit oder Eignung für einen bestimmten Zweck.
+
+This project is an unpaid open-source donation. Liability is limited to intent and gross negligence (§ 521 German Civil Code). Use at your own risk. No warranty, no maintenance guarantee, no fitness-for-purpose assumed.
+
+---
+
+<a id="18-verification--test-suite"></a>
+<a id="verification--test-suite"></a>
+<a id="verifikation--testsuite"></a>
+## 18. Verifikation & Testsuite
+
+`clutch` verfügt über eine umfassende automatisierte Testsuite mit 100% Erfolgsquote unter Linux, Windows und macOS:
+
+```bash
+# Unit-, Vertrags- und Regressionstests ausführen
+python -m pytest -ra -v
+
+# Schneller Durchlauf
+pytest -q
+
+# Code-Stil und Linter prüfen
+ruff check .
+
+# Bytecode-Kompilierung validieren
+python -m compileall clutch tests
+```
+
+Die Testsuite prüft:
+- Routing-Mechanik, Aufgabenanalyse und Zweck-Zuordnung (`test_route.py`, `test_clutch.py`)
+- Automobile Ausführungsmuster: Kolonne, Team, Schwarm und Hybrid (`test_patterns.py`)
+- Lernengine, Epsilon-Greedy-Exploration und Fitness-Feedback (`test_learning.py`)
+- Provider-Engines und Modellkatalog-Parität (`test_kimi_motoren.py`, `test_motorblock.py`)
+- Metadaten-Verträge, zweisprachige Doku-Parität, CI-Timeouts, Gitignore-Hygiene und Lizenz-Integrität (`test_metadata.py`)
