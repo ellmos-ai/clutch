@@ -371,6 +371,19 @@ def test_mixed_provider_routing():
     print(f"[OK] Mixed-Provider Routing (Gang={config.gang.name})")
 
 
+def test_cli_version():
+    """Testet dass clutch --version ohne Fehler beendet und die Version ausgibt."""
+    import subprocess
+    result = subprocess.run(
+        [sys.executable, "-m", "clutch.cli", "--version"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert "clutch " in result.stdout
+    print("[OK] CLI --version")
+
+
 if __name__ == "__main__":
     test_streckenanalyse()
     test_getriebe()
@@ -385,4 +398,6 @@ if __name__ == "__main__":
     test_schwarm()
     test_fahrer_integration()
     test_mixed_provider_routing()
-    print("\n=== ALLE 13 TESTS BESTANDEN ===")
+    test_cli_version()
+    print("\n=== ALLE 14 TESTS BESTANDEN ===")
+

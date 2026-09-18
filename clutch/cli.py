@@ -22,6 +22,7 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+from clutch import __version__
 from clutch.i18n import t, set_lang, LANGS
 
 
@@ -821,6 +822,12 @@ def _build_top_parser() -> argparse.ArgumentParser:
             "  clutch config default_provider anthropic\n"
             "  clutch chat\n"
         ),
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
+        help="Programmversion anzeigen",
     )
     parser.add_argument("--db", metavar="PFAD", default=None,
                         help="Pfad zur clutch.db (Standard: ~/.clutch/clutch.db)")
