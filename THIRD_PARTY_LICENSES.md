@@ -1,10 +1,10 @@
 # Third-Party Licenses & Software Inventory
 
-**Project:** `clutch` (`clutch-router`)  
-**License:** [MIT License](LICENSE)  
-**Audit Date:** 2026-09-16  
-**Repository:** [ellmos-ai/clutch](https://github.com/ellmos-ai/clutch)  
-**Umbrella Collective:** [open-bricks](https://github.com/open-bricks)  
+**Project:** `clutch` (`clutch-router`)<br>
+**License:** [MIT License](LICENSE)<br>
+**Audit Date:** 2026-09-23<br>
+**Repository:** [ellmos-ai/clutch](https://github.com/ellmos-ai/clutch)<br>
+**Umbrella Collective:** [open-bricks](https://github.com/open-bricks)
 
 ---
 
