@@ -74,6 +74,10 @@ LOCK.permissions.json
 
 # Test-, Coverage- und Packaging-Caches
 .pytest_cache/
+.pytest_temp/
+.pytest_tmp*/
+.hypothesis/
+.nyc_output/
 .ruff_cache/
 .coverage
 coverage/
