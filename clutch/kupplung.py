@@ -125,6 +125,7 @@ class Kupplung:
         effort_override: Optional[str] = None,
         ausschluss: Optional[list[str]] = None,
         praeferenz: Optional[list[str]] = None,
+        model_override: Optional[str] = None,
     ) -> FahrtConfig:
         """Bestimmt die optimale FahrtConfig fuer ein StreckenProfil.
 
@@ -153,6 +154,29 @@ class Kupplung:
         effort = self._effort_waehlen(
             effort_override if effort_override is not None else basis.get("effort")
         )
+
+        if model_override:
+            # Explizite Modellwahl: exakter Treffer, fail-closed, kein stilles Ersetzen/Exploration
+            gang = self.getriebe.loese_modell(model_override)
+            if gang.name in blockiert:
+                raise RuntimeError(f"Modell '{gang.name}' ist deaktiviert oder gesperrt")
+            basis_gas = basis.get("gas", 0.5)
+            gas_wert = self.pedal.anpassen(
+                basis_gas,
+                profil.schwierigkeit,
+                profil.tempo.value,
+            )
+            muster = self._muster_waehlen(basis.get("muster", "einzelfahrt"), profil)
+            return FahrtConfig(
+                gang=gang,
+                gas=self.pedal.stellung(gas_wert),
+                muster=muster,
+                ist_erkundung=False,
+                entscheidungs_grund=f"explizite Modellwahl: {gang.name}",
+                effort=effort,
+                effective_effort=effort,
+                alternativen=[],
+            )
 
         # 2. Gang waehlen
         gang_name = basis.get("gang", "claude-sonnet")

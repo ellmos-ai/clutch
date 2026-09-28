@@ -22,6 +22,7 @@ from pathlib import Path
 from typing import Any, Callable, Optional
 
 from clutch.strecke import StreckenAnalyse, StreckenProfil
+from clutch.gang import Gang
 from clutch.getriebe import Getriebe
 from clutch.kupplung import Kupplung, FahrtConfig
 from clutch.fahrtenbuch import Fahrtenbuch
@@ -123,11 +124,16 @@ class Fahrer:
         """Analysiert die Strecke (den Task)."""
         return self.analyse.analysiere(beschreibung, kontext)
 
+    def loese_modell(self, selector: str) -> Gang:
+        """Löst einen Modell-Selektor über das Getriebe auf."""
+        return self.getriebe.loese_modell(selector)
+
     def kuppeln(self, profil: StreckenProfil, zweck: Optional[str] = None,
                 vertrauenswuerdig: bool = True,
                 effort_override: Optional[str] = None,
                 ausschluss: Optional[list[str]] = None,
-                praeferenz: Optional[list[str]] = None) -> FahrtConfig:
+                praeferenz: Optional[list[str]] = None,
+                model_override: Optional[str] = None) -> FahrtConfig:
         """Kuppelt: Waehlt Gang und Gas basierend auf Strecke + Systemzustand.
 
         zweck (coding/vision/research/...) steuert das Zweck-Routing (M2):
@@ -136,6 +142,7 @@ class Fahrer:
         mit Auto-Approve aus.
         effort_override setzt optional high/xhigh/max-delegate fuer genau
         diesen Aufruf; max-delegate bleibt ein transparenter Delegationshinweis.
+        model_override erzwingt ein bestimmtes Modell (fail-closed, kein Fallback).
         """
 
         # Bordcomputer checken
@@ -151,10 +158,11 @@ class Fahrer:
             effort_override=effort_override,
             ausschluss=ausschluss,
             praeferenz=praeferenz,
+            model_override=model_override,
         )
 
-        # Gesperrtes Modell Fallback
-        if config.gang.name in system_status.gesperrte_modelle:
+        # Gesperrtes Modell Fallback (nur bei Auto-Routing)
+        if not model_override and config.gang.name in system_status.gesperrte_modelle:
             runter = self.getriebe.naechster_gang_runter(config.gang.name)
             if runter:
                 config = replace(
@@ -199,6 +207,7 @@ class Fahrer:
         effort_override = kontext.get("effort") if kontext else None
         ausschluss = kontext.get("ausschluss") if kontext else None
         praeferenz = kontext.get("praeferenz") if kontext else None
+        model_override = kontext.get("model_override") if kontext else None
 
         # 2. Kuppeln (zweck-bewusst)
         config = self.kuppeln(
@@ -208,6 +217,7 @@ class Fahrer:
             effort_override=effort_override,
             ausschluss=ausschluss,
             praeferenz=praeferenz,
+            model_override=model_override,
         )
         config.task_class = (
             str(kontext.get("task_class")) if kontext and kontext.get("task_class")
@@ -217,7 +227,7 @@ class Fahrer:
         config.reasoning_mode = str(kontext.get("reasoning_mode", "standard")) if kontext else "standard"
         config.service_tier = str(kontext.get("service_tier", "default")) if kontext else "default"
         config.is_delegate = bool(kontext.get("is_delegate", False)) if kontext else False
-        if kontext and kontext.get("task_class") and kontext.get("empirical_routing", True):
+        if not model_override and kontext and kontext.get("task_class") and kontext.get("empirical_routing", True):
             try:
                 decision = self.fahrschule.empirisch_routen(config.task_class)
                 gang = next(
