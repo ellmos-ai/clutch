@@ -54,6 +54,12 @@ Falls Private Vulnerability Reporting im Repository noch nicht aktiviert ist, ko
 | `INV-LEDGER-09` | Transaktionssicheres SQLite-Audit-Ledger | Fahrtenbuch, Sitzungsverläufe und Prompts werden sicher in lokalen SQLite-Datenbanken mit ACID-Garantie persistiert. |
 | `INV-SLA-10` | Plattformübergreifende Multi-OS-Parität & SLA | Identisches Verhalten unter Linux, Windows und macOS mit 48-Stunden-Sicherheits-Reaktions-SLA. |
 
+### Gesetzlicher Haftungsausschluss (§ 521 BGB Gefälligkeitsrecht)
+
+Dieses Projekt ist eine **unentgeltliche Open-Source-Schenkung** im Sinne der §§ 516 ff. BGB. Die Haftung des Urhebers ist gemäß **§ 521 BGB** auf **Vorsatz und grobe Fahrlässigkeit** beschränkt. Ergänzend gelten die Haftungsausschlüsse der MIT-Lizenz.
+
+Nutzung auf eigenes Risiko. Keine Wartungszusage, keine Verfügbarkeitsgarantie, keine Gewähr für Fehlerfreiheit oder Eignung für einen bestimmten Zweck.
+
 ---
 
 ## English
@@ -109,3 +115,9 @@ If private vulnerability reporting is not yet active, contact the security team 
 | `INV-PURPOSE-08` | Purpose & Vision Alignment | Vision and multimodal tasks are strictly routed to vision-capable models; code tasks match coding gears. |
 | `INV-LEDGER-09` | Transactional SQLite Audit Ledger | All trips, execution records, chat sessions, and prompt library entries are safely stored in local ACID SQLite databases. |
 | `INV-SLA-10` | Cross-Platform Multi-OS Parity & SLA | Identical behavior across Linux, Windows, and macOS with committed 48h security response SLA. |
+
+### Statutory Liability Disclaimer (§ 521 BGB German Civil Code)
+
+This project is an **unpaid open-source donation** pursuant to §§ 516 et seq. BGB (German Civil Code). Pursuant to **§ 521 BGB**, the author's liability is strictly limited to **intent and gross negligence**. Additionally, the limitations and disclaimers of the MIT License apply in full.
+
+Use at your own risk. No warranty, no maintenance guarantee, no fitness-for-purpose assumed.

@@ -1,0 +1,122 @@
+================================================================================
+CLUTCH - THIRD-PARTY SOFTWARE LICENSES & LEVEL 1 SBOM INVENTORY
+================================================================================
+
+Project: clutch (clutch-router - Provider-Neutral LLM Router & Orchestration Engine)
+Version: 0.6.3 (Strictly frozen under T-20260920-167562623)
+License: MIT License (see LICENSE)
+Attribution: Canonical Open-Source Attribution (see NOTICE)
+Audit Date: 2026-09-28
+Repository: https://github.com/ellmos-ai/clutch
+Organization: ellmos-ai (https://github.com/ellmos-ai)
+Umbrella Collective: open-bricks (https://github.com/open-bricks)
+
+--------------------------------------------------------------------------------
+1. RUNTIME ARCHITECTURE & DEPENDENCY FOOTPRINT
+--------------------------------------------------------------------------------
+
+clutch is engineered as a provider-neutral, local-first, zero-egress LLM
+orchestration engine and model router. It analyzes task complexity and purpose,
+dispatches to optimal model gears (G1-G5), tracks financial budgets with a 4-zone
+fuel gauge, enforces persistent circuit breakers, and learns through experience.
+
+Mandatory Runtime Dependencies:
+Package                 Version Spec    License       Type      Purpose
+--------------------------------------------------------------------------------
+anthropic               >=0.40.0        MIT           External  Anthropic Claude client
+google-genai            >=1.0.0         Apache-2.0    External  Google Gemini client
+requests                >=2.31.0        Apache-2.0    External  HTTP client for Ollama/Kimi
+Python Standard Library >=3.10          PSF-2.0       Built-in  argparse, asyncio, sqlite3
+
+Optional Web Interface Dependencies ([web]):
+Package                 Version Spec    License       Scope     Purpose
+--------------------------------------------------------------------------------
+fastapi                 >=0.110         MIT           [web]     Local chat Web API
+uvicorn                 >=0.27          BSD-3-Clause  [web]     ASGI web server
+python-multipart        >=0.0.9         Apache-2.0    [web]     Multipart form parsing
+
+Development, Quality & Test Tooling:
+Package / Tool          Version Spec    License       Scope     Purpose
+--------------------------------------------------------------------------------
+pytest                  >=7.0           MIT           [test]    Unit & contract tests
+ruff                    >=0.6           MIT/Apache-2  [linter]  Code formatting & lint
+setuptools              >=68.0          MIT           [build]   Packaging standard
+wheel                   >=0.40          MIT           [build]   Wheel distribution
+
+Network calls are strictly restricted to user-configured LLM provider endpoints
+(Anthropic, Google, Ollama, Kimi, or local/remote OpenAI-compatible APIs).
+Zero telemetry, tracking, or background telemetry egress exists.
+
+--------------------------------------------------------------------------------
+2. ZERO-COPYLEFT GUARANTEE & UNPRIVILEGED EXECUTION (RUNASINVOKER)
+--------------------------------------------------------------------------------
+
+- Zero-Copyleft Guarantee:
+  All runtime components, optional extensions, and development tooling are governed
+  strictly by permissive, business-friendly open-source licenses (MIT, Apache-2.0,
+  BSD-3-Clause, PSF-2.0). The codebase contains zero GPL, AGPL, or viral copyleft
+  dependencies. Downstream applications integrating clutch as an SDK remain free
+  of licensing contamination.
+
+- Unprivileged User-Mode Operation (RunAsInvoker):
+  All CLI commands (clutch route, clutch run, clutch chat), background processes,
+  SQLite metric databases, and the optional FastAPI web server execute strictly
+  within unprivileged user space. No administrative rights, root elevation, sudo,
+  or UAC prompts are ever required (INV-UNPRIV-03).
+
+--------------------------------------------------------------------------------
+3. GOVERNANCE & RUNTIME INVARIANTS (LEVEL 1 SBOM MAPPING)
+--------------------------------------------------------------------------------
+
+Invariant ID    Category                              Evaluation Dimension
+--------------------------------------------------------------------------------
+INV-LOCAL-01    Provider Agnosticism & Zero Lock-in   Hot-swap across Anthropic, Gemini, Ollama, Kimi
+INV-LOCAL-02    100% Local-First & Zero Egress        Local metrics, zero telemetry egress
+INV-UNPRIV-03   Unprivileged RunAsInvoker User Mode   Non-elevation execution across all CLI/Web tools
+INV-CIRCUIT-04  Fail-Closed Circuit Breakers          Persistent availability blocks in ~/.clutch/
+INV-OVERLAY-05  Update-Safe User Overlays             Persistent overrides in ~/.clutch/user_overrides.json
+INV-FALLBACK-06 Dual-Alternative Ranked Fallbacks     Primary model gear plus two ranked fallbacks
+INV-BUDGET-07   Two-Dimensional Budget & Telemetry    Financial fuel gauge + shadow token throughput
+INV-PURPOSE-08  Purpose & Vision Alignment            Automatic modality and task complexity matching
+INV-LEDGER-09   Transactional SQLite Audit Ledger     ACID SQLite trip log, chat history & prompts
+INV-SLA-10      Cross-Platform Multi-OS Parity & SLA  Linux/Windows/macOS parity with 48h response SLA
+
+All 10 Invariants VERIFIED as of 2026-09-28.
+
+--------------------------------------------------------------------------------
+4. STATUTORY LIABILITY DISCLAIMER (§ 521 BGB GEFÄLLIGKEITSRECHT)
+--------------------------------------------------------------------------------
+
+Dieses Projekt ist eine unentgeltliche Open-Source-Schenkung im Sinne der §§ 516 ff. BGB.
+Die Haftung des Urhebers ist gemäß § 521 BGB auf Vorsatz und grobe Fahrlässigkeit
+beschränkt. Ergänzend gelten die Haftungsausschlüsse der MIT-Lizenz. Nutzung auf
+eigenes Risiko.
+
+This project is an unpaid open-source donation. Liability is limited to intent
+and gross negligence (§ 521 German Civil Code). Complete details in SECURITY.md.
+
+--------------------------------------------------------------------------------
+5. PERMISSIVE LICENSE TEXT SUMMARIES
+--------------------------------------------------------------------------------
+
+- MIT License:
+  Copyright (c) 2026 Lukas Geiger / ellmos-ai
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction. Complete text in LICENSE.
+
+- Apache License 2.0 (Apache-2.0):
+  Applicable to google-genai, requests, python-multipart. Full text available at
+  https://www.apache.org/licenses/LICENSE-2.0
+
+- BSD 3-Clause License:
+  Applicable to uvicorn. Full text available at
+  https://opensource.org/licenses/BSD-3-Clause
+
+- Python Software Foundation License Version 2 (PSF-2.0):
+  Applicable to Python Standard Library. Full text at
+  https://docs.python.org/3/license.html
+
+================================================================================
+END OF THIRD-PARTY LICENSES & LEVEL 1 SBOM INVENTORY
+================================================================================
