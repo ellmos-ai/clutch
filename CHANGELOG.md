@@ -22,6 +22,16 @@ Multi-Host-Änderungen zu überschreiben.
   Belege und ein zulässiger Lebenszyklus machen ein Modell claimbar.
 - Atomare Kataloganwendung reichert ausschließlich bereits kuratierte Gänge an;
   unbekannte Provider-Modelle werden gemeldet, aber nicht still registriert.
+- **Pfad B Marketing, Discoverability & Level 1 SBOM Text Companion (2026-09-28)**:
+  - **18-Punkte Schnellnavigation mit reziproken dualen HTML-Ankern**: Vollständige Synchronisation zwischen `README.md` und `README_de.md` mit stabilen Abwärtskompatibilitäts- und Schnellzugriffs-Ankern (`<a id="sec-01"></a>` bis `<a id="sec-18"></a>`).
+  - **Plain-Text Level 1 SBOM Begleitdatei (`THIRD_PARTY_LICENSES.txt`)**: Vollständiges Softwareinventar für Laufzeit-, Web- und Dev-Abhängigkeiten mit Zero-Copyleft-Garantie, `RunAsInvoker`-Non-Elevation (`INV-UNPRIV-03`), Zero-Egress und Bestätigung aller 10 Governance-Invarianten `INV-LOCAL-01` bis `INV-SLA-10`.
+  - **Kanonische Open-Source Attribution (`NOTICE`)**: Formalisierung der Urheberrechts-Attribution für Lukas Geiger, ellmos-ai und open-bricks Dachorganisation.
+  - **PEP 621 Standardisierung & Metadaten-Sättigung (`pyproject.toml`)**: 20 kuratierte Keywords synchron zu den 20 GitHub Topics, Whitelist für 4 Lizenzdateien (`LICENSE`, `NOTICE`, `THIRD_PARTY_LICENSES.md`, `THIRD_PARTY_LICENSES.txt`), Projekt-URLs für `Notice`, `Third-Party Licenses (Text)` und `Level 1 SBOM`, Pytest-Testisolation mit `--basetemp=.pytest_temp`.
+  - **Multi-Host- & Gitignore-Härtung (`.gitignore`)**: Schutzregeln für `.pytest_temp/`, `*-IDEAPAD*` und `*-MacBook*`.
+  - **Rechtliche Parität & Haftungsausschluss (§ 521 BGB Gefälligkeitsrecht)**: Verankerung der gesetzlichen Haftungsbeschränkung auf Vorsatz und grobe Fahrlässigkeit in Section 17 beider READMEs, `SECURITY.md`, `llms.txt` und Level 1 SBOM samt verbindlicher 48h Security Response SLA.
+  - **Auffindbarkeitskontext & Maschinenindex (`llms.txt`)**: Aktualisierung auf Stand 2026-09-28 mit 416+ bestandenen Tests, NOTICE- und Level 1 SBOM-Verlinkung.
+  - **Shields.io Badges**: Synchronisierung der Badges in beiden READMEs (`Verified: 2026-09-28`, `Pytest: 416 passed | 100% green`, `Attribution: NOTICE`, `Level 1 SBOM: Plain-Text`, `Statutory: § 521 BGB`).
+  - **Automatisierte Vertragstests (`tests/test_metadata.py`)**: Erweiterung der Testsuite um Kontrakttests für duale HTML-Anker, kanonische NOTICE, Level 1 SBOM Text-Companion, 20 Topics Sättigung, § 521 BGB und unreleased Release-Notizen.
 - **Pfad B Marketing, Discoverability & Software-Transparenz (2026-09-16)**:
   - **18-Punkte Schnellnavigation mit dualen HTML-Ankern**: Vollständige Synchronisation zwischen `README.md` und `README_de.md` mit stabilen Abwärtskompatibilitäts-Ankern (`<a id="..."></a>`).
   - **Zielgruppen- & Persona-Mapping (`[PERSONA-01]` bis `[PERSONA-04]`)**: Detaillierte Dokumentation für Autonome Agenten-Entwickler, Multi-Host/Edge-Systemingenieure, Tool-Builder und Datenschutz-Beauftragte.

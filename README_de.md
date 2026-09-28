@@ -10,14 +10,18 @@
 
 [![Version 0.6.3](https://img.shields.io/badge/Version-0.6.3-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
 [![CI](https://img.shields.io/badge/CI-bestanden-brightgreen.svg)](https://github.com/ellmos-ai/clutch/actions)
-[![Pytest](https://img.shields.io/badge/Pytest-415%20bestanden-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
+[![Pytest](https://img.shields.io/badge/Pytest-416%20bestanden%20%7C%20100%25%20gr%C3%BCn-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![Plattformen](https://img.shields.io/badge/Plattformen-Linux%20%7C%20Windows%20%7C%20macOS-blue.svg)](https://github.com/ellmos-ai/clutch)
 [![Lizenz: MIT](https://img.shields.io/badge/Lizenz-MIT-green.svg)](LICENSE)
+[![Attribution: NOTICE](https://img.shields.io/badge/Attribution-NOTICE-blue.svg)](NOTICE)
 [![Provider](https://img.shields.io/badge/Provider-Anthropic%20%7C%20Gemini%20%7C%20OpenAI%20%7C%20Ollama%20%7C%20Kimi-purple.svg)](https://github.com/ellmos-ai/clutch)
+[![Level 1 SBOM: Plain-Text](https://img.shields.io/badge/Level%201%20SBOM-Plain--Text-brightgreen.svg)](THIRD_PARTY_LICENSES.txt)
 [![Drittanbieter-Lizenzen: Geprüft](https://img.shields.io/badge/Drittanbieter--Lizenzen-Gepr%C3%BCft-brightgreen.svg)](THIRD_PARTY_LICENSES.md)
 [![Marketing-Log: Aktiv](https://img.shields.io/badge/Marketing--Log-Aktiv-blue.svg)](MARKETING-LOG.txt)
 [![Sicherheits-SLA: 48h](https://img.shields.io/badge/Sicherheits--SLA-48h%20Antwort%20%7C%205d%20Triage-blue.svg)](SECURITY.md)
+[![Gesetzlich: § 521 BGB](https://img.shields.io/badge/Gesetzlich-%C2%A7%20521%20BGB-informational.svg)](SECURITY.md)
+[![Geprüft: 2026-09-28](https://img.shields.io/badge/Gepr%C3%BCft-2026--09--28-blue.svg)](MARKETING-LOG.txt)
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![Sicherheit: Local-First](https://img.shields.io/badge/Sicherheit-Local--First-green.svg)](SECURITY.md)
 [![Privatsphäre: Zero-Egress](https://img.shields.io/badge/Privatsph%C3%A4re-Zero--Egress-success.svg)](SECURITY.md)
@@ -35,27 +39,28 @@
 
 ## Schnellnavigation
 
-1. [Funktionen & Highlights](#1-features)
-2. [Architektur & Metaphern-Abbildung](#2-architecture)
-3. [Zielgruppen & Auffindbarkeit](#3-target-personas--discoverability)
-4. [Vergleichsmatrix gegenüber Alternativen](#4-comparative-matrix-vs-alternatives)
-5. [Duale Mermaid-Diagramme](#5-dual-mermaid-diagrams)
-6. [Governance- & Laufzeit-Invarianten](#6-governance--runtime-invariants)
-7. [Streckentypen & Aufgabenklassifikation](#7-road-types)
-8. [Installation & Voraussetzungen](#8-installation)
-9. [Schnellstart & Kurzanleitung](#9-quick-start)
-10. [Kommandozeilen-Schnittstelle (CLI)](#10-command-line-interface)
-11. [API-Keys & Zugangsdaten](#11-api-keys--credentials)
-12. [Konfiguration & Benutzer-Overlays](#12-configuration)
-13. [Unterstützte Provider & Modell-Gänge](#13-supported-providers)
-14. [Ausführungsmuster](#14-execution-patterns)
-15. [Verwandte Tools & Ökosystem](#15-ecosystem--sibling-tools)
-16. [Drittanbieter-Lizenzen & Transparenz](#16-third-party-licenses--transparency)
-17. [Sicherheitsrichtlinie & Haftung](#17-security-policy--liability)
-18. [Verifikation & Testsuite](#18-verification--test-suite)
+1. [Funktionen & Highlights](#sec-01)
+2. [Architektur & Metaphern-Abbildung](#sec-02)
+3. [Zielgruppen & Auffindbarkeit](#sec-03)
+4. [Vergleichsmatrix gegenüber Alternativen](#sec-04)
+5. [Duale Mermaid-Diagramme](#sec-05)
+6. [Governance- & Laufzeit-Invarianten](#sec-06)
+7. [Streckentypen & Aufgabenklassifikation](#sec-07)
+8. [Installation & Voraussetzungen](#sec-08)
+9. [Schnellstart & Kurzanleitung](#sec-09)
+10. [Kommandozeilen-Schnittstelle (CLI)](#sec-10)
+11. [API-Keys & Zugangsdaten](#sec-11)
+12. [Konfiguration & Benutzer-Overlays](#sec-12)
+13. [Unterstützte Provider & Modell-Gänge](#sec-13)
+14. [Ausführungsmuster](#sec-14)
+15. [Verwandte Tools & Ökosystem](#sec-15)
+16. [Drittanbieter-Lizenzen & Transparenz](#sec-16)
+17. [Sicherheitsrichtlinie & Haftung](#sec-17)
+18. [Verifikation & Testsuite](#sec-18)
 
 ---
 
+<a id="sec-01"></a>
 <a id="1-features"></a>
 <a id="features"></a>
 <a id="funktionen"></a>
@@ -79,6 +84,7 @@
 
 ---
 
+<a id="sec-02"></a>
 <a id="2-architecture"></a>
 <a id="architecture"></a>
 <a id="architektur"></a>
@@ -132,6 +138,7 @@ Das gesamte System folgt einer **Auto-/Fahrmetapher**:
 
 ---
 
+<a id="sec-03"></a>
 <a id="3-target-personas--discoverability"></a>
 <a id="target-personas--discoverability"></a>
 <a id="zielgruppen--auffindbarkeit"></a>
@@ -171,6 +178,7 @@ Zur semantischen Erkennung durch Entwicklerverzeichnisse und KI-Suchmaschinen:
 
 ---
 
+<a id="sec-04"></a>
 <a id="4-comparative-matrix-vs-alternatives"></a>
 <a id="comparative-matrix-vs-alternatives"></a>
 <a id="vergleichsmatrix-gegenueber-alternativen"></a>
@@ -193,6 +201,7 @@ Die folgende Matrix vergleicht `clutch` mit etablierten Routing- und Gateway-Par
 
 ---
 
+<a id="sec-05"></a>
 <a id="5-dual-mermaid-diagrams"></a>
 <a id="dual-mermaid-diagrams"></a>
 <a id="duale-mermaid-diagramme"></a>
@@ -302,6 +311,7 @@ sequenceDiagram
 
 ---
 
+<a id="sec-06"></a>
 <a id="6-governance--runtime-invariants"></a>
 <a id="governance--runtime-invariants"></a>
 <a id="governance--laufzeit-invarianten"></a>
@@ -322,6 +332,7 @@ sequenceDiagram
 
 ---
 
+<a id="sec-07"></a>
 <a id="7-road-types"></a>
 <a id="road-types"></a>
 <a id="streckentypen"></a>
@@ -340,6 +351,7 @@ sequenceDiagram
 
 ---
 
+<a id="sec-08"></a>
 <a id="8-installation"></a>
 <a id="installation"></a>
 ## 8. Installation & Voraussetzungen
@@ -366,6 +378,7 @@ pip install -e .[web]
 
 ---
 
+<a id="sec-09"></a>
 <a id="9-quick-start"></a>
 <a id="quick-start"></a>
 <a id="kurzanleitung"></a>
@@ -399,6 +412,7 @@ fahrer.trainieren()
 
 ---
 
+<a id="sec-10"></a>
 <a id="10-command-line-interface"></a>
 <a id="command-line-interface"></a>
 <a id="kommandozeilen-schnittstelle"></a>
@@ -426,6 +440,7 @@ clutch serve --web                     # Lokale Web-UI starten (benötigt: pip i
 
 ---
 
+<a id="sec-11"></a>
 <a id="11-api-keys--credentials"></a>
 <a id="api-keys--credentials"></a>
 <a id="api-keys--zugangsdaten"></a>
@@ -441,6 +456,7 @@ Schlüsselwerte werden niemals ausgegeben, geloggt oder in Git committet.
 
 ---
 
+<a id="sec-12"></a>
 <a id="12-configuration"></a>
 <a id="configuration"></a>
 <a id="konfiguration"></a>
@@ -539,6 +555,7 @@ Routing, bevor ein LLM ausgewählt wird.
 
 ---
 
+<a id="sec-13"></a>
 <a id="13-supported-providers"></a>
 <a id="supported-providers"></a>
 <a id="unterstuetzte-provider"></a>
@@ -557,6 +574,7 @@ Routing, bevor ein LLM ausgewählt wird.
 
 ---
 
+<a id="sec-14"></a>
 <a id="14-execution-patterns"></a>
 <a id="execution-patterns"></a>
 <a id="ausfuehrungsmuster"></a>
@@ -570,6 +588,7 @@ Routing, bevor ein LLM ausgewählt wird.
 
 ---
 
+<a id="sec-15"></a>
 <a id="15-ecosystem--sibling-tools"></a>
 <a id="ecosystem--sibling-tools"></a>
 <a id="verwandte-tools--oekosystem"></a>
@@ -594,6 +613,7 @@ Teil der [ellmos-ai](https://github.com/ellmos-ai) Multi-Agenten-Infrastruktur u
 
 ---
 
+<a id="sec-16"></a>
 <a id="16-third-party-licenses--transparency"></a>
 <a id="third-party-licenses--transparency"></a>
 <a id="drittanbieter-lizenzen--transparenz"></a>
@@ -610,6 +630,7 @@ Vollständige Abhängigkeitstabellen, Lizenztexte und Urheberrechtshinweise find
 
 ---
 
+<a id="sec-17"></a>
 <a id="17-security-policy--liability"></a>
 <a id="security-policy--liability"></a>
 <a id="sicherheitsrichtlinie--haftung"></a>
@@ -627,6 +648,7 @@ This project is an unpaid open-source donation. Liability is limited to intent a
 
 ---
 
+<a id="sec-18"></a>
 <a id="18-verification--test-suite"></a>
 <a id="verification--test-suite"></a>
 <a id="verifikation--testsuite"></a>

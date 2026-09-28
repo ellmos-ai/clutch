@@ -180,3 +180,65 @@ latest 2026 ecosystem gold standard:
 - Bytecode Compilation: python -m compileall clutch tests passed with 0 errors.
 - Git Tree Hygiene: git diff --check passed with 0 whitespace issues.
 ================================================================================
+
+================================================================================
+MARKETING & DISCOVERABILITY LOG: clutch
+================================================================================
+Date: 2026-09-28
+Path: Pfad B (Marketing & Design / Discoverability)
+Version: 0.6.3 (Strictly frozen under T-20260920-167562623)
+Repository: ellmos-ai/clutch
+Organization: ellmos-ai
+Umbrella Collective: open-bricks
+
+1. EXECUTIVE SUMMARY
+--------------------------------------------------------------------------------
+Comprehensive Pfad B marketing, discoverability and software transparency upgrade
+elevating clutch to the latest 2026 ecosystem gold standard:
+  - 18-point dual reciprocal HTML anchors (<a id="sec-01"></a> through <a id="sec-18"></a>)
+    across README.md and README_de.md with complete bilateral parity.
+  - Plain-text Level 1 SBOM companion: THIRD_PARTY_LICENSES.txt with full runtime
+    and dev dependency inventory (MIT, Apache-2.0, BSD-3-Clause, PSF-2.0),
+    unprivileged user mode (RunAsInvoker) non-elevation guarantee (INV-UNPRIV-03),
+    zero-copyleft isolation (0% viral copyleft), zero-egress architecture, and
+    formal confirmation of all 10 Governance and Runtime Invariants (INV-LOCAL-01..INV-SLA-10).
+  - Canonical open-source attribution file: NOTICE formalizing copyright attribution
+    for Lukas Geiger under the ellmos-ai and open-bricks umbrella.
+  - PEP 621 Standard & Metadata saturation in pyproject.toml:
+    * 20 curated keywords matching the 20 GitHub repositoryTopics 1-to-1
+    * license-files whitelist: ["LICENSE", "NOTICE", "THIRD_PARTY_LICENSES.md", "THIRD_PARTY_LICENSES.txt"]
+    * Project URLs expanded: "Notice", "Third-Party Licenses (Text)", "Level 1 SBOM"
+    * Pytest test isolation with --basetemp=.pytest_temp and hardened norecursedirs
+  - Multi-host protection in .gitignore for .pytest_temp/, *-IDEAPAD*, and *-MacBook*.
+  - Statutory liability disclaimer (§ 521 BGB Gefälligkeitsrecht) & 48h Security Response
+    SLA in Section 17 of READMEs, SECURITY.md, llms.txt, and Level 1 SBOM.
+  - Machine-readable llms.txt context updated for 2026-09-28 with 416+ passing tests,
+    NOTICE, Level 1 SBOM text companion links, and § 521 BGB statutory notice.
+  - Synchronized Shields.io badges across README.md and README_de.md:
+    * Version 0.6.3 (Frozen)
+    * Pytest 416 passed | 100% green
+    * Attribution: NOTICE
+    * Level 1 SBOM: Plain-Text
+    * Statutory: § 521 BGB
+    * Verified: 2026-09-28 / Geprüft: 2026-09-28
+  - Automated contract test suite expanded in tests/test_metadata.py with new
+    regression tests verifying 18-point dual HTML anchors parity, canonical NOTICE,
+    Level 1 SBOM companion, PEP 621 keyword saturation, project URLs, § 521 BGB
+    statutory notices, and unreleased CHANGELOG / MARKETING-LOG entries.
+
+2. ENHANCEMENTS & ASSETS
+--------------------------------------------------------------------------------
+- Dual Reciprocal Anchors: 18 numbered anchor links synchronized across README.md and README_de.md.
+- Plain-Text Level 1 SBOM: Complete software bill of materials in THIRD_PARTY_LICENSES.txt.
+- Open-Source NOTICE: Canonical attribution for Lukas Geiger, ellmos-ai and open-bricks umbrella.
+- PEP 621 Saturation: 20 keywords matching GitHub topics, 4 license files, expanded project URLs.
+- Legal & Compliance Parity: Statutory notice (§ 521 BGB Gefälligkeitsrecht) and 48h Security SLA.
+- Machine Context: llms.txt synchronized with 2026-09-28 audit, NOTICE, and Level 1 SBOM links.
+
+3. QUALITY GATES & VERIFICATION
+--------------------------------------------------------------------------------
+- Ruff Linting: ruff check . passed with 0 errors.
+- Test Suite: 100% green pass across all unit and contract tests (416+ tests).
+- Bytecode Compilation: python -m compileall clutch tests passed with 0 errors.
+- Git Tree Hygiene: git diff --check passed with 0 whitespace issues.
+================================================================================

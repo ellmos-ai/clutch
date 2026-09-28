@@ -12,10 +12,12 @@ def test_core_documentation_files_exist():
         "README_de.md",
         "SECURITY.md",
         "LICENSE",
+        "NOTICE",
         "CHANGELOG.md",
         "llms.txt",
         "pyproject.toml",
         "THIRD_PARTY_LICENSES.md",
+        "THIRD_PARTY_LICENSES.txt",
         "MARKETING-LOG.txt",
     ]
     for filename in required_files:
@@ -46,12 +48,14 @@ def test_llms_txt_structure_and_timestamp():
     """Verify that llms.txt contains the canonical structure and a recent timestamp."""
     llms_text = (REPO_ROOT / "llms.txt").read_text(encoding="utf-8")
 
-    assert "Last-checked: 2026-09-16" in llms_text, "llms.txt Last-checked timestamp should be 2026-09-16"
-    assert "415" in llms_text, "llms.txt should report 415 passing unit tests"
+    assert "Last-checked: 2026-09-28" in llms_text, "llms.txt Last-checked timestamp should be 2026-09-28"
+    assert "416" in llms_text, "llms.txt should report 416+ passing unit tests"
     assert "## Audience" in llms_text, "llms.txt missing Audience section"
     assert "## Search Phrases" in llms_text, "llms.txt missing Search Phrases section"
     assert "## Docs" in llms_text, "llms.txt missing Docs section"
+    assert "NOTICE" in llms_text, "llms.txt missing NOTICE link"
     assert "THIRD_PARTY_LICENSES.md" in llms_text, "llms.txt missing THIRD_PARTY_LICENSES.md link"
+    assert "THIRD_PARTY_LICENSES.txt" in llms_text, "llms.txt missing THIRD_PARTY_LICENSES.txt link"
     assert "MARKETING-LOG.txt" in llms_text, "llms.txt missing MARKETING-LOG.txt link"
     assert "Core Governance & Runtime Invariants" in llms_text, "llms.txt missing Governance Invariants section"
 
@@ -121,11 +125,14 @@ def test_quick_navigation_anchors_parity():
 
     assert "## Quick Navigation" in readme_en, "README.md missing Quick Navigation"
     assert "## Schnellnavigation" in readme_de, "README_de.md missing Schnellnavigation"
-    assert "18. [Verification & Test Suite](#18-verification--test-suite)" in readme_en
-    assert "18. [Verifikation & Testsuite](#18-verification--test-suite)" in readme_de
+    assert "18. [Verification & Test Suite](#sec-18)" in readme_en
+    assert "18. [Verifikation & Testsuite](#sec-18)" in readme_de
     for i in range(1, 19):
         assert f"\n{i}. [" in readme_en, f"README.md missing navigation item {i}"
         assert f"\n{i}. [" in readme_de, f"README_de.md missing navigation item {i}"
+        sec_id = f"sec-{i:02d}"
+        assert f"(#{sec_id})" in readme_en, f"README.md missing navigation anchor #{sec_id}"
+        assert f"(#{sec_id})" in readme_de, f"README_de.md missing navigation anchor #{sec_id}"
 
 
 
@@ -184,7 +191,8 @@ def test_pytest_configuration_and_flags():
     """Verify that pyproject.toml configures pytest with standardized flags."""
     pyproject_text = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
     assert "[tool.pytest.ini_options]" in pyproject_text, "Missing [tool.pytest.ini_options] in pyproject.toml"
-    assert 'addopts = "-ra -v"' in pyproject_text, "pytest addopts should be configured with -ra -v"
+    assert "-ra -v" in pyproject_text, "pytest addopts should include -ra -v"
+    assert "--basetemp=.pytest_temp" in pyproject_text, "pytest addopts should include --basetemp=.pytest_temp"
     assert 'testpaths = ["tests"]' in pyproject_text, "pytest testpaths should specify tests"
 
 
@@ -218,8 +226,14 @@ def test_readme_badges_parity():
 
     assert "badge/Version-0.6.3-" in readme_en, "README.md missing Version 0.6.3 badge"
     assert "badge/Version-0.6.3-" in readme_de, "README_de.md missing Version 0.6.3 badge"
-    assert "Pytest-415%20passed" in readme_en, "README.md missing current pytest badge"
-    assert "Pytest-415%20bestanden" in readme_de, "README_de.md missing current pytest badge"
+    assert "Pytest-416%20passed" in readme_en, "README.md missing current pytest badge"
+    assert "Pytest-416%20bestanden" in readme_de, "README_de.md missing current pytest badge"
+    assert "Attribution-NOTICE" in readme_en, "README.md missing NOTICE badge"
+    assert "Attribution-NOTICE" in readme_de, "README_de.md missing NOTICE badge"
+    assert "Level%201%20SBOM-Plain--Text" in readme_en, "README.md missing Level 1 SBOM badge"
+    assert "Level%201%20SBOM-Plain--Text" in readme_de, "README_de.md missing Level 1 SBOM badge"
+    assert "Verified-2026--09--28" in readme_en, "README.md missing Verified date badge"
+    assert "Gepr%C3%BCft-2026--09--28" in readme_de, "README_de.md missing Geprüft date badge"
     assert "Security%20SLA-48h" in readme_en, "README.md missing Security SLA badge"
     assert "Sicherheits--SLA-48h" in readme_de, "README_de.md missing Sicherheits-SLA badge"
     assert "code%20style-ruff" in readme_en, "README.md missing ruff code style badge"
@@ -272,7 +286,11 @@ def test_frontier_ollama_models_in_catalog():
 def test_pep621_license_files():
     """Verify that pyproject.toml defines license-files for packaging compliance."""
     pyproject_text = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
-    assert 'license-files = ["LICENSE"]' in pyproject_text, "Missing license-files in pyproject.toml"
+    assert "license-files = [" in pyproject_text, "Missing license-files in pyproject.toml"
+    assert '"LICENSE"' in pyproject_text, "Missing LICENSE in license-files"
+    assert '"NOTICE"' in pyproject_text, "Missing NOTICE in license-files"
+    assert '"THIRD_PARTY_LICENSES.md"' in pyproject_text, "Missing THIRD_PARTY_LICENSES.md in license-files"
+    assert '"THIRD_PARTY_LICENSES.txt"' in pyproject_text, "Missing THIRD_PARTY_LICENSES.txt in license-files"
 
 
 def test_readme_target_personas_and_discoverability():
@@ -330,7 +348,104 @@ def test_pyproject_marketing_urls():
 
 
 def test_marketing_log_recency():
-    """Verify that MARKETING-LOG.txt contains the 2026-09-16 Pfad B entry."""
+    """Verify that MARKETING-LOG.txt contains the 2026-09-28 Pfad B entry."""
     mkt_text = (REPO_ROOT / "MARKETING-LOG.txt").read_text(encoding="utf-8")
-    assert "Date: 2026-09-16" in mkt_text
+    assert "Date: 2026-09-28" in mkt_text
     assert "Pfad B (Marketing & Design / Discoverability)" in mkt_text
+
+
+def test_sec_dual_html_anchors_parity():
+    """Verify that both READMEs contain dual reciprocal HTML anchors sec-01 through sec-18."""
+    readme_en = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+    readme_de = (REPO_ROOT / "README_de.md").read_text(encoding="utf-8")
+
+    for i in range(1, 19):
+        anchor = f'<a id="sec-{i:02d}"></a>'
+        assert anchor in readme_en, f"README.md missing anchor {anchor}"
+        assert anchor in readme_de, f"README_de.md missing anchor {anchor}"
+
+
+def test_canonical_notice_attribution():
+    """Verify that NOTICE exists, attributes Lukas Geiger, ellmos-ai, and references SBOMs."""
+    notice_file = REPO_ROOT / "NOTICE"
+    assert notice_file.is_file(), "NOTICE file missing"
+    notice_text = notice_file.read_text(encoding="utf-8")
+
+    assert "clutch" in notice_text
+    assert "Lukas Geiger" in notice_text
+    assert "ellmos-ai" in notice_text
+    assert "open-bricks" in notice_text
+    assert "THIRD_PARTY_LICENSES.md" in notice_text
+    assert "THIRD_PARTY_LICENSES.txt" in notice_text
+
+
+def test_third_party_licenses_plain_text_companion():
+    """Verify THIRD_PARTY_LICENSES.txt plain-text Level 1 SBOM companion completeness."""
+    sbom_file = REPO_ROOT / "THIRD_PARTY_LICENSES.txt"
+    assert sbom_file.is_file(), "THIRD_PARTY_LICENSES.txt missing"
+    sbom_text = sbom_file.read_text(encoding="utf-8")
+
+    assert "LEVEL 1 SBOM INVENTORY" in sbom_text
+    assert "Zero-Copyleft Guarantee" in sbom_text
+    assert "RunAsInvoker" in sbom_text
+    assert "INV-UNPRIV-03" in sbom_text
+    assert "§ 521 BGB" in sbom_text
+
+    for inv in [
+        "INV-LOCAL-01", "INV-LOCAL-02", "INV-UNPRIV-03", "INV-CIRCUIT-04",
+        "INV-OVERLAY-05", "INV-FALLBACK-06", "INV-BUDGET-07", "INV-PURPOSE-08",
+        "INV-LEDGER-09", "INV-SLA-10"
+    ]:
+        assert inv in sbom_text, f"THIRD_PARTY_LICENSES.txt missing invariant {inv}"
+
+
+def test_statutory_notice_bgb_521_and_48h_sla():
+    """Verify § 521 BGB statutory notice and 48h SLA across READMEs, SECURITY.md, and llms.txt."""
+    readme_en = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+    readme_de = (REPO_ROOT / "README_de.md").read_text(encoding="utf-8")
+    sec_text = (REPO_ROOT / "SECURITY.md").read_text(encoding="utf-8")
+    llms_text = (REPO_ROOT / "llms.txt").read_text(encoding="utf-8")
+
+    assert "§ 521 BGB" in readme_en
+    assert "§ 521 BGB" in readme_de
+    assert "§ 521 BGB" in sec_text
+    assert "§ 521 BGB" in llms_text
+    assert "48h" in readme_en or "48 hours" in readme_en
+    assert "48h" in readme_de or "48 Stunden" in readme_de
+
+
+def test_pyproject_topics_saturation():
+    """Verify that pyproject.toml keywords are saturated with 20 GitHub repositoryTopics."""
+    pyproject_text = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
+
+    expected_topics = [
+        "agent-framework", "ai", "auto-routing", "budget-tracking", "circuit-breaker",
+        "llm", "llm-agents", "llm-orchestration", "llm-router", "local-first",
+        "model-routing", "multi-agent", "multi-provider", "open-source", "orchestration",
+        "provider-neutral", "python", "python-library", "sqlite", "zero-egress"
+    ]
+    for topic in expected_topics:
+        assert f'"{topic}"' in pyproject_text, f"pyproject.toml missing topic {topic}"
+
+
+def test_pyproject_project_urls_expansion():
+    """Verify that pyproject.toml project.urls includes Notice, Third-Party Licenses (Text), and Level 1 SBOM."""
+    pyproject_text = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
+
+    assert "Notice = " in pyproject_text
+    assert '"Third-Party Licenses (Text)" = ' in pyproject_text
+    assert '"Level 1 SBOM" = ' in pyproject_text
+
+
+def test_changelog_unreleased_pfad_b_entry():
+    """Verify that CHANGELOG.md contains the 2026-09-28 Pfad B unreleased entry."""
+    cl_text = (REPO_ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+    assert "Pfad B Marketing, Discoverability & Level 1 SBOM Text Companion (2026-09-28)" in cl_text
+
+
+def test_pytest_isolation_and_multihost_gitignore():
+    """Verify that .gitignore excludes .pytest_temp/ and multi-host device names."""
+    gi_text = (REPO_ROOT / ".gitignore").read_text(encoding="utf-8")
+    assert ".pytest_temp/" in gi_text
+    assert "*-IDEAPAD*" in gi_text
+    assert "*-MacBook*" in gi_text

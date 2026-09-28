@@ -1,0 +1,6 @@
+clutch
+Copyright (c) 2026 Lukas Geiger
+
+This product is developed as part of the ellmos-ai infrastructure line under the open-bricks umbrella.
+Provider-neutral LLM router and model orchestration engine with auto-learning maintained by Lukas Geiger and ellmos-ai contributors.
+Third-party dependency licenses and transparency inventory are documented in THIRD_PARTY_LICENSES.md and THIRD_PARTY_LICENSES.txt.
