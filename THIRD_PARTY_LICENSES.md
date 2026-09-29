@@ -1,10 +1,11 @@
 # Third-Party Licenses & Software Inventory
 
-**Project:** `clutch` (`clutch-router`)  
-**License:** [MIT License](LICENSE)  
-**Audit Date:** 2026-09-16  
-**Repository:** [ellmos-ai/clutch](https://github.com/ellmos-ai/clutch)  
-**Umbrella Collective:** [open-bricks](https://github.com/open-bricks)  
+**Project:** `clutch` (`clutch-router`)<br>
+**License:** [MIT License](LICENSE)<br>
+**Audit Date:** 2026-09-29<br>
+**Plain-Text Companion:** [THIRD_PARTY_LICENSES.txt](THIRD_PARTY_LICENSES.txt) (Level 1 SBOM plain-text companion)<br>
+**Repository:** [ellmos-ai/clutch](https://github.com/ellmos-ai/clutch)<br>
+**Umbrella Collective:** [open-bricks](https://github.com/open-bricks)
 
 ---
 
@@ -59,18 +60,18 @@ The following tools are utilized exclusively during development, code quality au
 
 `clutch` adheres to ten foundational governance and runtime invariants:
 
-| Invariant | Category | Description |
-|---|---|---|
-| `INV-LOCAL-01` | Provider Agnosticism & Zero Lock-in | Seamless hot-swapping across Anthropic, Google Gemini, OpenAI, Ollama, and Kimi without vendor lock-in. |
-| `INV-LOCAL-02` | 100% Local-First & Zero Egress | All routing decisions, session history, and metrics remain on local disk; zero tracking or telemetry egress. |
-| `INV-UNPRIV-03` | Non-Elevation User Mode (`RunAsInvoker`) | All CLI commands, web apps, and background routines operate strictly in unprivileged user space. |
-| `INV-CIRCUIT-04` | Fail-Closed Circuit Breakers | Persistent circuit breakers survive one-shot CLI processes and avoid hammering rate-limited providers. |
-| `INV-OVERLAY-05` | Update-Safe User Overlays | User preferences, model exclusions, and aliases live in `~/.clutch/user_overrides.json` across package updates. |
-| `INV-FALLBACK-06` | Dual-Alternative Ranked Fallbacks | Every routing decision provides a primary model plus two ranked alternatives for instantaneous failover. |
-| `INV-BUDGET-07` | Two-Dimensional Telemetry & Budget | Combines financial USD consumption zones (`Tankuhr`) with real-time token throughput tracking. |
-| `INV-PURPOSE-08` | Purpose & Vision Alignment | Vision and multimodal tasks are strictly routed to vision-capable models; code tasks match coding gears. |
-| `INV-LEDGER-09` | Transactional SQLite Audit Ledger | All trips, execution records, chat sessions, and prompt library entries are safely stored in local ACID SQLite databases. |
-| `INV-SLA-10` | Cross-Platform Multi-OS Parity & SLA | Identical behavior across Linux, Windows, and macOS with committed 48h security response SLA. |
+| Invariant | Category | Verification Status | Description |
+|---|---|:---:|---|
+| `INV-LOCAL-01` | Provider Agnosticism & Zero Lock-in | **VERIFIED** | Seamless hot-swapping across Anthropic, Google Gemini, OpenAI, Ollama, and Kimi without vendor lock-in. |
+| `INV-LOCAL-02` | 100% Local-First & Zero Egress | **VERIFIED** | All routing decisions, session history, and metrics remain on local disk; zero tracking or telemetry egress. |
+| `INV-UNPRIV-03` | Non-Elevation User Mode (`RunAsInvoker`) | **VERIFIED** | All CLI commands, web apps, and background routines operate strictly in unprivileged user space. |
+| `INV-CIRCUIT-04` | Fail-Closed Circuit Breakers | **VERIFIED** | Persistent circuit breakers survive one-shot CLI processes and avoid hammering rate-limited providers. |
+| `INV-OVERLAY-05` | Update-Safe User Overlays | **VERIFIED** | User preferences, model exclusions, and aliases live in `~/.clutch/user_overrides.json` across package updates. |
+| `INV-FALLBACK-06` | Dual-Alternative Ranked Fallbacks | **VERIFIED** | Every routing decision provides a primary model plus two ranked alternatives for instantaneous failover. |
+| `INV-BUDGET-07` | Two-Dimensional Telemetry & Budget | **VERIFIED** | Combines financial USD consumption zones (`Tankuhr`) with real-time token throughput tracking. |
+| `INV-PURPOSE-08` | Purpose & Vision Alignment | **VERIFIED** | Vision and multimodal tasks are strictly routed to vision-capable models; code tasks match coding gears. |
+| `INV-LEDGER-09` | Transactional SQLite Audit Ledger | **VERIFIED** | All trips, execution records, chat sessions, and prompt library entries are safely stored in local ACID SQLite databases. |
+| `INV-SLA-10` | Cross-Platform Multi-OS Parity & SLA | **VERIFIED** | Identical behavior across Linux, Windows, and macOS with committed 48h security response SLA. |
 
 ---
 

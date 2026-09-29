@@ -1,0 +1,6 @@
+clutch (clutch-router)
+Copyright (c) 2026 Lukas Geiger
+
+This product is developed as part of the ellmos-ai multi-agent infrastructure line under the open-bricks umbrella.
+Provider-neutral LLM orchestration engine and router (CLI/Web/API) with auto-learning maintained by Lukas Geiger and ellmos-ai contributors.
+Third-party dependency licenses and transparency inventory are documented in THIRD_PARTY_LICENSES.md and THIRD_PARTY_LICENSES.txt.

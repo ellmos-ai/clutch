@@ -4,11 +4,19 @@ Alle wesentlichen Änderungen an **clutch** werden hier dokumentiert.
 
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased] - Beleggestützter Ausführungsresolver
+## [Unreleased] - 2026-09-29
 
-T-20260822-230246761 ergänzt den aktuellen 0.6.3-Stand um einen
-Provider-Katalogvertrag, ohne zwischenzeitliche Modell-, CI- oder
-Multi-Host-Änderungen zu überschreiben.
+### Added
+- **Pfad B Marketing, Visual Architecture & Level 1 SBOM Hardening (2026-09-29)**:
+  - **18-Punkte Schnellnavigation mit reziproken dualen HTML-Ankern**: Vollständige Synchronisation von `<a id="sec-01"></a>` bis `<a id="sec-18"></a>` in `README.md` und `README_de.md` unter Beibehaltung aller bestehenden Legacy-Anker.
+  - **ASCII Vier-Sichten-Topologie (Four-View Architectural Topology)**: Projektion der 4 Architektur-Sichten in Abschnitt 2 beider READMEs (Sicht 1: Aufrufer-Laufzeiten & Clients, Sicht 2: Soveräne Routing- & Orchestrierungs-Engine, Sicht 3: Laufzeit-Persistenz, Telemetrie & Auto-Lernen, Sicht 4: Air-Gap-Perimeter, Zero-Egress & RunAsInvoker).
+  - **Reintext Level 1 SBOM Begleitdatei (`THIRD_PARTY_LICENSES.txt`)**: Vollständiges Plain-Text Software-Inventar aller Laufzeit-, Web- und Dev-Abhängigkeiten mit Zero-Copyleft-Garantie, `RunAsInvoker`-Nicht-Eskalationszertifikat und Invarianten-Querverweistabelle für `INV-LOCAL-01` bis `INV-SLA-10` (alle 10 verifiziert).
+  - **Kanonische Urheberrechts- und Attributierungsdatei (`NOTICE`)**: Projekt-Attributierung an Lukas Geiger, ellmos-ai und open-bricks Dachorganisation mit Querverweisen auf `LICENSE` und `THIRD_PARTY_LICENSES.txt`.
+  - **20/20 PEP 621 Keywords & Metadaten-Härtung (`pyproject.toml`)**: Vollständige Sättigung mit 20 GitHub-Topics, `license-files = ["LICENSE", "NOTICE", "THIRD_PARTY_LICENSES.txt"]`, neuen Projekt-URLs für Level 1 SBOM und Plain-Text-Lizenzen sowie Test-Härtung mit `--basetemp=.pytest_temp`.
+  - **Shields.io Badges & Synchronisation**: Aktualisierte Pytest-Metriken (416+ Tests), Level 1 SBOM Plain-Text Audit-Badge und Verifikationsstempel 2026-09-29.
+  - **Automatisierte Vertragstests (`tests/test_metadata.py`)**: Umfassender Ausbau der Vertragstests für duale HTML-Anker sec-01..sec-18, ASCII-Vier-Sichten-Topologie, Level 1 SBOM Invarianten, PEP 621 Keywords-Sättigung und Versions-Freeze Invariante (0.6.3 unverändert).
+
+## [0.6.3] - 2026-09-13
 
 ### Added
 - Öffentliche, JSON-fähige Auflösung für Runner, `self`, Familien, exakte

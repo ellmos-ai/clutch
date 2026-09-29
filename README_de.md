@@ -10,7 +10,9 @@
 
 [![Version 0.6.3](https://img.shields.io/badge/Version-0.6.3-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
 [![CI](https://img.shields.io/badge/CI-bestanden-brightgreen.svg)](https://github.com/ellmos-ai/clutch/actions)
-[![Pytest](https://img.shields.io/badge/Pytest-415%20bestanden-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
+[![Pytest](https://img.shields.io/badge/Pytest-421%20bestanden-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
+[![Level 1 SBOM: Reintext](https://img.shields.io/badge/Level%201%20SBOM-Reintext%20Gepr%C3%BCft-brightgreen.svg)](THIRD_PARTY_LICENSES.txt)
+[![Geprüft: 2026-09-29](https://img.shields.io/badge/Gepr%C3%BCft-2026--09--29-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![Plattformen](https://img.shields.io/badge/Plattformen-Linux%20%7C%20Windows%20%7C%20macOS-blue.svg)](https://github.com/ellmos-ai/clutch)
 [![Lizenz: MIT](https://img.shields.io/badge/Lizenz-MIT-green.svg)](LICENSE)
@@ -35,27 +37,28 @@
 
 ## Schnellnavigation
 
-1. [Funktionen & Highlights](#1-features)
-2. [Architektur & Metaphern-Abbildung](#2-architecture)
-3. [Zielgruppen & Auffindbarkeit](#3-target-personas--discoverability)
-4. [Vergleichsmatrix gegenüber Alternativen](#4-comparative-matrix-vs-alternatives)
-5. [Duale Mermaid-Diagramme](#5-dual-mermaid-diagrams)
-6. [Governance- & Laufzeit-Invarianten](#6-governance--runtime-invariants)
-7. [Streckentypen & Aufgabenklassifikation](#7-road-types)
-8. [Installation & Voraussetzungen](#8-installation)
-9. [Schnellstart & Kurzanleitung](#9-quick-start)
-10. [Kommandozeilen-Schnittstelle (CLI)](#10-command-line-interface)
-11. [API-Keys & Zugangsdaten](#11-api-keys--credentials)
-12. [Konfiguration & Benutzer-Overlays](#12-configuration)
-13. [Unterstützte Provider & Modell-Gänge](#13-supported-providers)
-14. [Ausführungsmuster](#14-execution-patterns)
-15. [Verwandte Tools & Ökosystem](#15-ecosystem--sibling-tools)
-16. [Drittanbieter-Lizenzen & Transparenz](#16-third-party-licenses--transparency)
-17. [Sicherheitsrichtlinie & Haftung](#17-security-policy--liability)
-18. [Verifikation & Testsuite](#18-verification--test-suite)
+1. [Funktionen & Highlights](#sec-01)
+2. [Architektur & Metaphern-Abbildung](#sec-02)
+3. [Zielgruppen & Auffindbarkeit](#sec-03)
+4. [Vergleichsmatrix gegenüber Alternativen](#sec-04)
+5. [Duale Mermaid-Diagramme](#sec-05)
+6. [Governance- & Laufzeit-Invarianten](#sec-06)
+7. [Streckentypen & Aufgabenklassifikation](#sec-07)
+8. [Installation & Voraussetzungen](#sec-08)
+9. [Schnellstart & Kurzanleitung](#sec-09)
+10. [Kommandozeilen-Schnittstelle (CLI)](#sec-10)
+11. [API-Keys & Zugangsdaten](#sec-11)
+12. [Konfiguration & Benutzer-Overlays](#sec-12)
+13. [Unterstützte Provider & Modell-Gänge](#sec-13)
+14. [Ausführungsmuster](#sec-14)
+15. [Verwandte Tools & Ökosystem](#sec-15)
+16. [Drittanbieter-Lizenzen & Transparenz](#sec-16)
+17. [Sicherheitsrichtlinie & Haftung](#sec-17)
+18. [Verifikation & Testsuite](#sec-18)
 
 ---
 
+<a id="sec-01"></a>
 <a id="1-features"></a>
 <a id="features"></a>
 <a id="funktionen"></a>
@@ -79,6 +82,7 @@
 
 ---
 
+<a id="sec-02"></a>
 <a id="2-architecture"></a>
 <a id="architecture"></a>
 <a id="architektur"></a>
@@ -130,8 +134,55 @@ Das gesamte System folgt einer **Auto-/Fahrmetapher**:
 | **Fahrschule** (Driving School) | Lernengine / Auto-Tuning | `fahrschule.py` |
 | **Token-Throughput** (Schattenzone) | Anthropic 5h/7d-Rate-Limit-Fenster als zweite Zone -- siehe [`docs/STAGED-MIGRATION.md`](docs/STAGED-MIGRATION.md) | `token_throughput.py` |
 
+### Visuelle Architektur & Vier-Sichten-Topologie (Four-View Architectural Topology)
+
+```
++--------------------------------------------------------------------------------------------------+
+|                     [SICHT 1: AUFRUFER-LAUFZEITEN, AGENTEN-CLIENTS & BEDIENUNG]                  |
+|  - CLI Cockpit (clutch route / run / chat / models / stats): Native Terminal-Befehle & JSON-I/O  |
+|  - FastAPI Web-UI (clutch serve --web): Lokale schlanke Chat-Oberfläche & Einstellungs-Panel     |
+|  - OpenAI-kompatibler Endpunkt (/v1/chat/completions): Drop-in-Adapter für bestehende Werkzeuge  |
+|  - Python-SDK (from clutch import Fahrer): Eingebettete Routing-Bibliothek ohne Hintergrunddienst|
++--------------------------------------------------------------------------------------------------+
+                                                |
+                                                | Aufgaben-Prompt & Routing-Wünsche
+                                                v
++--------------------------------------------------------------------------------------------------+
+|                 [SICHT 2: CLUTCH SOVERÄNE ROUTING- & ORCHESTRIERUNGS-ENGINE]                     |
+|  - Fahrer (Zentrale Steuerung): Streckenanalyse, Aufgabenkomplexität & Reasoning-Schiedsgericht  |
+|  - Strecke (Aufgaben-Klassifikator): Zweckerkennung (Coding, Vision, Recherche, Bulk) & Modalität|
+|  - Getriebe (Modell-Register): Provider-neutraler Katalog (G1 Haiku .. G5 Opus, Kimi, Ollama)    |
+|  - Gas/Bremse: Orthogonale Steuerung der Denkzeit / Reasoning-Effort (0-100% / low, med, high)  |
+|  - Kupplung: Dynamischer Modellwechsel, zwei gerankte Fallback-Alternativen & Konvoi-Pipelines   |
++--------------------------------------------------------------------------------------------------+
+                                                |
+                                                | Gesundheits-, Quoten- & Budget-Prüfung
+                                                v
++--------------------------------------------------------------------------------------------------+
+|             [SICHT 3: LAUFZEIT-PERSISTENZ, TELEMETRIE & AUTO-LERNENDE FAHRSCHULE]                |
+|  - Bordcomputer: Persistenter Circuit-Breaker (availability.json), der Neustarts überdauert      |
+|  - Tankuhr: Vier-Zonen-Budgetanzeige (Grün/Gelb/Orange/Rot) & Anthropic 5h/7d Token-Durchsatz   |
+|  - Nutzer-Overlays: Persistente Einstellungen, Modell-Caps & Aliase (~/.clutch/user_overrides)   |
+|  - Fahrtenbuch: Transaktionales SQLite-Hauptbuch für Latenzen, Token-Kosten & Chat-Sitzungen    |
+|  - Fahrschule: Epsilon-Greedy Lernengine zur kontinuierlichen Fitness-Optimierung der Routen     |
++--------------------------------------------------------------------------------------------------+
+                                                |
+                                                | Provider-Aufrufe an konfigurierte APIs
+                                                v
++--------------------------------------------------------------------------------------------------+
+|               [SICHT 4: AIR-GAP-PERIMETER, ZERO-EGRESS & RUNASINVOKER-ISOLIERUNG]                |
+|  - Direkter Provider-Perimeter: HTTPS-Verbindungen ausschließlich zu konfigurierten Endpunkten   |
+|    (Anthropic Claude, Google Gemini, OpenAI GPT, Moonshot Kimi, lokaler/entfernter Ollama)      |
+|  - Local-First & Zero Egress: Keine Cloud-Telemetrie, keine Drittanbieter-Gateways, kein Tracking|
+|  - Unprivilegierter RunAsInvoker-Modus: Ausführung rein im Benutzerkontext ohne Admin-Rechte     |
+|  - Lizenz-Isolation: 100% freie MIT-Lizenz ohne Copyleft-Effekte mit geprüftem Level-1-SBOM     |
++--------------------------------------------------------------------------------------------------+
+```
+
+
 ---
 
+<a id="sec-03"></a>
 <a id="3-target-personas--discoverability"></a>
 <a id="target-personas--discoverability"></a>
 <a id="zielgruppen--auffindbarkeit"></a>
@@ -171,6 +222,7 @@ Zur semantischen Erkennung durch Entwicklerverzeichnisse und KI-Suchmaschinen:
 
 ---
 
+<a id="sec-04"></a>
 <a id="4-comparative-matrix-vs-alternatives"></a>
 <a id="comparative-matrix-vs-alternatives"></a>
 <a id="vergleichsmatrix-gegenueber-alternativen"></a>
@@ -193,6 +245,7 @@ Die folgende Matrix vergleicht `clutch` mit etablierten Routing- und Gateway-Par
 
 ---
 
+<a id="sec-05"></a>
 <a id="5-dual-mermaid-diagrams"></a>
 <a id="dual-mermaid-diagrams"></a>
 <a id="duale-mermaid-diagramme"></a>
@@ -302,6 +355,7 @@ sequenceDiagram
 
 ---
 
+<a id="sec-06"></a>
 <a id="6-governance--runtime-invariants"></a>
 <a id="governance--runtime-invariants"></a>
 <a id="governance--laufzeit-invarianten"></a>
@@ -322,6 +376,7 @@ sequenceDiagram
 
 ---
 
+<a id="sec-07"></a>
 <a id="7-road-types"></a>
 <a id="road-types"></a>
 <a id="streckentypen"></a>
@@ -340,6 +395,7 @@ sequenceDiagram
 
 ---
 
+<a id="sec-08"></a>
 <a id="8-installation"></a>
 <a id="installation"></a>
 ## 8. Installation & Voraussetzungen
@@ -366,6 +422,7 @@ pip install -e .[web]
 
 ---
 
+<a id="sec-09"></a>
 <a id="9-quick-start"></a>
 <a id="quick-start"></a>
 <a id="kurzanleitung"></a>
@@ -399,6 +456,7 @@ fahrer.trainieren()
 
 ---
 
+<a id="sec-10"></a>
 <a id="10-command-line-interface"></a>
 <a id="command-line-interface"></a>
 <a id="kommandozeilen-schnittstelle"></a>
@@ -426,6 +484,7 @@ clutch serve --web                     # Lokale Web-UI starten (benötigt: pip i
 
 ---
 
+<a id="sec-11"></a>
 <a id="11-api-keys--credentials"></a>
 <a id="api-keys--credentials"></a>
 <a id="api-keys--zugangsdaten"></a>
@@ -441,6 +500,7 @@ Schlüsselwerte werden niemals ausgegeben, geloggt oder in Git committet.
 
 ---
 
+<a id="sec-12"></a>
 <a id="12-configuration"></a>
 <a id="configuration"></a>
 <a id="konfiguration"></a>
@@ -539,6 +599,7 @@ Routing, bevor ein LLM ausgewählt wird.
 
 ---
 
+<a id="sec-13"></a>
 <a id="13-supported-providers"></a>
 <a id="supported-providers"></a>
 <a id="unterstuetzte-provider"></a>
@@ -557,6 +618,7 @@ Routing, bevor ein LLM ausgewählt wird.
 
 ---
 
+<a id="sec-14"></a>
 <a id="14-execution-patterns"></a>
 <a id="execution-patterns"></a>
 <a id="ausfuehrungsmuster"></a>
@@ -570,6 +632,7 @@ Routing, bevor ein LLM ausgewählt wird.
 
 ---
 
+<a id="sec-15"></a>
 <a id="15-ecosystem--sibling-tools"></a>
 <a id="ecosystem--sibling-tools"></a>
 <a id="verwandte-tools--oekosystem"></a>
@@ -594,6 +657,7 @@ Teil der [ellmos-ai](https://github.com/ellmos-ai) Multi-Agenten-Infrastruktur u
 
 ---
 
+<a id="sec-16"></a>
 <a id="16-third-party-licenses--transparency"></a>
 <a id="third-party-licenses--transparency"></a>
 <a id="drittanbieter-lizenzen--transparenz"></a>
@@ -610,6 +674,7 @@ Vollständige Abhängigkeitstabellen, Lizenztexte und Urheberrechtshinweise find
 
 ---
 
+<a id="sec-17"></a>
 <a id="17-security-policy--liability"></a>
 <a id="security-policy--liability"></a>
 <a id="sicherheitsrichtlinie--haftung"></a>
@@ -627,6 +692,7 @@ This project is an unpaid open-source donation. Liability is limited to intent a
 
 ---
 
+<a id="sec-18"></a>
 <a id="18-verification--test-suite"></a>
 <a id="verification--test-suite"></a>
 <a id="verifikation--testsuite"></a>

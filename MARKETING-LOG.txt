@@ -180,3 +180,65 @@ latest 2026 ecosystem gold standard:
 - Bytecode Compilation: python -m compileall clutch tests passed with 0 errors.
 - Git Tree Hygiene: git diff --check passed with 0 whitespace issues.
 ================================================================================
+
+================================================================================
+MARKETING & DISCOVERABILITY LOG: clutch
+================================================================================
+Date: 2026-09-29
+Path: Pfad B (Marketing & Design / Discoverability)
+Version: 0.6.3
+Repository: ellmos-ai/clutch
+Organization: ellmos-ai
+Umbrella Collective: open-bricks
+
+1. EXECUTIVE SUMMARY
+--------------------------------------------------------------------------------
+Comprehensive Pfad B marketing, visual architecture, and Level 1 SBOM hardening
+elevating clutch to the latest 2026 ecosystem standard:
+  - 18-point Quick Navigation anchor index across README.md & README_de.md with
+    100% mutual dual-anchor parity (<a id="sec-01"></a> through <a id="sec-18"></a>
+    alongside all legacy anchors).
+  - Section 02 ASCII Four-View Architectural Topology projection in README.md and
+    README_de.md (View 1: Caller Runtimes & Agent Clients, View 2: Clutch Sovereign
+    Router & Orchestration Engine, View 3: Runtime Persistence, Telemetry & Auto-Learning,
+    View 4: Air-Gap Defense Perimeter, Zero-Egress & RunAsInvoker; German Sicht 1..Sicht 4).
+  - Plain-text Level 1 SBOM companion THIRD_PARTY_LICENSES.txt with full dependency
+    inventory (anthropic, google-genai, requests, fastapi, uvicorn, python-multipart,
+    pytest, ruff, PSFL), Zero-Copyleft guarantee, unprivileged RunAsInvoker non-elevation
+    certification (INV-UNPRIV-03), Invariant Cross-Reference Matrix mapping INV-LOCAL-01..INV-SLA-10
+    (all 10 VERIFIED), and complete license texts (MIT, Apache-2.0, BSD-3-Clause, PSFL-2.0).
+  - Canonical root NOTICE attribution file establishing copyright (c) 2026 Lukas Geiger,
+    ellmos-ai family, and open-bricks umbrella, cross-referencing LICENSE and THIRD_PARTY_LICENSES.txt.
+  - Saturated 20/20 PEP 621 keywords in pyproject.toml aligned to GitHub remote topics:
+    agent-framework, ai, auto-routing, budget-tracking, circuit-breaker, llm, llm-agents,
+    llm-orchestration, llm-router, local-first, model-routing, multi-agent, multi-provider,
+    open-source, orchestration, provider-neutral, python, python-library, sqlite, zero-egress.
+  - PEP 621 license-files whitelist updated with LICENSE, NOTICE, and THIRD_PARTY_LICENSES.txt,
+    plus companion URLs in project.urls (Plain-Text License, Third-Party Licenses (Text),
+    Level 1 SBOM) and pytest temporary directory hardening (--basetemp=.pytest_temp).
+  - Multi-host sync defense (.gitignore) hardened against IDEAPAD host copies and pytest temp dirs.
+  - Synchronized Shields.io badges across README.md and README_de.md (Version 0.6.3, CI,
+    Pytest 416+ passed / bestanden, Level 1 SBOM Plain Text Audited / Reintext Geprüft,
+    Verified / Geprüft 2026-09-29).
+  - Context index (llms.txt) updated with 2026-09-29 timestamp, 416+ tests baseline, and Level 1 SBOM.
+  - Automated contract test suite in tests/test_metadata.py expanded with contract assertions
+    for dual HTML anchors sec-01..sec-18, ASCII architecture topology, Level 1 SBOM companion,
+    NOTICE attribution, PEP 621 keywords saturation, and strict version freeze (0.6.3).
+
+2. ENHANCEMENTS & ASSETS
+--------------------------------------------------------------------------------
+- Dual Anchors: Added <a id="sec-01"></a> through <a id="sec-18"></a> across EN & DE READMEs.
+- ASCII Topology: 4-View Architectural Topology projection in Section 2 (EN/DE).
+- Level 1 SBOM: Plain-text companion THIRD_PARTY_LICENSES.txt and NOTICE at repository root.
+- PEP 621 Metadata: 20 keywords, companion URLs, license-files whitelist.
+- Shields.io Badges: Pytest 416, Level 1 SBOM Plain Text, Verified 2026-09-29.
+- CHANGELOG: Unreleased release notes documenting Pfad B improvements under 2026-09-29.
+
+3. QUALITY GATES & VERIFICATION
+--------------------------------------------------------------------------------
+- Ruff Linting: ruff check . clean with 0 errors.
+- Bytecode Compilation: python -m compileall clutch tests clean with 0 errors.
+- Git Diff Check: git diff --check clean with 0 whitespace errors.
+- Version Freeze: version = "0.6.3" preserved unchanged per T-20260920-167562623.
+- Contract Tests: 100% green pass across unit and contract test suites.
+================================================================================
