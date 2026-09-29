@@ -59,6 +59,9 @@ docs/BACH_MIGRATION.md
 *-ASUS.*
 *-LAPTOP.*
 *-WORKSTATION-LG.*
+*-IDEAPAD*
+*-IDEAPAD-GEI*
+Desktop.ini
 
 # Patch- und Merge-Artefakte
 *.orig
@@ -74,6 +77,8 @@ LOCK.permissions.json
 
 # Test-, Coverage- und Packaging-Caches
 .pytest_cache/
+.pytest_temp/
+.pytest_tmp*/
 .ruff_cache/
 .coverage
 coverage/

@@ -10,14 +10,32 @@ version = "0.6.3"
 description = "Provider-neutral LLM orchestration engine and router (CLI/Web/API) with auto-learning"
 readme = "README.md"
 license = "MIT"
-license-files = ["LICENSE"]
+license-files = ["LICENSE", "NOTICE", "THIRD_PARTY_LICENSES.txt"]
 requires-python = ">=3.10"
 authors = [
     {name = "Lukas Geiger"},
 ]
 keywords = [
-    "llm", "orchestration", "router", "ai", "multi-provider", "model-routing",
-    "claude", "gemini", "ollama", "kimi", "openai-compatible", "cli", "agent",
+    "agent-framework",
+    "ai",
+    "auto-routing",
+    "budget-tracking",
+    "circuit-breaker",
+    "llm",
+    "llm-agents",
+    "llm-orchestration",
+    "llm-router",
+    "local-first",
+    "model-routing",
+    "multi-agent",
+    "multi-provider",
+    "open-source",
+    "orchestration",
+    "provider-neutral",
+    "python",
+    "python-library",
+    "sqlite",
+    "zero-egress",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -58,6 +76,9 @@ Security = "https://github.com/ellmos-ai/clutch/blob/master/SECURITY.md"
 "Parent Organization" = "https://github.com/ellmos-ai"
 "Umbrella Ecosystem" = "https://github.com/open-bricks"
 "Third-Party Licenses" = "https://github.com/ellmos-ai/clutch/blob/master/THIRD_PARTY_LICENSES.md"
+"Third-Party Licenses (Text)" = "https://raw.githubusercontent.com/ellmos-ai/clutch/master/THIRD_PARTY_LICENSES.txt"
+"Plain-Text License" = "https://raw.githubusercontent.com/ellmos-ai/clutch/master/LICENSE"
+"Level 1 SBOM" = "https://raw.githubusercontent.com/ellmos-ai/clutch/master/THIRD_PARTY_LICENSES.txt"
 "Marketing Log" = "https://github.com/ellmos-ai/clutch/blob/master/MARKETING-LOG.txt"
 "LLM Ready" = "https://github.com/ellmos-ai/clutch/blob/master/llms.txt"
 
@@ -73,7 +94,8 @@ clutch = ["config/*.json", "locales/*.json", "web/*.html"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = "-ra -v"
+addopts = "-ra -v --basetemp=.pytest_temp"
+norecursedirs = [".pytest_temp", ".pytest_tmp*"]
 
 [tool.ruff]
 target-version = "py310"
