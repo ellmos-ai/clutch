@@ -10,6 +10,13 @@ T-20260822-230246761 ergänzt den aktuellen 0.6.3-Stand um einen
 Provider-Katalogvertrag, ohne zwischenzeitliche Modell-, CI- oder
 Multi-Host-Änderungen zu überschreiben.
 
+### Security
+- Bei absichtlichem Netzwerk-Bind schützt das Bearer-Token nun auch die
+  Web-UI-Wurzel, bevor diese das Token in ihr HTML einbettet. Zuvor konnte ein
+  unauthentifizierter Netzclient das Token aus `GET /` lesen und damit das
+  `/api/*`-Gate einschließlich Credential-, Config- und Sitzungszugriffen
+  umgehen. Die direkte Loopback-UI bleibt unverändert nutzbar.
+
 ### Added
 - Öffentliche, JSON-fähige Auflösung für Runner, `self`, Familien, exakte
   Registrynamen und Modell-IDs samt Aliasnormalisierung und stabilem

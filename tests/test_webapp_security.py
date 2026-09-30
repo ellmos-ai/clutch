@@ -68,13 +68,31 @@ def test_auth_token_blocks_unauthenticated_api_access():
 
 
 def test_index_injects_clutch_token_script():
-    # The token gate guards /api/* — the UI page stays reachable and receives the injected token script
+    # Loopback UI stays directly reachable and receives the injected token.
     with tempfile.TemporaryDirectory() as tmp:
         client = TestClient(_app(tmp, auth_token="s3cret"),
                             base_url="http://127.0.0.1")
         resp = client.get("/")
         assert resp.status_code == 200
         assert "<script>window.CLUTCH_TOKEN = 's3cret';</script>" in resp.text
+
+
+def test_non_loopback_index_requires_token_before_bootstrap():
+    """A network client must not obtain the API token from public HTML."""
+    with tempfile.TemporaryDirectory() as tmp:
+        client = TestClient(
+            _app(tmp, auth_token="s3cret", allowed_hosts=["external.test"]),
+            base_url="http://external.test",
+        )
+        denied = client.get("/")
+        assert denied.status_code == 401
+        assert "s3cret" not in denied.text
+
+        allowed = client.get(
+            "/", headers={"Authorization": "Bearer s3cret"}
+        )
+        assert allowed.status_code == 200
+        assert "<script>window.CLUTCH_TOKEN = 's3cret';</script>" in allowed.text
 
 
 def test_serve_refuses_non_loopback_without_token(monkeypatch):
