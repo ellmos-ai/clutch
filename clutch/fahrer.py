@@ -22,8 +22,7 @@ from pathlib import Path
 from typing import Any, Callable, Optional
 
 from clutch.strecke import StreckenAnalyse, StreckenProfil
-from clutch.gang import Gang
-from clutch.getriebe import Getriebe
+from clutch.getriebe import Gang, Getriebe
 from clutch.kupplung import Kupplung, FahrtConfig
 from clutch.fahrtenbuch import Fahrtenbuch
 from clutch.bordcomputer import Bordcomputer

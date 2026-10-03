@@ -160,7 +160,7 @@ def test_cli_run_unavailable_model_fails_closed(capsys):
 
 
 def test_cli_run_with_model_success(capsys):
-    with patch("clutch.motorblock.Motor.ist_verfuegbar", return_value=True), \
+    with patch("clutch.motorblock.OllamaMotor.ist_verfuegbar", return_value=True), \
          patch("clutch.motorblock.MotorBlock.ausfuehren") as mock_ausfuehren:
         mock_ausfuehren.return_value = MotorErgebnis(
             text="Antwort von GLM",
@@ -176,7 +176,7 @@ def test_cli_run_with_model_success(capsys):
 
 
 def test_cli_positional_prompt_with_model(capsys):
-    with patch("clutch.motorblock.Motor.ist_verfuegbar", return_value=True), \
+    with patch("clutch.motorblock.OllamaMotor.ist_verfuegbar", return_value=True), \
          patch("clutch.motorblock.MotorBlock.ausfuehren") as mock_ausfuehren:
         mock_ausfuehren.return_value = MotorErgebnis(
             text="Antwort von GLM",
@@ -220,11 +220,12 @@ def test_chat_runtime_with_model():
 
 
 def test_webapp_chat_with_model():
+    pytest.importorskip("fastapi")
     from fastapi.testclient import TestClient
     from clutch.webapp import create_app
     from clutch.chat_runtime import ChatRuntime
 
-    with patch("clutch.motorblock.Motor.ist_verfuegbar", return_value=True), \
+    with patch("clutch.motorblock.OllamaMotor.ist_verfuegbar", return_value=True), \
          patch("clutch.motorblock.MotorBlock.ausfuehren") as mock_ausfuehren:
         mock_ausfuehren.return_value = MotorErgebnis(
             text="Web Antwort",
