@@ -12,6 +12,7 @@ def test_core_documentation_files_exist():
         "README_de.md",
         "SECURITY.md",
         "LICENSE",
+        "NOTICE",
         "CHANGELOG.md",
         "llms.txt",
         "pyproject.toml",
@@ -46,8 +47,8 @@ def test_llms_txt_structure_and_timestamp():
     """Verify that llms.txt contains the canonical structure and a recent timestamp."""
     llms_text = (REPO_ROOT / "llms.txt").read_text(encoding="utf-8")
 
-    assert "Last-checked: 2026-09-16" in llms_text, "llms.txt Last-checked timestamp should be 2026-09-16"
-    assert "415" in llms_text, "llms.txt should report 415 passing unit tests"
+    assert "Last-checked: 2026-09-23" in llms_text, "llms.txt Last-checked timestamp should be 2026-09-23"
+    assert "420" in llms_text, "llms.txt should report 420 passing unit tests"
     assert "## Audience" in llms_text, "llms.txt missing Audience section"
     assert "## Search Phrases" in llms_text, "llms.txt missing Search Phrases section"
     assert "## Docs" in llms_text, "llms.txt missing Docs section"
@@ -218,8 +219,8 @@ def test_readme_badges_parity():
 
     assert "badge/Version-0.6.3-" in readme_en, "README.md missing Version 0.6.3 badge"
     assert "badge/Version-0.6.3-" in readme_de, "README_de.md missing Version 0.6.3 badge"
-    assert "Pytest-415%20passed" in readme_en, "README.md missing current pytest badge"
-    assert "Pytest-415%20bestanden" in readme_de, "README_de.md missing current pytest badge"
+    assert "Pytest-420%20passed" in readme_en, "README.md missing current pytest badge"
+    assert "Pytest-420%20bestanden" in readme_de, "README_de.md missing current pytest badge"
     assert "Security%20SLA-48h" in readme_en, "README.md missing Security SLA badge"
     assert "Sicherheits--SLA-48h" in readme_de, "README_de.md missing Sicherheits-SLA badge"
     assert "code%20style-ruff" in readme_en, "README.md missing ruff code style badge"
@@ -272,7 +273,7 @@ def test_frontier_ollama_models_in_catalog():
 def test_pep621_license_files():
     """Verify that pyproject.toml defines license-files for packaging compliance."""
     pyproject_text = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
-    assert 'license-files = ["LICENSE"]' in pyproject_text, "Missing license-files in pyproject.toml"
+    assert 'license-files = ["LICENSE", "NOTICE", "THIRD_PARTY_LICENSES.md"]' in pyproject_text, "Missing license-files in pyproject.toml"
 
 
 def test_readme_target_personas_and_discoverability():
@@ -330,7 +331,58 @@ def test_pyproject_marketing_urls():
 
 
 def test_marketing_log_recency():
-    """Verify that MARKETING-LOG.txt contains the 2026-09-16 Pfad B entry."""
+    """Verify that MARKETING-LOG.txt contains the 2026-09-23 Pfad A and 2026-09-16 Pfad B entries."""
     mkt_text = (REPO_ROOT / "MARKETING-LOG.txt").read_text(encoding="utf-8")
+    assert "Date: 2026-09-23" in mkt_text
+    assert "Pfad A (Repository Hygiene & Standardization)" in mkt_text
     assert "Date: 2026-09-16" in mkt_text
     assert "Pfad B (Marketing & Design / Discoverability)" in mkt_text
+
+
+def test_notice_file_exists_and_attribution():
+    """Verify that NOTICE exists with formal attribution to Lukas Geiger, ellmos-ai, and open-bricks."""
+    notice_file = REPO_ROOT / "NOTICE"
+    assert notice_file.is_file(), "NOTICE file missing"
+    content = notice_file.read_text(encoding="utf-8")
+    assert "clutch" in content
+    assert "Copyright (c) 2026 Lukas Geiger" in content
+    assert "ellmos-ai" in content
+    assert "open-bricks" in content
+    assert "THIRD_PARTY_LICENSES.md" in content
+
+
+def test_review_gate_workflow_timeouts():
+    """Verify that review-gate.yml specifies timeout-minutes on all jobs."""
+    rg_file = REPO_ROOT / ".github" / "workflows" / "review-gate.yml"
+    assert rg_file.is_file(), "review-gate.yml missing"
+    content = rg_file.read_text(encoding="utf-8")
+    assert "timeout-minutes: 5" in content
+
+
+def test_extended_multihost_lock_defense_patterns():
+    """Verify that .gitignore excludes extended multi-host, lock, and cache patterns."""
+    gi_text = (REPO_ROOT / ".gitignore").read_text(encoding="utf-8")
+    extended_patterns = [
+        "*conflicted copy*",
+        "*-ASUS*",
+        "*-WORKSTATION*",
+        "*-Mac Studio*",
+        "*-MacBook*",
+        "LOCK.user.*",
+        "LOCK.until.*",
+        "LOCK.condition.*",
+        ".automation-lock",
+        "uv.lock",
+        ".coverage.*",
+        ".nyc_output/",
+        ".hypothesis/",
+    ]
+    for pattern in extended_patterns:
+        assert pattern in gi_text, f".gitignore missing extended pattern: {pattern}"
+
+
+def test_pep621_notice_and_bugtracker_urls():
+    """Verify that pyproject.toml defines Notice and Bug Tracker URLs."""
+    pyproject_text = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
+    assert 'Notice = "https://github.com/ellmos-ai/clutch/blob/master/NOTICE"' in pyproject_text
+    assert '"Bug Tracker" = "https://github.com/ellmos-ai/clutch/issues"' in pyproject_text

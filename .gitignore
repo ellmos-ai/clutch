@@ -48,14 +48,24 @@ docs/BACH_MIGRATION.md
 *.tar.gz
 *.zip
 
-# Multi-Host-Synchronisationskonflikte & OneDrive-Kopien
+# Multi-Host Cloud-Sync & Machine Suffixes
+*conflicted copy*
+* (kopie)*
+* (Kopie)*
+* (copy)*
+* (Copy)*
+*-WORKSTATION*
+*-WORKSTATION-LG*
+*-ASUS*
+*-ASUS-GEI*
+*-LAPTOP*
+*-Mac Studio*
+*-MacBook*
 *-conflict-*
 *.sync-conflict-*
 *.conflict
 *-CONFLIT-*
 *.sync-temp-*
-* (kopie)*
-* (copy)*
 *-ASUS.*
 *-LAPTOP.*
 *-WORKSTATION-LG.*
@@ -63,26 +73,34 @@ docs/BACH_MIGRATION.md
 # Patch- und Merge-Artefakte
 *.orig
 *.rej
-!package-lock.json
 
-# Interne Multi-Agenten-Koordination & Locks
+# Kanonisches Lock-System & Package Locks
 LOCK
 LOCK.*
+LOCK.user.*
+LOCK.until.*
+LOCK.condition.*
 *.lock
 LOCK*.txt
 LOCK.permissions.json
+.automation-lock
+uv.lock
+!package-lock.json
 
 # Test-, Coverage- und Packaging-Caches
 .pytest_cache/
 .ruff_cache/
 .coverage
+.coverage.*
 coverage/
 htmlcov/
 wheelhouse/
 .wheel-smoke/
 .tox/
 .turbo/
+.nyc_output/
 .mypy_cache/
+.hypothesis/
 
 # Temporäre Editor- und Log-Dateien
 *.tmp

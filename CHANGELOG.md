@@ -22,6 +22,13 @@ Multi-Host-Änderungen zu überschreiben.
   Belege und ein zulässiger Lebenszyklus machen ein Modell claimbar.
 - Atomare Kataloganwendung reichert ausschließlich bereits kuratierte Gänge an;
   unbekannte Provider-Modelle werden gemeldet, aber nicht still registriert.
+- **Pfad A Repository-Hygiene, NOTICE-Attribution, Multi-Host-Lock-Defense & Review-Gate-Härtung (2026-09-23)**:
+  - **Formelle NOTICE-Attribution (`NOTICE`)**: Etablierung der kanonischen NOTICE-Datei für Urheberrecht Lukas Geiger / ellmos-ai / open-bricks, MIT-Lizenzverweis und Verlinkung von `THIRD_PARTY_LICENSES.md`.
+  - **PEP 621 Standardisierung (`pyproject.toml`)**: Ergänzung von `license-files = ["LICENSE", "NOTICE", "THIRD_PARTY_LICENSES.md"]` sowie Aufnahme von `Notice` und `Bug Tracker` in `[project.urls]`.
+  - **Multi-Host Cloud-Sync & Kanonische Lock-Defense (`.gitignore`)**: Ergänzung robuster Ausschlussmuster für Multi-Host-Token (`*-WORKSTATION*`, `*-WORKSTATION-LG*`, `*-ASUS*`, `*-ASUS-GEI*`, `*-LAPTOP*`, `*-Mac Studio*`, `*-MacBook*`), Cloud-Sync-Kopien (`*conflicted copy*`, `* (kopie)*`, `* (Kopie)*`, `* (copy)*`, `* (Copy)*`), kanonische Lock-Dateien (`LOCK.user.*`, `LOCK.until.*`, `LOCK.condition.*`, `.automation-lock`), `uv.lock` sowie Coverage-/Test-Caches (`.coverage.*`, `.nyc_output/`, `.hypothesis/`).
+  - **Review-Gate CI-Härtung (`.github/workflows/review-gate.yml`)**: Explizite `timeout-minutes: 5`-Schranken für die Jobs `pending` und `dispatch` gegen unbegrenzt laufende Runner-Hänger.
+  - **GitHub Topics & Discoverability**: Sättigung des Repositories auf das Maximum von 20/20 GitHub Topics (`circuit-breaker`, `multi-agent`, `zero-egress` ergänzt).
+  - **Automatisierte Vertragstestsuite (`tests/test_metadata.py`)**: Ausbau der Vertragstests um NOTICE-Existenz und -Attribution, PEP 621 NOTICE/Bug Tracker URLs, Review-Gate Job-Timeouts und erweiterte Multi-Host-Lock-Muster.
 - **Pfad B Marketing, Discoverability & Software-Transparenz (2026-09-16)**:
   - **18-Punkte Schnellnavigation mit dualen HTML-Ankern**: Vollständige Synchronisation zwischen `README.md` und `README_de.md` mit stabilen Abwärtskompatibilitäts-Ankern (`<a id="..."></a>`).
   - **Zielgruppen- & Persona-Mapping (`[PERSONA-01]` bis `[PERSONA-04]`)**: Detaillierte Dokumentation für Autonome Agenten-Entwickler, Multi-Host/Edge-Systemingenieure, Tool-Builder und Datenschutz-Beauftragte.
