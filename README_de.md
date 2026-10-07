@@ -10,7 +10,9 @@
 
 [![Version 0.6.3](https://img.shields.io/badge/Version-0.6.3-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
 [![CI](https://img.shields.io/badge/CI-bestanden-brightgreen.svg)](https://github.com/ellmos-ai/clutch/actions)
-[![Pytest](https://img.shields.io/badge/Pytest-415%20bestanden-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
+[![Pytest](https://img.shields.io/badge/Pytest-416%20bestanden-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
+[![Attribution: NOTICE](https://img.shields.io/badge/Attribution-NOTICE-blue.svg)](NOTICE)
+[![Verifiziert: 2026-09-26](https://img.shields.io/badge/Verifiziert-2026--09--26-blue.svg)](CHANGELOG.md)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![Plattformen](https://img.shields.io/badge/Plattformen-Linux%20%7C%20Windows%20%7C%20macOS-blue.svg)](https://github.com/ellmos-ai/clutch)
 [![Lizenz: MIT](https://img.shields.io/badge/Lizenz-MIT-green.svg)](LICENSE)
@@ -56,6 +58,7 @@
 
 ---
 
+<a id="sec-01"></a>
 <a id="1-features"></a>
 <a id="features"></a>
 <a id="funktionen"></a>
@@ -79,6 +82,7 @@
 
 ---
 
+<a id="sec-02"></a>
 <a id="2-architecture"></a>
 <a id="architecture"></a>
 <a id="architektur"></a>
@@ -132,6 +136,7 @@ Das gesamte System folgt einer **Auto-/Fahrmetapher**:
 
 ---
 
+<a id="sec-03"></a>
 <a id="3-target-personas--discoverability"></a>
 <a id="target-personas--discoverability"></a>
 <a id="zielgruppen--auffindbarkeit"></a>
@@ -171,6 +176,7 @@ Zur semantischen Erkennung durch Entwicklerverzeichnisse und KI-Suchmaschinen:
 
 ---
 
+<a id="sec-04"></a>
 <a id="4-comparative-matrix-vs-alternatives"></a>
 <a id="comparative-matrix-vs-alternatives"></a>
 <a id="vergleichsmatrix-gegenueber-alternativen"></a>
@@ -193,6 +199,7 @@ Die folgende Matrix vergleicht `clutch` mit etablierten Routing- und Gateway-Par
 
 ---
 
+<a id="sec-05"></a>
 <a id="5-dual-mermaid-diagrams"></a>
 <a id="dual-mermaid-diagrams"></a>
 <a id="duale-mermaid-diagramme"></a>
@@ -302,6 +309,7 @@ sequenceDiagram
 
 ---
 
+<a id="sec-06"></a>
 <a id="6-governance--runtime-invariants"></a>
 <a id="governance--runtime-invariants"></a>
 <a id="governance--laufzeit-invarianten"></a>
@@ -322,6 +330,7 @@ sequenceDiagram
 
 ---
 
+<a id="sec-07"></a>
 <a id="7-road-types"></a>
 <a id="road-types"></a>
 <a id="streckentypen"></a>
@@ -340,6 +349,7 @@ sequenceDiagram
 
 ---
 
+<a id="sec-08"></a>
 <a id="8-installation"></a>
 <a id="installation"></a>
 ## 8. Installation & Voraussetzungen
@@ -366,6 +376,7 @@ pip install -e .[web]
 
 ---
 
+<a id="sec-09"></a>
 <a id="9-quick-start"></a>
 <a id="quick-start"></a>
 <a id="kurzanleitung"></a>
@@ -399,6 +410,7 @@ fahrer.trainieren()
 
 ---
 
+<a id="sec-10"></a>
 <a id="10-command-line-interface"></a>
 <a id="command-line-interface"></a>
 <a id="kommandozeilen-schnittstelle"></a>
@@ -426,6 +438,7 @@ clutch serve --web                     # Lokale Web-UI starten (benötigt: pip i
 
 ---
 
+<a id="sec-11"></a>
 <a id="11-api-keys--credentials"></a>
 <a id="api-keys--credentials"></a>
 <a id="api-keys--zugangsdaten"></a>
@@ -441,6 +454,7 @@ Schlüsselwerte werden niemals ausgegeben, geloggt oder in Git committet.
 
 ---
 
+<a id="sec-12"></a>
 <a id="12-configuration"></a>
 <a id="configuration"></a>
 <a id="konfiguration"></a>
@@ -539,6 +553,7 @@ Routing, bevor ein LLM ausgewählt wird.
 
 ---
 
+<a id="sec-13"></a>
 <a id="13-supported-providers"></a>
 <a id="supported-providers"></a>
 <a id="unterstuetzte-provider"></a>
@@ -557,6 +572,7 @@ Routing, bevor ein LLM ausgewählt wird.
 
 ---
 
+<a id="sec-14"></a>
 <a id="14-execution-patterns"></a>
 <a id="execution-patterns"></a>
 <a id="ausfuehrungsmuster"></a>
@@ -570,6 +586,7 @@ Routing, bevor ein LLM ausgewählt wird.
 
 ---
 
+<a id="sec-15"></a>
 <a id="15-ecosystem--sibling-tools"></a>
 <a id="ecosystem--sibling-tools"></a>
 <a id="verwandte-tools--oekosystem"></a>
@@ -594,6 +611,7 @@ Teil der [ellmos-ai](https://github.com/ellmos-ai) Multi-Agenten-Infrastruktur u
 
 ---
 
+<a id="sec-16"></a>
 <a id="16-third-party-licenses--transparency"></a>
 <a id="third-party-licenses--transparency"></a>
 <a id="drittanbieter-lizenzen--transparenz"></a>
@@ -610,6 +628,7 @@ Vollständige Abhängigkeitstabellen, Lizenztexte und Urheberrechtshinweise find
 
 ---
 
+<a id="sec-17"></a>
 <a id="17-security-policy--liability"></a>
 <a id="security-policy--liability"></a>
 <a id="sicherheitsrichtlinie--haftung"></a>
@@ -627,6 +646,7 @@ This project is an unpaid open-source donation. Liability is limited to intent a
 
 ---
 
+<a id="sec-18"></a>
 <a id="18-verification--test-suite"></a>
 <a id="verification--test-suite"></a>
 <a id="verifikation--testsuite"></a>

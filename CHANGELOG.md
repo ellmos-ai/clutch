@@ -22,6 +22,14 @@ Multi-Host-Änderungen zu überschreiben.
   Belege und ein zulässiger Lebenszyklus machen ein Modell claimbar.
 - Atomare Kataloganwendung reichert ausschließlich bereits kuratierte Gänge an;
   unbekannte Provider-Modelle werden gemeldet, aber nicht still registriert.
+- **Pfad B Marketing, Discoverability & Software-Transparenz (2026-09-26)**:
+  - **Kanonische Root-Attribution (`NOTICE`)**: Bereitstellung der formalen Urheber- und Lizenz-Attributionsdatei für Lukas Geiger, die `ellmos-ai`-Organisation und das Dach-Kollektiv `open-bricks`.
+  - **Level 1 SBOM Invariant Cross-Reference Matrix (`THIRD_PARTY_LICENSES.md`)**: Vollständiges Re-Audit Stand 2026-09-26 mit formaler Verifikationsmatrix aller 10 Governance- und Laufzeit-Invarianten (`INV-LOCAL-01` bis `INV-SLA-10`), Bestätigung von `RunAsInvoker`, Zero-Copyleft und Zero-Egress.
+  - **18-Punkte Schnellnavigation mit reziproken dualen HTML-Anker-Aliasen**: Vollständige Parität von `<a id="sec-01"></a>` bis `<a id="sec-18"></a>` in `README.md` und `README_de.md`.
+  - **PEP 621 Standardisierung & 20/20 Keywords Sättigung (`pyproject.toml`)**: `license-files` um `NOTICE` und `THIRD_PARTY_LICENSES.md` erweitert, `Notice`-URL unter `[project.urls]` registriert, 20 kuratierte Keywords synchron zu den GitHub Repository Topics gesättigt, pytest `--basetemp=.pytest_temp` und gehärtete `norecursedirs` konfiguriert.
+  - **Multi-Host Gitignore-Härtung (`.gitignore`)**: Ergänzung von `.pytest_temp/`, `.pytest_tmp*/`, `.hypothesis/` und `.nyc_output/`.
+  - **Shields.io Badges & RAG-Kontext (`llms.txt`)**: Badges für `Attribution-NOTICE-blue.svg` und `Verified-2026--09--26-blue.svg` synchronisiert; `llms.txt` Stand 2026-09-26 mit Level 1 SBOM und gesetzlichem Hinweis (§ 521 BGB Gefälligkeitsrecht) aktualisiert.
+  - **Automatisierte Vertragstest-Erweiterung (`tests/test_metadata.py`)**: Neue Kontrakttests für kanonische NOTICE-Attribution, 18-Punkte duale Anker `sec-01`..`sec-18`, 20 PEP 621 Keywords, Level 1 SBOM Invarianten-Matrix, Notice-URL und Marketing-Log-Aktualität 2026-09-26.
 - **Pfad B Marketing, Discoverability & Software-Transparenz (2026-09-16)**:
   - **18-Punkte Schnellnavigation mit dualen HTML-Ankern**: Vollständige Synchronisation zwischen `README.md` und `README_de.md` mit stabilen Abwärtskompatibilitäts-Ankern (`<a id="..."></a>`).
   - **Zielgruppen- & Persona-Mapping (`[PERSONA-01]` bis `[PERSONA-04]`)**: Detaillierte Dokumentation für Autonome Agenten-Entwickler, Multi-Host/Edge-Systemingenieure, Tool-Builder und Datenschutz-Beauftragte.

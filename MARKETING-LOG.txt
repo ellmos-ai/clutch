@@ -180,3 +180,55 @@ latest 2026 ecosystem gold standard:
 - Bytecode Compilation: python -m compileall clutch tests passed with 0 errors.
 - Git Tree Hygiene: git diff --check passed with 0 whitespace issues.
 ================================================================================
+
+================================================================================
+MARKETING & DISCOVERABILITY LOG: clutch
+================================================================================
+Date: 2026-09-26
+Path: Pfad B (Marketing & Design / Discoverability)
+Version: 0.6.3 (frozen per T-20260920-167562623)
+Repository: ellmos-ai/clutch
+Organization: ellmos-ai
+Umbrella Collective: open-bricks
+
+1. EXECUTIVE SUMMARY
+--------------------------------------------------------------------------------
+Comprehensive Pfad B discoverability, visual architecture, and software transparency
+audit elevating clutch to the September 2026 ecosystem gold standard:
+  - Canonical Root NOTICE Attribution File (NOTICE): Formal copyright and authorship
+    attribution for Lukas Geiger, ellmos-ai organization, and open-bricks collective.
+  - Level 1 SBOM Invariant Cross-Reference Matrix (THIRD_PARTY_LICENSES.md):
+    Complete Level 1 SBOM audit Stand 2026-09-26 mapping INV-LOCAL-01..INV-SLA-10,
+    certifying RunAsInvoker non-elevation, Zero-Copyleft, Zero-Egress, and formal NOTICE link.
+  - 18-Point Quick Navigation Parity with Dual HTML Reciprocal Anchor Aliases:
+    Full parity of <a id="sec-01"></a> through <a id="sec-18"></a> across README.md
+    and README_de.md alongside legacy anchors.
+  - Saturated PEP 621 Keywords & Standardized Metadata (pyproject.toml):
+    Saturated 20/20 PEP 621 keywords aligned with remote GitHub repository topics:
+    ai, agent-framework, auto-routing, budget-tracking, circuit-breaker, llm,
+    llm-agents, llm-orchestration, llm-router, local-first, model-routing, multi-agent,
+    multi-provider, open-source, orchestration, provider-neutral, python,
+    python-library, sqlite, zero-egress.
+    Added Notice URL in [project.urls] and expanded license-files to include NOTICE
+    and THIRD_PARTY_LICENSES.md. Standardized pytest basetemp and norecursedirs.
+    Strict version freeze discipline preserved: version = "0.6.3" unchanged.
+  - Multi-Host Gitignore Hardening (.gitignore):
+    Added exclusions for .pytest_temp/, .pytest_tmp*/, .hypothesis/, and .nyc_output/.
+  - Synchronized Status Badges & RAG-Discovery Context:
+    Added Attribution-NOTICE-blue.svg and Verified-2026--09--26-blue.svg badges.
+    Synchronized llms.txt context index with Stand 2026-09-26, NOTICE entrypoint,
+    and statutory notice (§ 521 BGB Gefälligkeitsrecht).
+  - Automated Contract Test Expansion (tests/test_metadata.py):
+    Extended test suite with dedicated contract tests for canonical root NOTICE
+    attribution, dual reciprocal HTML anchors sec-01..sec-18, 20 PEP 621 keywords,
+    Level 1 SBOM matrix recency 2026-09-26, pyproject Notice URL, pytest options,
+    and MARKETING-LOG recency 2026-09-26.
+
+2. QUALITY GATES & VERIFICATION
+--------------------------------------------------------------------------------
+- Mermaid Linter: python _tools/lint_mermaid.py clean (0 errors across 16 files).
+- Ruff Linting: ruff check . clean (0 errors).
+- Bytecode Compilation: python -m compileall clutch tests clean (0 errors).
+- Test Suite: 100% green pass across all unit and contract tests via pytest.
+- Git Tree Hygiene: git diff --check clean (0 whitespace errors).
+================================================================================

@@ -10,7 +10,9 @@
 
 [![Version 0.6.3](https://img.shields.io/badge/Version-0.6.3-orange.svg)](https://github.com/ellmos-ai/clutch/releases)
 [![CI](https://img.shields.io/badge/CI-passing-brightgreen.svg)](https://github.com/ellmos-ai/clutch/actions)
-[![Pytest](https://img.shields.io/badge/Pytest-415%20passed-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
+[![Pytest](https://img.shields.io/badge/Pytest-416%20passed-brightgreen.svg)](https://github.com/ellmos-ai/clutch)
+[![Attribution: NOTICE](https://img.shields.io/badge/Attribution-NOTICE-blue.svg)](NOTICE)
+[![Verified: 2026-09-26](https://img.shields.io/badge/Verified-2026--09--26-blue.svg)](CHANGELOG.md)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![Platforms](https://img.shields.io/badge/Platforms-Linux%20%7C%20Windows%20%7C%20macOS-blue.svg)](https://github.com/ellmos-ai/clutch)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -56,6 +58,7 @@
 
 ---
 
+<a id="sec-01"></a>
 <a id="1-features"></a>
 <a id="features"></a>
 ## 1. Features & Highlights
@@ -78,6 +81,7 @@
 
 ---
 
+<a id="sec-02"></a>
 <a id="2-architecture"></a>
 <a id="architecture"></a>
 ## 2. Architecture & Metaphor Mapping
@@ -130,6 +134,7 @@ The entire system follows a **car/driving metaphor**:
 
 ---
 
+<a id="sec-03"></a>
 <a id="3-target-personas--discoverability"></a>
 <a id="target-personas--discoverability"></a>
 ## 3. Target Personas & Discoverability
@@ -168,6 +173,7 @@ To facilitate discoverability across developer directories, package managers, an
 
 ---
 
+<a id="sec-04"></a>
 <a id="4-comparative-matrix-vs-alternatives"></a>
 <a id="comparative-matrix-vs-alternatives"></a>
 ## 4. Comparative Matrix vs. Alternatives
@@ -189,6 +195,7 @@ The following matrix compares `clutch` against existing model routing and gatewa
 
 ---
 
+<a id="sec-05"></a>
 <a id="5-dual-mermaid-diagrams"></a>
 <a id="dual-mermaid-diagrams"></a>
 ## 5. Dual Mermaid Diagrams
@@ -297,6 +304,7 @@ sequenceDiagram
 
 ---
 
+<a id="sec-06"></a>
 <a id="6-governance--runtime-invariants"></a>
 <a id="governance--runtime-invariants"></a>
 ## 6. Governance & Runtime Invariants
@@ -316,6 +324,7 @@ sequenceDiagram
 
 ---
 
+<a id="sec-07"></a>
 <a id="7-road-types"></a>
 <a id="road-types"></a>
 ## 7. Road Types & Task Classification
@@ -333,6 +342,7 @@ sequenceDiagram
 
 ---
 
+<a id="sec-08"></a>
 <a id="8-installation"></a>
 <a id="installation"></a>
 ## 8. Installation & Requirements
@@ -359,6 +369,7 @@ pip install -e .[web]
 
 ---
 
+<a id="sec-09"></a>
 <a id="9-quick-start"></a>
 <a id="quick-start"></a>
 ## 9. Quick Start
@@ -391,6 +402,7 @@ fahrer.trainieren()
 
 ---
 
+<a id="sec-10"></a>
 <a id="10-command-line-interface"></a>
 <a id="command-line-interface"></a>
 ## 10. Command-Line Interface
@@ -420,6 +432,7 @@ Three usage modes: **console** (humans), **web UI** (humans, graphical), and **C
 
 ---
 
+<a id="sec-11"></a>
 <a id="11-api-keys--credentials"></a>
 <a id="api-keys--credentials"></a>
 ## 11. API Keys & Credentials
@@ -434,6 +447,7 @@ Values are never printed, logged, or committed.
 
 ---
 
+<a id="sec-12"></a>
 <a id="12-configuration"></a>
 <a id="configuration"></a>
 ## 12. Configuration & User Overlays
@@ -544,6 +558,7 @@ zone stops routing before an LLM is selected.
 
 ---
 
+<a id="sec-13"></a>
 <a id="13-supported-providers"></a>
 <a id="supported-providers"></a>
 ## 13. Supported Providers & Model Tiers
@@ -573,6 +588,7 @@ See [GPT-5.6 cost and routing](docs/GPT56_COST_ROUTING.md), the [example input](
 
 ---
 
+<a id="sec-14"></a>
 <a id="14-execution-patterns"></a>
 <a id="execution-patterns"></a>
 ## 14. Execution Patterns
@@ -623,6 +639,7 @@ clutch/
 
 ---
 
+<a id="sec-15"></a>
 <a id="15-ecosystem--sibling-tools"></a>
 <a id="ecosystem--sibling-tools"></a>
 ## 15. Ecosystem & Sibling Tools
@@ -646,6 +663,7 @@ Part of the [ellmos-ai](https://github.com/ellmos-ai) multi-agent infrastructure
 
 ---
 
+<a id="sec-16"></a>
 <a id="16-third-party-licenses--transparency"></a>
 <a id="third-party-licenses--transparency"></a>
 ## 16. Third-Party Licenses & Transparency
@@ -661,6 +679,7 @@ For full dependency tables, license texts, and attribution notices, refer to [TH
 
 ---
 
+<a id="sec-17"></a>
 <a id="17-security-policy--liability"></a>
 <a id="security-policy--liability"></a>
 ## 17. Security Policy & Liability
@@ -677,6 +696,7 @@ This project is an unpaid open-source donation. Liability is limited to intent a
 
 ---
 
+<a id="sec-18"></a>
 <a id="18-verification--test-suite"></a>
 <a id="verification--test-suite"></a>
 ## 18. Verification & Test Suite

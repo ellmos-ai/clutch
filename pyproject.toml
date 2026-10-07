@@ -10,14 +10,32 @@ version = "0.6.3"
 description = "Provider-neutral LLM orchestration engine and router (CLI/Web/API) with auto-learning"
 readme = "README.md"
 license = "MIT"
-license-files = ["LICENSE"]
+license-files = ["LICENSE", "NOTICE", "THIRD_PARTY_LICENSES.md"]
 requires-python = ">=3.10"
 authors = [
     {name = "Lukas Geiger"},
 ]
 keywords = [
-    "llm", "orchestration", "router", "ai", "multi-provider", "model-routing",
-    "claude", "gemini", "ollama", "kimi", "openai-compatible", "cli", "agent",
+    "ai",
+    "agent-framework",
+    "auto-routing",
+    "budget-tracking",
+    "circuit-breaker",
+    "llm",
+    "llm-agents",
+    "llm-orchestration",
+    "llm-router",
+    "local-first",
+    "model-routing",
+    "multi-agent",
+    "multi-provider",
+    "open-source",
+    "orchestration",
+    "provider-neutral",
+    "python",
+    "python-library",
+    "sqlite",
+    "zero-egress",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -55,6 +73,7 @@ Repository = "https://github.com/ellmos-ai/clutch"
 Issues = "https://github.com/ellmos-ai/clutch/issues"
 Changelog = "https://github.com/ellmos-ai/clutch/blob/master/CHANGELOG.md"
 Security = "https://github.com/ellmos-ai/clutch/blob/master/SECURITY.md"
+Notice = "https://github.com/ellmos-ai/clutch/blob/master/NOTICE"
 "Parent Organization" = "https://github.com/ellmos-ai"
 "Umbrella Ecosystem" = "https://github.com/open-bricks"
 "Third-Party Licenses" = "https://github.com/ellmos-ai/clutch/blob/master/THIRD_PARTY_LICENSES.md"
@@ -73,7 +92,8 @@ clutch = ["config/*.json", "locales/*.json", "web/*.html"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = "-ra -v"
+addopts = "-ra -v --basetemp=.pytest_temp"
+norecursedirs = [".pytest_temp", ".pytest_tmp*", ".hypothesis", ".turbo", ".nyc_output", ".tox"]
 
 [tool.ruff]
 target-version = "py310"

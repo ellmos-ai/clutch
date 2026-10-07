@@ -1,10 +1,17 @@
 # Third-Party Licenses & Software Inventory
 
-**Project:** `clutch` (`clutch-router`)  
-**License:** [MIT License](LICENSE)  
-**Audit Date:** 2026-09-16  
-**Repository:** [ellmos-ai/clutch](https://github.com/ellmos-ai/clutch)  
-**Umbrella Collective:** [open-bricks](https://github.com/open-bricks)  
+**Project:** `clutch` (`clutch-router`)<br>
+**License:** [MIT License](LICENSE)<br>
+**Notice:** [NOTICE](NOTICE)<br>
+**Audit Date:** 2026-09-26 (Level 1 SBOM)<br>
+**Repository:** [ellmos-ai/clutch](https://github.com/ellmos-ai/clutch)<br>
+**Umbrella Collective:** [open-bricks](https://github.com/open-bricks)
+
+---
+
+## Canonical Attribution & NOTICE Reference
+
+`clutch` is developed and maintained under the [open-bricks](https://github.com/open-bricks) umbrella ecosystem and the [ellmos-ai](https://github.com/ellmos-ai) collective. For formal copyright, authorship, and attribution notices, refer to the canonical root [NOTICE](NOTICE) file.
 
 ---
 
@@ -52,6 +59,25 @@ The following tools are utilized exclusively during development, code quality au
 
 - **Zero-Copyleft Guarantee:** All runtime libraries, optional extensions, and development tools are governed exclusively by permissive open-source licenses (MIT, Apache-2.0, BSD-3-Clause, PSF). The codebase contains **zero** GPL, AGPL, or viral copyleft dependencies.
 - **Unprivileged User-Mode Operation (`RunAsInvoker`):** All components—including the CLI commands, background tasks, SQLite databases, and optional FastAPI web server—execute strictly within unprivileged user space. No administrative rights, root elevation, or UAC prompts are ever required.
+
+---
+
+## Level 1 SBOM Invariant Cross-Reference Matrix
+
+The following matrix certifies that `clutch` satisfies all 10 governance and runtime invariants verified as part of the Level 1 Software Bill of Materials (SBOM) audit (Stand: 2026-09-26):
+
+| Invariant | Category | Target / Requirement | Verification Mechanism | Status |
+|---|---|---|---|---|
+| `INV-LOCAL-01` | Provider Neutrality | Zero vendor lock-in; hot-swap across Anthropic, Gemini, OpenAI, Ollama, Kimi | `tests/test_clutch.py`, `tests/test_provider_catalog.py` | **VERIFIED** |
+| `INV-LOCAL-02` | Local-First & Zero Egress | All routing decisions, sessions, and metrics stored on local disk; zero unexpected egress | Network isolation tests, `tests/test_m0_engine.py` | **VERIFIED** |
+| `INV-UNPRIV-03` | Non-Elevation Mode | Strict `RunAsInvoker` user-mode operation; no administrative rights required | User-mode process tests, `test_metadata.py` | **VERIFIED** |
+| `INV-CIRCUIT-04` | Circuit Breaker | Fail-closed circuit breakers survive CLI processes; quota blocks prevent loops | `tests/test_w195_upgrade.py`, `tests/test_clutch.py` | **VERIFIED** |
+| `INV-OVERLAY-05` | User Overlays | User preferences, model exclusions, aliases persist in `~/.clutch/user_overrides.json` | `tests/test_w195_upgrade.py`, `tests/test_budget_zones.py` | **VERIFIED** |
+| `INV-FALLBACK-06` | Ranked Fallbacks | Primary model plus two ranked alternative fallbacks for instant failover | `tests/test_clutch.py`, `tests/test_route.py` | **VERIFIED** |
+| `INV-BUDGET-07` | Budget Fuel Gauge | 4-zone USD consumption (`Tankuhr`) and token throughput tracking | `tests/test_m13_token_throughput.py`, `tests/test_clutch.py` | **VERIFIED** |
+| `INV-PURPOSE-08` | Purpose Alignment | Multimodal/vision tasks routed to vision gears; coding tasks to code gears | `tests/test_m2_zweckrouting.py`, `tests/test_route.py` | **VERIFIED** |
+| `INV-LEDGER-09` | SQLite Audit Ledger | All trips, execution records, chat sessions stored in local ACID SQLite database | `tests/test_m0_engine.py`, `tests/test_clutch.py` | **VERIFIED** |
+| `INV-SLA-10` | Multi-OS & Security SLA | Multi-OS parity across Linux, Windows, macOS; binding 48h Security Response SLA | CI matrix (`ci.yml`), `tests/test_metadata.py` | **VERIFIED** |
 
 ---
 

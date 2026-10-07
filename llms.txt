@@ -1,11 +1,11 @@
 # clutch - Provider-Neutral LLM Orchestration Engine
 
-Last-checked: 2026-09-16
-Test-suite: 410 passing unit tests (pytest verified 100% green)
+Last-checked: 2026-09-26
+Test-suite: 423+ passing unit and contract tests (pytest verified 100% green)
 
 > clutch (German: Kupplung) uses a driving metaphor to intelligently route tasks to optimal LLM models across providers. It analyzes task complexity and purpose, selects the right model and reasoning level, tracks budgets with a four-zone fuel gauge, enforces persistent circuit breakers, and learns from experience via fitness scoring and epsilon-greedy exploration.
 
-clutch is the routing layer of the ellmos family (Extra Large Language Model Operating Systems): a provider-neutral orchestration engine that sits in front of Anthropic (Claude), Google (Gemini), OpenAI (GPT/Codex), Ollama (local & remote), Claude Code, agy through companion-for-agy, and Kimi/Moonshot. Every concept is mapped onto a car metaphor -- Fahrer (driver/orchestrator), Getriebe (gearbox/model registry, gears G1-G5 from Haiku to Opus), Gas/Bremse (throttle, reasoning level 0-100%), Kupplung (clutch, model switching), Tankuhr (fuel gauge, budget tracking), Fahrtenbuch (trip log, SQLite metrics), Fahrschule (learning engine). Current version v0.6.3 (library + CLI + optional FastAPI web UI; evidence-bearing execution selectors and provider-catalog snapshots; persistent availability/quota blocks; update-safe user overrides; per-call preferences, exclusions and ranked alternatives; purpose- and vision-aware routing; model discovery; credential store; i18n en/de/es/zh/ja/ru; multi-OS CI across Linux, Windows, macOS). Python 3.10+, MIT. Verified 415/415 passing unit and contract tests.
+clutch is the routing layer of the ellmos family (Extra Large Language Model Operating Systems): a provider-neutral orchestration engine that sits in front of Anthropic (Claude), Google (Gemini), OpenAI (GPT/Codex), Ollama (local & remote), Claude Code, agy through companion-for-agy, and Kimi/Moonshot. Every concept is mapped onto a car metaphor -- Fahrer (driver/orchestrator), Getriebe (gearbox/model registry, gears G1-G5 from Haiku to Opus), Gas/Bremse (throttle, reasoning level 0-100%), Kupplung (clutch, model switching), Tankuhr (fuel gauge, budget tracking), Fahrtenbuch (trip log, SQLite metrics), Fahrschule (learning engine). Current version v0.6.3 (library + CLI + optional FastAPI web UI; evidence-bearing execution selectors and provider-catalog snapshots; persistent availability/quota blocks; update-safe user overrides; per-call preferences, exclusions and ranked alternatives; purpose- and vision-aware routing; model discovery; credential store; i18n en/de/es/zh/ja/ru; multi-OS CI across Linux, Windows, macOS). Python 3.10+, MIT. Verified 423+ passing unit and contract tests (100% green). Level 1 SBOM Invariant Cross-Reference Matrix and statutory notice (§ 521 BGB Gefälligkeitsrecht) verified.
 
 Execution-selector contract: `resolve_execution_selector()` and `clutch resolve` resolve runner, self, family, exact registry-name, and exact model-ID selectors without execution or silent substitution. `resolved` is separate from fail-closed `claimable`; provider adapters must independently prove documented, API-listed, account-accessible, runner-compatible, and host-ready stages. Failed refreshes retain the last proven provider snapshot.
 
@@ -33,7 +33,8 @@ Execution patterns: single (one task), convoy (chain), team (parallel workers), 
 - [GLOSSARY](https://github.com/ellmos-ai/clutch/blob/master/GLOSSARY.md): German automotive code terms mapped to English
 - [CHANGELOG](https://github.com/ellmos-ai/clutch/blob/master/CHANGELOG.md): Release notes and version history
 - [SECURITY](https://github.com/ellmos-ai/clutch/blob/master/SECURITY.md): Security policy, response SLAs, and vulnerability reporting
-- [THIRD_PARTY_LICENSES](https://github.com/ellmos-ai/clutch/blob/master/THIRD_PARTY_LICENSES.md): SPDX inventory, zero-copyleft guarantee, RunAsInvoker affirmation
+- [NOTICE](https://github.com/ellmos-ai/clutch/blob/master/NOTICE): Canonical root open-source attribution notice
+- [THIRD_PARTY_LICENSES](https://github.com/ellmos-ai/clutch/blob/master/THIRD_PARTY_LICENSES.md): SPDX inventory, zero-copyleft guarantee, RunAsInvoker affirmation, Level 1 SBOM matrix
 - [MARKETING_LOG](https://github.com/ellmos-ai/clutch/blob/master/MARKETING-LOG.txt): Historical discoverability, marketing, and design audit trail
 - [LICENSE](https://github.com/ellmos-ai/clutch/blob/master/LICENSE): MIT license text
 
