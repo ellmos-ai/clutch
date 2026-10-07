@@ -4,6 +4,14 @@ Public-readiness was completed before the repository was published as
 `ellmos-ai/clutch`. This file now tracks follow-up work for a public,
 provider-neutral LLM orchestration library.
 
+## Security-Audit 2026-09-30
+
+- [x] **(hoch)** Das Token-Gate schützte bei Nicht-Loopback-Bind nur
+  `/api/*`, während das öffentliche `GET /` dasselbe Token in das HTML
+  einbettete. Die UI-Wurzel erfordert bei erlaubten Netzwerk-Hosts nun bereits
+  das Token; der Loopback-Start behält seine direkte UI-Nutzung. Ein
+  Regressionstest deckt beide Grenzen ab.
+
 ## Review 2026-07-04 (Modul-Review-Loop, Subagent-Review — alle 4 Funde gefixt)
 
 - [x] **(hoch)** Web-API ohne jede Authentifizierung (Credential-/Config-CRUD offen)

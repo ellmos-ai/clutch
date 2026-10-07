@@ -70,7 +70,9 @@ def create_app(
         Wenn gesetzt, erfordert jeder /api/*-Zugriff den Header
         ``Authorization: Bearer <token>`` (oder ``X-Clutch-Token``). Ohne Token
         (Standard) ist die API ungeschützt — nur für reinen Loopback-Betrieb
-        gedacht, wo `serve()` das erzwingt.
+        gedacht, wo `serve()` das erzwingt. Sobald ein Nicht-Loopback-Host
+        erlaubt ist, wird auch die UI-Wurzel geschützt, bevor sie das Token
+        für ihre API-Aufrufe erhält.
     """
     _require_fastapi()
 
@@ -124,9 +126,11 @@ def create_app(
     # DNS-Rebinding-Schutz: nur erlaubte Host-Header akzeptieren. Eine boesartige
     # Webseite kann ihren eigenen Hostnamen per DNS-Rebinding auf 127.0.0.1
     # zeigen lassen; der Host-Header traegt dann aber die Angreifer-Domain.
+    loopback_hosts = {"localhost", "127.0.0.1", "::1"}
+    effektive_hosts = allowed_hosts or ["localhost", "127.0.0.1", "::1"]
     app.add_middleware(
         TrustedHostMiddleware,
-        allowed_hosts=allowed_hosts or ["localhost", "127.0.0.1", "::1"],
+        allowed_hosts=effektive_hosts,
     )
 
     # CORS: keine Cookie-Auth -> allow_credentials=False; nur die eigene UI-Origin.
@@ -138,11 +142,20 @@ def create_app(
         allow_headers=["*"],
     )
 
-    # Token-Gate fuer /api/* (nur aktiv, wenn ein Token gesetzt ist).
+    # Token-Gate fuer /api/* (nur aktiv, wenn ein Token gesetzt ist). Bei
+    # Netzwerk-Bind muss auch die UI-Wurzel geschützt werden: Sie bettet das
+    # Token ein, damit ihre anschließenden API-Aufrufe authentifiziert sind.
+    # Würde '/' öffentlich bleiben, könnte jeder Netzclient das Token zuerst
+    # aus dem HTML lesen und damit das API-Gate umgehen.
+    schuetze_index = any(host not in loopback_hosts for host in effektive_hosts)
     if auth_token:
         @app.middleware("http")
         async def _token_gate(request: Request, call_next):  # noqa: ANN001
-            if request.url.path.startswith("/api/"):
+            geschuetzter_pfad = (
+                request.url.path.startswith("/api/")
+                or (schuetze_index and request.url.path == "/")
+            )
+            if geschuetzter_pfad:
                 header = request.headers.get("authorization", "")
                 vorgelegt = header[7:] if header.startswith("Bearer ") else ""
                 vorgelegt = vorgelegt or request.headers.get("x-clutch-token", "")
