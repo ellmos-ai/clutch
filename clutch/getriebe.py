@@ -264,6 +264,11 @@ class Getriebe:
             return None
         return self._gaenge.get(canonical)
 
+    def loese_modell(self, selector: str) -> Gang:
+        """Löst einen Modell-Selektor zu einem konkreten Gang auf."""
+        from clutch.execution import resolve_model
+        return resolve_model(selector, getriebe=self)
+
     def alle_gaenge(self, einschliesslich_deaktiviert: bool = False) -> list[Gang]:
         """Alle registrierten Gaenge, sortiert nach Gang-Nummer."""
         values = self._gaenge.values()

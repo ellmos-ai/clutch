@@ -409,19 +409,22 @@ Nach `pip install -e .` steht das `clutch`-Kommando bereit:
 ```bash
 clutch route "Fix den Auth-Bug"        # Zeigt Routing-Entscheidung (Dry-Run, kein API-Call)
 clutch route "..." --prefer codex --exclude claude-sonnet --zweck coding --effort high
-clutch "Erkläre Quantencomputing"     # One-Shot: Route + Ausführung, gibt Antwort aus
-clutch run "..." --json                # Maschinenlesbare Ausgabe (für KI-Agenten)
-clutch chat                            # Interaktive REPL-Sitzung
-clutch models [--status] [--json]      # Modelle inklusive Verfügbarkeit & Sperrgrund
-clutch models disable claude-sonnet    # Persistentes, update-festes Nutzer-Overlay
+clutch route "..." --model ollama-glm-5.3   # Routing-Vorschau für bestimmtes Modell
+clutch "Erkläre Quantencomputing"           # One-Shot: Auto-Routing + Ausführung, gibt Antwort aus
+clutch "..." --model ollama-glm-5.3         # One-Shot: Bestimmtes Modell (fail-closed bei Nichtverfügbarkeit)
+clutch run "..." --model claude-sonnet      # One-Shot mit explizitem Modell ausführen
+clutch run "..." --json                     # Maschinenlesbare Ausgabe (für KI-Agenten)
+clutch chat [--model <Selektor>]            # Interaktive REPL (Auto-Routing oder fixes Modell)
+clutch models [--status] [--json]           # Modelle inklusive Verfügbarkeit & Sperrgrund
+clutch models disable claude-sonnet         # Persistentes, update-festes Nutzer-Overlay
 clutch models enable claude-sonnet
-clutch resolve gpt5 --runner codex --json  # nur auflösen; führt kein Modell aus
-clutch config prefer openai            # Modell oder Provider dauerhaft bevorzugen
-clutch stats                           # Nutzungs-, Budget- und Health-Dashboard
-clutch config <key> [value]            # CLI-Einstellungen lesen/schreiben
-clutch keys set MOONSHOT_API_KEY       # API-Key sicher speichern (Maskierte Eingabe)
-clutch keys list                       # Gespeicherte Key-Namen auflisten (keine Werte)
-clutch serve --web                     # Lokale Web-UI starten (benötigt: pip install clutch[web])
+clutch resolve gpt5 --runner codex --json   # nur auflösen; führt kein Modell aus
+clutch config prefer openai                 # Modell oder Provider dauerhaft bevorzugen
+clutch stats                                # Nutzungs-, Budget- und Health-Dashboard
+clutch config <key> [value]                 # CLI-Einstellungen lesen/schreiben
+clutch keys set MOONSHOT_API_KEY            # API-Key sicher speichern (Maskierte Eingabe)
+clutch keys list                            # Gespeicherte Key-Namen auflisten (keine Werte)
+clutch serve --web                          # Lokale Web-UI starten (benötigt: pip install clutch[web])
 ```
 
 ---
