@@ -2,112 +2,58 @@
 
 ## Deutsch
 
-Vielen Dank fuer Ihr Interesse, zu diesem Projekt beizutragen!
+Beiträge sind willkommen. Melde Fehler und schlage Änderungen über ein Issue im [ellmos-ai/clutch-Repository](https://github.com/ellmos-ai/clutch/issues) vor. Für Änderungen am Code erstelle einen Pull Request. Größere Änderungen sollten vor der Umsetzung mit einem Issue abgestimmt werden.
 
-### Wie Sie beitragen koennen
+### Hinweis zur CLA-Vorlage
 
-1. **Bug melden:** Erstellen Sie ein Issue mit dem Label `bug`
-2. **Feature vorschlagen:** Erstellen Sie ein Issue mit dem Label `enhancement`
-3. **Code beitragen:** Erstellen Sie einen Pull Request
+Die bisherige Contributor-Vorlage verlangt eine CLA-Zustimmung, verweist aber auf eine im Repository nicht vorhandene `CLA.md`. Die geltende Contributor-Lizenzregel ist daher vom Repository-Owner zu klären. Dieser Leitfaden schafft keine neue CLA-Pflicht und hebt keine bestehende Regel auf.
 
-### Pull Requests
+### Entwicklungsumgebung
 
-1. Forken Sie das Repository
-2. Erstellen Sie einen Feature-Branch: `git checkout -b feature/mein-feature`
-3. Committen Sie Ihre Aenderungen: `git commit -m "Beschreibung der Aenderung"`
-4. Pushen Sie den Branch: `git push origin feature/mein-feature`
-5. Erstellen Sie einen Pull Request
-
-### Contributor License Agreement (CLA)
-
-<!-- OPTION A: Fuer Projekte mit Dual-Licensing (RPX, etc.) -- diesen Block verwenden -->
-Dieses Projekt verwendet ein [Contributor License Agreement (CLA)](CLA.md).
-Bei Ihrem ersten Pull Request bestaetigen Sie bitte Ihre Zustimmung durch einen Kommentar:
-
-> I have read and agree to the Contributor License Agreement (CLA).
-
-Sie behalten Ihr Urheberrecht -- das CLA raeumt dem Projektinhaber lediglich Nutzungsrechte ein, die eine flexible Lizenzierung des Gesamtprojekts ermoeglichen.
-
-<!-- OPTION B: Fuer Community-Projekte ohne kommerzielle Plaene -- diesen Block stattdessen verwenden
-### Developer Certificate of Origin (DCO)
-
-Dieses Projekt verwendet den [Developer Certificate of Origin (DCO)](https://developercertificate.org/).
-Bitte signieren Sie jeden Commit mit `--signoff`:
-
-    git commit --signoff -m "Beschreibung der Aenderung"
-
-Damit bestaetigen Sie, dass Sie das Recht haben, den Code unter der Projektlizenz einzureichen.
--->
-
-### Code-Richtlinien
-
-- Python: PEP 8 Stil
-- Encoding: UTF-8 fuer alle Dateien
-- Sprache: Code und Kommentare auf Deutsch oder Englisch
-- Keine hardcoded Pfade oder API-Keys
-
-### Erste Schritte
+Voraussetzung ist Python 3.10 oder neuer. Klone das Repository und installiere die Testwerkzeuge:
 
 ```bash
-git clone https://github.com/lukisch/PROJEKTNAME.git
-cd PROJEKTNAME
-pip install -r requirements.txt
-python main.py
+git clone https://github.com/ellmos-ai/clutch.git
+cd clutch
+python -m pip install -e ".[test]" build
+python -m pytest -ra -v
+ruff check .
+python -m compileall -q clutch tests
 ```
 
----
+Für die optionale Weboberfläche installiere zusätzlich das web-Extra:
+
+```bash
+python -m pip install -e ".[web,test]"
+```
+
+Bitte verwende UTF-8, vermeide fest codierte Hostpfade oder Zugangsdaten und führe relevante Tests vor dem Pull Request aus. GitHub Actions führt die Plattform- und Python-Matrix für jeden Pull Request aus.
 
 ## English
 
-Thank you for your interest in contributing to this project!
+Contributions are welcome. Report bugs or propose changes through an issue in the [ellmos-ai/clutch repository](https://github.com/ellmos-ai/clutch/issues). Submit code changes as a pull request. Discuss larger changes in an issue before implementation.
 
-### How to Contribute
+### CLA template note
 
-1. **Report bugs:** Create an issue with the `bug` label
-2. **Suggest features:** Create an issue with the `enhancement` label
-3. **Contribute code:** Create a Pull Request
+The existing contributor template asks contributors to agree to a CLA but links to a `CLA.md` that is not present in the repository. The repository owner needs to clarify the applicable contributor-licensing rule. This guide neither creates a new CLA requirement nor removes an existing rule.
 
-### Pull Requests
+### Development setup
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/my-feature`
-3. Commit your changes: `git commit -m "Description of change"`
-4. Push the branch: `git push origin feature/my-feature`
-5. Create a Pull Request
-
-### Contributor License Agreement (CLA)
-
-<!-- OPTION A: For projects with dual licensing (RPX, etc.) -->
-This project uses a [Contributor License Agreement (CLA)](CLA.md).
-On your first pull request, please confirm your agreement by commenting:
-
-> I have read and agree to the Contributor License Agreement (CLA).
-
-You retain your copyright -- the CLA only grants the project owner usage rights that enable flexible licensing of the overall project.
-
-<!-- OPTION B: For community projects without commercial plans
-### Developer Certificate of Origin (DCO)
-
-This project uses the [Developer Certificate of Origin (DCO)](https://developercertificate.org/).
-Please sign off every commit with `--signoff`:
-
-    git commit --signoff -m "Description of change"
-
-This certifies that you have the right to submit the code under the project license.
--->
-
-### Code Guidelines
-
-- Python: PEP 8 style
-- Encoding: UTF-8 for all files
-- Language: Code and comments in German or English
-- No hardcoded paths or API keys
-
-### Getting Started
+Python 3.10 or newer is required. Clone the repository and install the test tools:
 
 ```bash
-git clone https://github.com/lukisch/PROJECTNAME.git
-cd PROJECTNAME
-pip install -r requirements.txt
-python main.py
+git clone https://github.com/ellmos-ai/clutch.git
+cd clutch
+python -m pip install -e ".[test]" build
+python -m pytest -ra -v
+ruff check .
+python -m compileall -q clutch tests
 ```
+
+To install the optional web interface dependencies as well:
+
+```bash
+python -m pip install -e ".[web,test]"
+```
+
+Use UTF-8, avoid hard-coded host paths or credentials, and run relevant tests before opening a pull request. GitHub Actions runs the platform and Python matrix for each pull request.

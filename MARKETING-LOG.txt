@@ -8,6 +8,9 @@ Repository: ellmos-ai/clutch
 Organization: ellmos-ai
 Umbrella Collective: open-bricks
 
+2026-10-12 ACTIVE-CLAIMS NOTE
+Earlier dated statements in this log are historical records, not current guarantees or verification. The active project documentation no longer claims zero egress, non-elevation certification, an audited complete dependency-license inventory, fixed response SLAs, or a current hard-coded test count. Current documentation describes observed provider, credential, process, budget, web, dependency, and test boundaries without implying certification or release approval.
+
 1. EXECUTIVE SUMMARY
 --------------------------------------------------------------------------------
 clutch (German: Kupplung) is the model routing and orchestration engine of the

@@ -1,0 +1,14 @@
+include LICENSE
+include README.md README_de.md README_es.md README_ja.md README_ru.md README_zh-Hans.md
+include SECURITY.md THIRD_PARTY_LICENSES.md CHANGELOG.md llms.txt MARKETING-LOG.txt
+include CONTRIBUTING.md CODE_OF_CONDUCT.md GLOSSARY.md CLUTCH.md
+include docs/archive/README-2026-10-12.md docs/archive/README_de-2026-10-12.md
+include docs/GPT56_COST_ROUTING.md docs/GPT56_COST_ROUTING_de.md docs/STAGED-MIGRATION.md
+include docs/gpt56_cost_example.json docs/gpt56_price_facts.svg docs/generate_gpt56_price_facts.py docs/assets/banner.svg
+recursive-include clutch *.py
+recursive-include clutch/config *.json
+recursive-include clutch/locales *.json
+recursive-include clutch/web *
+recursive-include tests *.py
+recursive-include tests/fixtures/provider_catalogs *.json
+global-exclude __pycache__ *.py[cod] *.db *.sqlite *.sqlite3 *.log *.tmp *.bak .ui_translations_*.json LOCK LOCK.* LOCK*.txt
