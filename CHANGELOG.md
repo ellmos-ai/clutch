@@ -22,14 +22,10 @@ Multi-Host-Änderungen zu überschreiben.
   Belege und ein zulässiger Lebenszyklus machen ein Modell claimbar.
 - Atomare Kataloganwendung reichert ausschließlich bereits kuratierte Gänge an;
   unbekannte Provider-Modelle werden gemeldet, aber nicht still registriert.
-- **Pfad B Marketing, Discoverability & Software-Transparenz (2026-09-16)**:
-  - **18-Punkte Schnellnavigation mit dualen HTML-Ankern**: Vollständige Synchronisation zwischen `README.md` und `README_de.md` mit stabilen Abwärtskompatibilitäts-Ankern (`<a id="..."></a>`).
-  - **Zielgruppen- & Persona-Mapping (`[PERSONA-01]` bis `[PERSONA-04]`)**: Detaillierte Dokumentation für Autonome Agenten-Entwickler, Multi-Host/Edge-Systemingenieure, Tool-Builder und Datenschutz-Beauftragte.
-  - **10-Dimensionen Vergleichsmatrix**: Gegenüberstellung von clutch mit Einzel-Provider-SDKs, Cloud-Gateways (LiteLLM/OpenRouter), Framework-Routern (CrewAI/AutoGen) und Ad-Hoc-Skripten entlang der Governance-Invarianten `INV-LOCAL-01` bis `INV-SLA-10`.
-  - **Drittanbieter-Lizenzinventar & Zero-Copyleft-Audit (`THIRD_PARTY_LICENSES.md`)**: Vollständige SPDX-Lizenzaufstellung aller Laufzeit-, Web- und Dev-Abhängigkeiten mit Bestätigung von 0 GPL/AGPL-Komponenten und `RunAsInvoker`-Ausführung.
-  - **PyPI / PEP 621 Projekt-URLs (`pyproject.toml`)**: Ergänzung von `Third-Party Licenses`, `Marketing Log` und `LLM Ready`.
-  - **Auffindbarkeitskontext & Maschinenindex (`llms.txt`)**: Audit-Links, Persona-Definitionen und hochpräzise Suchphrasen hinzugefügt.
-  - **Automatisierte Vertragstests (`tests/test_metadata.py`)**: Neue Kontrakttests für 18-Punkte Navigationsparität, Personas, Vergleichsmatrix, Lizenz-Audit und Marketing-Log-Aktualität.
+### Changed
+- **Full-care documentation and packaging (2026-10-12)**: Current guides qualify provider requests, local credential storage, process permissions, budget zones, optional web use, and the limits of the direct-dependency license inventory. The source distribution explicitly includes the six language guides and linked public documentation; the wheel includes the declared runtime modules and web assets. This entry describes documentation and packaging scope, not a security certification, license audit, or release.
+- **Historischer Pfad-B-Dokumentationsschritt (2026-09-16):** Der damalige Schritt ergänzte README-Navigation, Zielgruppen- und Vergleichsinhalte, Drittanbietertexte, Projektverweise und `llms.txt`. Die dabei formulierten Audit-, Zero-Copyleft- und RunAsInvoker-Behauptungen waren nicht belegt und wurden mit der begrenzten, am Quellstand geprüften Dokumentation vom 2026-10-12 ersetzt. Dies hält die Dokumentationshistorie fest und ändert keine Release-Version.
+
 
 ### Compatibility
 - `resolve_execution_selector()` behält die in 0.6.0 veröffentlichte
@@ -72,6 +68,8 @@ Pfad A ("Technische Hygiene") Wartungs- und Standardisierungslauf im GitHubBot-F
 ## [0.6.1] - 2026-09-08 - Discoverability, Dual-Mermaid, Invariants & Multi-OS CI Parity
 
 Pfad B ("Marketing & Design / Discoverability") Wartungs- und Standardisierungslauf im GitHubBot-Flottenverbund.
+
+**Korrekturhinweis (2026-10-12):** Dieser Abschnitt bleibt als Dokumentationshistorie erhalten. Die damals aufgeführten Audit-, Zero-Copyleft- und RunAsInvoker-Behauptungen waren durch die damalige Prüfung nicht belegt. Die aktuelle Dokumentation ersetzt sie durch begrenzte, am Quellstand überprüfte Aussagen; diese Korrektur ändert keine Release-Version.
 
 ### Added
 - **Multi-OS CI Matrix (`.github/workflows/ci.yml`)**: Umfassender GitHub Actions CI-Workflow mit Matrix über `ubuntu-latest`, `windows-latest` und `macos-latest` sowie Python `3.10`, `3.11`, `3.12`, `3.13`, automatischer Pip-Cache-Nutzung, `ruff check .`, `python -m compileall -q` Bytecode-Prüfung und `pytest -q`.

@@ -10,7 +10,8 @@
 
 ![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![License MIT](https://img.shields.io/badge/License-MIT-green)
-![Version 0.4.0](https://img.shields.io/badge/Version-0.4.0-orange)
+![Version 0.6.3](https://img.shields.io/badge/Version-0.6.3-orange)
+![CI](https://github.com/ellmos-ai/clutch/actions/workflows/ci.yml/badge.svg?branch=master)
 
 **clutch** (alemán: *Kupplung*, «embrague») utiliza una metáfora automovilística para enrutar tareas de forma inteligente hacia los modelos LLM óptimos entre múltiples proveedores. Analiza la complejidad y el propósito de cada tarea, selecciona el modelo y el nivel de razonamiento adecuados, realiza un seguimiento del presupuesto y aprende de la experiencia. Úsalo como **biblioteca**, **CLI** o **aplicación web local**.
 
@@ -157,7 +158,7 @@ Tres modos de uso: **consola** (personas), **interfaz web** (personas, gráfica)
 clutch resuelve las claves en este orden (el primero no vacío gana):
 
 1. Variable de entorno (p. ej. `MOONSHOT_API_KEY`) -- preferido para CI/servidores
-2. Almacén clutch `~/.clutch/credentials.json` (via `clutch keys set`, modo de archivo 0600)
+2. Almacén clutch `~/.clutch/credentials.json` (via `clutch keys set`; texto sin cifrar, modo POSIX 0600 best effort)
 3. Archivos `~/.credentials/<name>` (interoperabilidad con herramientas hermanas)
 
 Los valores nunca se imprimen, registran ni confirman en repositorios.
@@ -238,7 +239,7 @@ clutch/
 ## Pruebas
 
 ```bash
-pip install -e . pytest
+python -m pip install -e ".[test]" build
 pytest -q
 ```
 
@@ -250,6 +251,10 @@ Pytest está configurado para recopilar solo `tests/`. Los scripts de prueba en 
 Consulta [CONTRIBUTING.md](CONTRIBUTING.md) para las directrices.
 Para los términos de la API automovilística alemana, consulta [GLOSSARY.md](GLOSSARY.md).
 
+## Datos, proveedores y límites de ejecución
+
+Por defecto, clutch guarda la configuración y el historial local bajo ~/.clutch; algunos comandos permiten indicar otras rutas. Al elegir un proveedor remoto, el prompt y el contexto enviado pueden llegar a ese servicio y se aplican sus propias condiciones y ajustes de cuenta. Las claves API guardadas en ~/.clutch/credentials.json son texto sin cifrar; el modo POSIX 0600 se intenta aplicar, pero no ofrece cifrado ni una garantía de ACL en todas las plataformas. Las zonas de presupuesto son umbrales locales, no límites de facturación del proveedor. Los procesos CLI heredan los permisos y el entorno de quien los inicia. La interfaz FastAPI opcional está pensada para uso local; clutch no bloquea de forma general el tráfico saliente ni certifica el alojamiento público. La aplicación HTTP actual sirve la página raíz, pero no define rutas para los recursos estáticos locales que esta referencia; por eso, el funcionamiento completo de la interfaz en el navegador aún no está verificado.
+
 ## Licencia
 
 Licencia MIT. Consulta [LICENSE](LICENSE) para más detalles.
@@ -258,8 +263,4 @@ Licencia MIT. Consulta [LICENSE](LICENSE) para más detalles.
 
 ## Responsabilidad / Haftung
 
-Este proyecto es una **donación de código abierto no remunerada** en el sentido de los §§ 516 y ss. del BGB (Código Civil alemán). La responsabilidad del autor se limita conforme al **§ 521 BGB** a **dolo e imprudencia grave**. Complementariamente se aplican las exclusiones de responsabilidad de GPL-3.0 / MIT / Apache-2.0 §§ 15–16 (según la licencia elegida).
-
-Uso bajo tu propio riesgo. Sin compromiso de mantenimiento, sin garantía de disponibilidad, sin garantía de ausencia de errores ni de idoneidad para un fin determinado.
-
-This project is an unpaid open-source donation. Liability is limited to intent and gross negligence (§ 521 German Civil Code). Use at your own risk. No warranty, no maintenance guarantee, no fitness-for-purpose assumed.
+clutch se distribuye bajo la licencia MIT indicada en [LICENSE](LICENSE). Esta documentación ofrece información general y no constituye asesoramiento jurídico. Las obligaciones legales y la responsabilidad dependen de los hechos y de la legislación aplicable; esta página no formula una determinación general de cumplimiento o responsabilidad.

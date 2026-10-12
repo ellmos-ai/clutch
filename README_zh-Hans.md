@@ -10,7 +10,8 @@
 
 ![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![License MIT](https://img.shields.io/badge/License-MIT-green)
-![Version 0.4.0](https://img.shields.io/badge/Version-0.4.0-orange)
+![Version 0.6.3](https://img.shields.io/badge/Version-0.6.3-orange)
+![CI](https://github.com/ellmos-ai/clutch/actions/workflows/ci.yml/badge.svg?branch=master)
 
 **clutch**（德语：*Kupplung*，即"离合器"）采用驾驶隐喻，将任务智能路由至跨多个供应商的最优 LLM 模型。它分析任务复杂度与目的，选择合适的模型和推理级别，追踪预算，并从经验中学习。可作为**库**、**CLI** 或**本地 Web 应用**使用。
 
@@ -156,7 +157,7 @@ clutch serve --web                    # 启动 Web 界面（需要：pip install
 clutch 按以下顺序解析密钥（第一个非空值优先）：
 
 1. 环境变量（例如 `MOONSHOT_API_KEY`）— CI/服务器首选
-2. clutch 存储 `~/.clutch/credentials.json`（通过 `clutch keys set`，文件权限 0600）
+2. clutch 存储 `~/.clutch/credentials.json`（通过 `clutch keys set`；未加密文本，尽力设置 POSIX 0600）
 3. `~/.credentials/<name>` 文件（与同类工具互操作）
 
 值从不被打印、记录或提交到仓库。
@@ -237,7 +238,7 @@ clutch/
 ## 测试
 
 ```bash
-pip install -e . pytest
+python -m pip install -e ".[test]" build
 pytest -q
 ```
 
@@ -248,6 +249,10 @@ Pytest 配置为仅收集 `tests/` 目录。根目录下的脚本如 `demo.py`�
 请参阅 [CONTRIBUTING.md](CONTRIBUTING.md) 了解贡献指南。
 德语汽车 API 术语说明请参阅 [GLOSSARY.md](GLOSSARY.md)。
 
+## 数据、服务提供方与执行边界
+
+clutch 默认将配置和历史记录保存在本地 ~/.clutch；部分命令允许指定其他路径。选择远程服务提供方时，提示内容和发送的上下文可能会到达该服务，并受其服务条款与账户设置约束。~/.clutch/credentials.json 中保存的 API 密钥是未加密文本；程序会尽力设置 POSIX 0600 权限，但这不构成加密，也不保证所有平台上的 ACL。预算区域是本地阈值，不是服务提供方的账单上限。CLI 子进程继承调用账户的权限和环境。可选 FastAPI 界面面向本地使用；clutch 不提供通用出站流量阻断，也不认证公开托管部署。当前 HTTP 应用会返回根路径页面，但尚未为其引用的本地静态资源定义 HTTP 路由，因此完整浏览器界面尚未验证。
+
 ## 许可证
 
 MIT 许可证。详情请参阅 [LICENSE](LICENSE)。
@@ -256,8 +261,4 @@ MIT 许可证。详情请参阅 [LICENSE](LICENSE)。
 
 ## 免责声明 / Haftung
 
-本项目是一项**无偿开源捐赠**，符合德国民法典（BGB）第 516 条及以后条款的规定。根据 **BGB 第 521 条**，作者的责任限于**故意和重大过失**。此外适用 GPL-3.0 / MIT / Apache-2.0 第 15–16 条（根据所选许可证）的免责条款。
-
-使用风险自担。不提供维护承诺、可用性保证，不保证无错误或适用于特定用途。
-
-This project is an unpaid open-source donation. Liability is limited to intent and gross negligence (§ 521 German Civil Code). Use at your own risk. No warranty, no maintenance guarantee, no fitness-for-purpose assumed.
+clutch 根据 [LICENSE](LICENSE) 中列出的 MIT 许可证分发。本文档提供一般项目信息，不构成法律意见。法律义务和责任取决于具体事实及适用法律；本页不作全面合规或责任认定。

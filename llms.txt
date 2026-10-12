@@ -1,80 +1,32 @@
-# clutch - Provider-Neutral LLM Orchestration Engine
+# clutch-router
 
-Last-checked: 2026-09-16
-Test-suite: 410 passing unit tests (pytest verified 100% green)
+A Python library and command-line tool for routing tasks across configured language-model providers. The optional FastAPI web interface is installed with the web extra. Current source metadata identifies version 0.6.3 and the project license is MIT; see [LICENSE](LICENSE).
 
-> clutch (German: Kupplung) uses a driving metaphor to intelligently route tasks to optimal LLM models across providers. It analyzes task complexity and purpose, selects the right model and reasoning level, tracks budgets with a four-zone fuel gauge, enforces persistent circuit breakers, and learns from experience via fitness scoring and epsilon-greedy exploration.
+## What it does
 
-clutch is the routing layer of the ellmos family (Extra Large Language Model Operating Systems): a provider-neutral orchestration engine that sits in front of Anthropic (Claude), Google (Gemini), OpenAI (GPT/Codex), Ollama (local & remote), Claude Code, agy through companion-for-agy, and Kimi/Moonshot. Every concept is mapped onto a car metaphor -- Fahrer (driver/orchestrator), Getriebe (gearbox/model registry, gears G1-G5 from Haiku to Opus), Gas/Bremse (throttle, reasoning level 0-100%), Kupplung (clutch, model switching), Tankuhr (fuel gauge, budget tracking), Fahrtenbuch (trip log, SQLite metrics), Fahrschule (learning engine). Current version v0.6.3 (library + CLI + optional FastAPI web UI; evidence-bearing execution selectors and provider-catalog snapshots; persistent availability/quota blocks; update-safe user overrides; per-call preferences, exclusions and ranked alternatives; purpose- and vision-aware routing; model discovery; credential store; i18n en/de/es/zh/ja/ru; multi-OS CI across Linux, Windows, macOS). Python 3.10+, MIT. Verified 415/415 passing unit and contract tests.
+- Exposes a Python library and the clutch CLI.
+- Resolves task routes across configured provider adapters and model catalogs.
+- Tracks local usage estimates with configurable budget zones.
+- Stores configuration, credentials, and history locally by default under ~/.clutch.
+- Offers an optional web interface through the web dependency extra.
 
-Execution-selector contract: `resolve_execution_selector()` and `clutch resolve` resolve runner, self, family, exact registry-name, and exact model-ID selectors without execution or silent substitution. `resolved` is separate from fail-closed `claimable`; provider adapters must independently prove documented, API-listed, account-accessible, runner-compatible, and host-ready stages. Failed refreshes retain the last proven provider snapshot.
+## Operational boundaries
 
-Gemini flash tier (2026-08-13): the preferred Google gear is `gemini-3.7-flash` (G2, 1M context, thinking levels low/medium/high recorded in the catalog); the older `gemini-3.5-flash` gear stays available as fallback. Gemini 3.7 is a Google-API gear only -- the agy/companion-for-agy rail still tops out at `gemini-3.6-flash`, which that CLI build offers.
+Remote-provider requests may include caller prompts and context and are handled under the selected provider's API and account terms. Some execution paths start external CLI processes that inherit the invoking account's permissions and environment. Saved API keys are unencrypted text; POSIX file mode 0600 is attempted where supported but is best effort. Local budget zones are estimates, not provider billing caps. The optional web interface is intended for local use; the project does not provide general egress blocking, process sandboxing, or public-hosting certification. The current HTTP app serves the root HTML page but does not define routes for its referenced local static assets, so complete browser UI behavior is not verified.
 
-Execution patterns: single (one task), convoy (chain), team (parallel workers), swarm (bulk). Road types classify tasks by difficulty: Feldweg (trivial, Haiku), Landstrasse (standard, Sonnet), Autobahn (architecture, Opus), Rallye (bulk, Haiku swarm), Konvoi (pipeline, Sonnet chain), Langstrecke (complex, Opus hybrid). Budget tracking uses four zones: green / yellow / orange / red with daily and monthly limits. Circuit breakers, latency tracking, and provider failover are built in (Bordcomputer).
+## Language entry points
 
-## Core Governance & Runtime Invariants
+- [English README](README.md)
+- [German README](README_de.md)
+- [Spanish README](README_es.md)
+- [Japanese README](README_ja.md)
+- [Russian README](README_ru.md)
+- [Simplified Chinese README](README_zh-Hans.md)
 
-1. Provider Agnosticism & Zero Lock-in: seamless hot-swapping between Anthropic, Google Gemini, OpenAI, Ollama, and Kimi.
-2. 100% Local-First & Zero Egress: no analytics, tracking, or telemetry egress; network calls connect strictly to user-configured LLM provider endpoints.
-3. Non-Elevation User Mode: all CLI commands, background processes, and FastAPI web servers execute within unprivileged user-space permissions.
-4. Fail-Closed Circuit Breaker: quota blocks, red windows, and API failures trigger persistent circuit breakers in `~/.clutch/availability.json` rather than looping.
-5. Update-Safe User Overlays: user preferences, model exclusions, aliases, and cost overrides live in `~/.clutch/user_overrides.json` and persist across package updates.
-6. Dual-Alternative Ranked Fallbacks: every routing resolution produces a primary gear plus two ranked alternative fallbacks.
-7. Two-Dimensional Telemetry: combines financial USD consumption zones (Tankuhr) with real-time token throughput burn rates (token_throughput.py).
-8. Purpose & Vision Alignment: multimodal and vision inputs are strictly routed to vision-capable models; code tasks match specialized coding gears.
-9. Transactional SQLite Audit Ledger: all trips, execution records, chat sessions, and prompt library entries are safely stored in local SQLite databases with ACID guarantees.
-10. Cross-Platform Multi-OS Parity: identical behavior, CLI ergonomics, test coverage, and routing semantics across Linux, Windows, and macOS.
+## Project references
 
-## Docs
-
-- [README](https://github.com/ellmos-ai/clutch/blob/master/README.md): Overview, architecture, road types, installation, quickstart
-- [README_de](https://github.com/ellmos-ai/clutch/blob/master/README_de.md): Deutsche Dokumentation
-- [GLOSSARY](https://github.com/ellmos-ai/clutch/blob/master/GLOSSARY.md): German automotive code terms mapped to English
-- [CHANGELOG](https://github.com/ellmos-ai/clutch/blob/master/CHANGELOG.md): Release notes and version history
-- [SECURITY](https://github.com/ellmos-ai/clutch/blob/master/SECURITY.md): Security policy, response SLAs, and vulnerability reporting
-- [THIRD_PARTY_LICENSES](https://github.com/ellmos-ai/clutch/blob/master/THIRD_PARTY_LICENSES.md): SPDX inventory, zero-copyleft guarantee, RunAsInvoker affirmation
-- [MARKETING_LOG](https://github.com/ellmos-ai/clutch/blob/master/MARKETING-LOG.txt): Historical discoverability, marketing, and design audit trail
-- [LICENSE](https://github.com/ellmos-ai/clutch/blob/master/LICENSE): MIT license text
-
-## Audience
-
-- [PERSONA-01] Autonomous AI Agent Engineers: multi-agent frameworks requiring deterministic model hot-swapping, failover, and prompt-amortization
-- [PERSONA-02] Multi-Host & Edge Infrastructure Systems Engineers: local Ollama + remote cloud fallbacks across workstations, laptops, and edge compute nodes
-- [PERSONA-03] Solo Developers & Tool Builders: drop-in LLM routing with automotive intuition, budget fuel gauge, circuit breakers, and auto-learning
-- [PERSONA-04] Privacy & Compliance Officers: 100% local-first zero-telemetry routing with audit logging and unprivileged user mode (`RunAsInvoker`)
-- Developers building provider-neutral LLM routing layers
-- Agent-framework maintainers who need model selection, budget limits, and failover
-- Local-first AI operators combining Anthropic, Gemini, Ollama, and Claude Code
-- Researchers comparing orchestration patterns such as chains, teams, swarms, and hybrids
-
-## Search Phrases
-
-- ellmos-ai clutch provider neutral LLM router
-- clutch LLM orchestration engine auto learning
-- Python model routing Anthropic Gemini Ollama Claude Code
-- local-first LLM budget tracking circuit breaker
-- agent framework chain team swarm orchestration
-- German automotive metaphor LLM routing
-- provider-neutral LLM orchestration engine and model router
-- automotive metaphor LLM routing Anthropic Gemini OpenAI Ollama Kimi
-- local-first zero-egress LLM budget tracking fuel gauge
-- persistent circuit breaker quota failover multi-agent system
-- adaptive reasoning effort throttle brake model switching
-- evidence-bearing execution selector model resolution
-- unprivileged user-mode LLM router RunAsInvoker MIT license
-
-## ellmos family (related projects)
-
-- [USMC](https://github.com/ellmos-ai/usmc): Shared memory primitive (Tier 1)
-- [Rinnsal](https://github.com/ellmos-ai/rinnsal): Lightweight agent infrastructure (Tier 2)
-- [BACH](https://github.com/ellmos-ai/bach): Full text-based OS for LLMs (Tier 3)
-- [Gardener](https://github.com/ellmos-ai/gardener): Database-based OS counterpart
-- [MarbleRun / llmauto](https://github.com/ellmos-ai/MarbleRun): Chain-execution framework
-- [Skills](https://github.com/ellmos-ai/skills): Portable skill library
-- [agent-ops-stack](https://github.com/ellmos-ai/agent-ops-stack): Composed operational sidecar stack
-- [convergence-reconciler](https://github.com/ellmos-ai/convergence-reconciler): Cross-model convergence validation
-
-## Optional
-
-- [GitHub Issues](https://github.com/ellmos-ai/clutch/issues): Bug reports and feature requests
+- [Security reporting and data boundaries](SECURITY.md)
+- [Direct dependency and upstream license references](THIRD_PARTY_LICENSES.md)
+- [Changelog](CHANGELOG.md)
+- [Contributor setup](CONTRIBUTING.md)
+- [Project sources and issues](https://github.com/ellmos-ai/clutch)

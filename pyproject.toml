@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68.0", "wheel"]
+requires = ["setuptools>=77.0.3", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -47,6 +47,11 @@ web = [
     "uvicorn>=0.27",
     "python-multipart>=0.0.9",
 ]
+test = [
+    "pytest>=7.0",
+    "ruff>=0.6",
+    "tomli>=2.0; python_version < '3.11'",
+]
 
 [project.urls]
 Homepage = "https://github.com/ellmos-ai/clutch"
@@ -68,7 +73,7 @@ clutch = "clutch.cli:main"
 include = ["clutch*"]
 
 [tool.setuptools.package-data]
-clutch = ["config/*.json", "locales/*.json", "web/*.html"]
+clutch = ["config/*.json", "locales/*.json", "web/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

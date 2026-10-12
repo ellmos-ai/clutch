@@ -10,7 +10,8 @@
 
 ![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![License MIT](https://img.shields.io/badge/License-MIT-green)
-![Version 0.4.0](https://img.shields.io/badge/Version-0.4.0-orange)
+![Version 0.6.3](https://img.shields.io/badge/Version-0.6.3-orange)
+![CI](https://github.com/ellmos-ai/clutch/actions/workflows/ci.yml/badge.svg?branch=master)
 
 **clutch**（ドイツ語：*Kupplung*、「クラッチ」）は、ドライビングのメタファーを用いて、複数のプロバイダーにまたがる最適な LLM モデルへタスクをインテリジェントにルーティングします。タスクの複雑さと目的を分析し、適切なモデルと推論レベルを選択し、予算を追跡し、経験から学習します。**ライブラリ**、**CLI**、または**ローカル Web アプリ**として使用できます。
 
@@ -20,7 +21,7 @@
 - **自動ルーティング** — タスクの複雑さ*と目的*（コーディング、ビジョン、調査、バルク処理）を分析し、最適なモデル + 推論レベルを選択
 - **目的・ビジョン対応** — 画像/ドキュメント入力をビジョン対応モデルにルーティング；タスクをモデルの強みに合わせて割り当て
 - **CLI + Web UI** — `clutch route/run/chat/models/stats`、およびオプションの FastAPI Web チャット（`clutch serve --web`）
-- **認証情報ストア** — API キーを `~/.clutch/credentials.json` に安全に保存（`clutch keys ...`）；環境変数が優先
+- **認証情報ストア** — API キーを `~/.clutch/credentials.json` に保存（`clutch keys ...`）；環境変数が優先
 - **モデル自動検出** — インストール済み Ollama モデル（ローカル/リモート）および OpenAI 互換 `/v1/models` エンドポイントを自動検出
 - **予算追跡** — 4 段階の燃料計（緑/黄/橙/赤）で日次・月次の制限を管理
 - **学習エンジン** — フィットネスのスコアリングと epsilon-greedy 探索によってルーティングを継続的に改善
@@ -156,7 +157,7 @@ clutch serve --web                    # Web UI を起動（要：pip install -e 
 clutch は以下の順序でキーを解決します（最初の空でない値が優先）：
 
 1. 環境変数（例：`MOONSHOT_API_KEY`）— CI/サーバーで推奨
-2. clutch ストア `~/.clutch/credentials.json`（`clutch keys set` 経由、ファイルモード 0600）
+2. clutch ストア `~/.clutch/credentials.json`（`clutch keys set` 経由、暗号化されていないテキスト。POSIX 0600 は可能な範囲で設定）
 3. `~/.credentials/<name>` ファイル（兄弟ツールとの相互運用）
 
 値は表示、ログ記録、コミットされることはありません。
@@ -237,7 +238,7 @@ clutch/
 ## テスト
 
 ```bash
-pip install -e . pytest
+python -m pip install -e ".[test]" build
 pytest -q
 ```
 
@@ -248,6 +249,10 @@ Pytest は `tests/` のみを収集するよう設定されています。`demo.
 ガイドラインは [CONTRIBUTING.md](CONTRIBUTING.md) を参照してください。
 ドイツ語の自動車 API 用語については [GLOSSARY.md](GLOSSARY.md) を参照してください。
 
+## データ、プロバイダー、実行上の境界
+
+clutch は既定で設定と履歴を ~/.clutch に保存します。コマンドによっては別のパスを指定できます。リモートプロバイダーを選ぶと、プロンプトと送信したコンテキストがそのサービスに届く場合があり、サービス側の利用条件とアカウント設定が適用されます。~/.clutch/credentials.json の API キーは暗号化されていないテキストです。POSIX の 0600 権限は可能な範囲で設定しますが、暗号化や全プラットフォームでの ACL 保証ではありません。予算ゾーンはローカルのしきい値であり、プロバイダーの請求上限ではありません。CLI の子プロセスは起動元アカウントの権限と環境を引き継ぎます。任意の FastAPI UI はローカル利用を想定しており、clutch は一般的な送信通信ブロックや公開ホスティングの認証を提供しません。現在の HTTP アプリはルートページを返しますが、参照されるローカル静的リソースの HTTP ルートは定義されていないため、ブラウザー UI 全体の動作は未検証です。
+
 ## ライセンス
 
 MIT ライセンス。詳細は [LICENSE](LICENSE) をご覧ください。
@@ -256,8 +261,4 @@ MIT ライセンス。詳細は [LICENSE](LICENSE) をご覧ください。
 
 ## 免責事項 / Haftung
 
-本プロジェクトは、BGB（ドイツ民法典）第 516 条以降の意味における**無償のオープンソース寄贈**です。作者の責任は **BGB 第 521 条**に基づき、**故意および重大な過失**に限定されます。補足として、GPL-3.0 / MIT / Apache-2.0 の第 15〜16 条（選択したライセンスによる）の免責条項が適用されます。
-
-利用は自己責任で行ってください。メンテナンスの約束、可用性の保証、エラーのなさや特定の目的への適合性の保証は一切ありません。
-
-This project is an unpaid open-source donation. Liability is limited to intent and gross negligence (§ 521 German Civil Code). Use at your own risk. No warranty, no maintenance guarantee, no fitness-for-purpose assumed.
+clutch は [LICENSE](LICENSE) に記載された MIT ライセンスで配布されます。この文書は一般情報であり、法律上の助言ではありません。法的義務と責任は個別の事実および適用法に左右され、このページは包括的な法令遵守や責任の判断を示すものではありません。
