@@ -3,13 +3,15 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from unittest.mock import patch
 import pytest
 
+from clutch.budget_policy import BudgetErschoepftError
 from clutch.execution import resolve_model
 from clutch.fahrer import Fahrer
 from clutch.getriebe import Getriebe
-from clutch.kupplung import FahrtConfig
+from clutch.kupplung import FahrtConfig, Kupplung
 from clutch.motorblock import MotorErgebnis
 from clutch.strecke import StreckenAnalyse
 import clutch.cli as cli
@@ -41,14 +43,17 @@ def test_resolve_model_model_id():
 
 def test_resolve_model_execution_selector():
     g = Getriebe()
-    # gpt5 resolves via family profile
-    gang = resolve_model("gpt5", g)
-    assert gang.provider == "openai"
-    assert "gpt-5" in gang.model_id
+    # Selector resolution is tested without probing installed CLIs, localhost,
+    # or credentials on the developer's machine.
+    with patch("clutch.execution._probe_provider", return_value=(True, True)):
+        # gpt5 resolves via family profile
+        gang = resolve_model("gpt5", g)
+        assert gang.provider == "openai"
+        assert "gpt-5" in gang.model_id
 
-    # claude profile resolves to an anthropic model
-    gang2 = resolve_model("claude", g)
-    assert gang2.provider in {"anthropic", "claude-code"}
+        # claude profile resolves to an anthropic model
+        gang2 = resolve_model("claude", g)
+        assert gang2.provider in {"anthropic", "claude-code"}
 
 
 def test_resolve_model_unknown_fails_closed():
@@ -86,13 +91,160 @@ def test_kuppeln_with_model_override():
     assert config.alternativen == []
 
 
-def test_kuppeln_model_override_ignores_budget_zone_downshift():
-    fahrer = Fahrer()
+def _isolated_kupplung(tmp_path, monkeypatch):
+    config_dir = Path(__file__).resolve().parents[1] / "clutch" / "config"
+    getriebe = Getriebe(
+        config_dir=config_dir,
+        overrides_path=tmp_path / "user_overrides.json",
+    )
+    monkeypatch.setattr(
+        "clutch.execution._probe_provider",
+        lambda provider: pytest.fail(f"unexpected provider readiness probe: {provider}"),
+    )
+    return Kupplung(getriebe, config_dir=config_dir)
+
+
+def _isolated_fahrer(tmp_path, monkeypatch):
+    config_dir = Path(__file__).resolve().parents[1] / "clutch"
+    # Install the fail-closed provider guard before construction, too, so the
+    # integration test cannot probe a host CLI, endpoint, or credential.
+    monkeypatch.setattr(
+        "clutch.execution._probe_provider",
+        lambda provider: pytest.fail(f"unexpected provider readiness probe: {provider}"),
+    )
+    fahrer = Fahrer(
+        base_dir=config_dir,
+        db_path=tmp_path / "clutch.db",
+        overrides_path=tmp_path / "user_overrides.json",
+        availability_path=tmp_path / "availability.json",
+        token_budget_path=tmp_path / "token_budget.json",
+        sparmodus_path=tmp_path / "sparmodus.json",
+    )
+    # Keep availability reads independent from external quota files.
+    monkeypatch.setattr(fahrer.bordcomputer.availability, "refresh_external", lambda now=None: None)
+    return fahrer
+
+
+def _recording_handler(calls):
+    def handler(config, task):
+        calls.append((config, task))
+        return MotorErgebnis(
+            text="isolated test response",
+            erfolg=True,
+            model_id=config.model_id,
+            provider=config.provider,
+        )
+
+    return handler
+
+
+@pytest.mark.parametrize(
+    ("budget_zone", "model_name"),
+    [
+        ("green", "claude-code"),
+        ("yellow", "claude-sonnet"),
+        ("orange", "gemini-3.7-flash"),
+    ],
+)
+def test_explicit_model_override_allows_exact_model_within_budget_zone(
+    tmp_path, monkeypatch, budget_zone, model_name
+):
+    kupplung = _isolated_kupplung(tmp_path, monkeypatch)
     profil = StreckenAnalyse().analysiere("Sehr schwere Aufgabe")
-    # Even in a restrictive budget zone, model_override maintains the requested model
-    config = fahrer.kupplungs_mechanik.einlegen(profil, model_override="openai-gpt-5.6-terra", budget_zone="sparmodus")
-    assert config.gang.name == "openai-gpt-5.6-terra"
-    assert config.entscheidungs_grund == "explizite Modellwahl: openai-gpt-5.6-terra"
+
+    config = kupplung.einlegen(
+        profil,
+        model_override=model_name,
+        budget_zone=budget_zone,
+        vertrauenswuerdig=True,
+    )
+
+    assert config.gang.name == model_name
+    assert config.entscheidungs_grund == f"explizite Modellwahl: {model_name}"
+
+
+@pytest.mark.parametrize(
+    ("budget_zone", "model_name", "limit"),
+    [
+        ("yellow", "openai-gpt-5.6-terra", 3),
+        ("orange", "claude-sonnet", 2),
+    ],
+)
+def test_explicit_model_override_fails_closed_above_budget_zone(
+    tmp_path, monkeypatch, budget_zone, model_name, limit
+):
+    kupplung = _isolated_kupplung(tmp_path, monkeypatch)
+    profil = StreckenAnalyse().analysiere("Sehr schwere Aufgabe")
+
+    with pytest.raises(RuntimeError, match=rf"Budgetlimit G{limit}.*{budget_zone}"):
+        kupplung.einlegen(
+            profil,
+            model_override=model_name,
+            budget_zone=budget_zone,
+        )
+
+
+@pytest.mark.parametrize("budget_zone", ["red", None])
+def test_explicit_model_override_stops_when_no_llm_is_allowed(
+    tmp_path, monkeypatch, budget_zone
+):
+    kupplung = _isolated_kupplung(tmp_path, monkeypatch)
+    profil = StreckenAnalyse().analysiere("Sehr schwere Aufgabe")
+    kwargs = {"budget_zone": budget_zone} if budget_zone is not None else {"max_gang": 0}
+
+    with pytest.raises(BudgetErschoepftError, match="kein verfügbarer Gang"):
+        kupplung.einlegen(
+            profil,
+            model_override="claude-sonnet",
+            **kwargs,
+        )
+
+
+def test_red_budget_zone_never_invokes_fahrer_handler(tmp_path, monkeypatch):
+    fahrer = _isolated_fahrer(tmp_path, monkeypatch)
+    monkeypatch.setattr(fahrer.tankuhr, "verbrauch_pct", lambda: 90.0)
+    handler_calls = []
+
+    with pytest.raises(BudgetErschoepftError, match="erlaubt keinen LLM-Einsatz"):
+        fahrer.fahren(
+            "Aufgabe aus einer nicht vertrauenswürdigen Quelle",
+            handler=_recording_handler(handler_calls),
+            kontext={"model_override": "claude-sonnet", "vertrauenswuerdig": False},
+        )
+
+    assert handler_calls == []
+
+
+@pytest.mark.parametrize("model_name", ["kimi-cli", "claude-code"])
+def test_untrusted_explicit_agentic_model_never_invokes_fahrer_handler(
+    tmp_path, monkeypatch, model_name
+):
+    fahrer = _isolated_fahrer(tmp_path, monkeypatch)
+    monkeypatch.setattr(fahrer.tankuhr, "verbrauch_pct", lambda: 0.0)
+    handler_calls = []
+
+    with pytest.raises(RuntimeError, match="nicht vertrauenswürdige Quellen"):
+        fahrer.fahren(
+            "Aufgabe aus einer nicht vertrauenswürdigen Quelle",
+            handler=_recording_handler(handler_calls),
+            kontext={"model_override": model_name, "vertrauenswuerdig": False},
+        )
+
+    assert handler_calls == []
+
+
+def test_explicit_agentic_model_is_allowed_for_trusted_source(tmp_path, monkeypatch):
+    kupplung = _isolated_kupplung(tmp_path, monkeypatch)
+    profil = StreckenAnalyse().analysiere("Aufgabe")
+
+    config = kupplung.einlegen(
+        profil,
+        model_override="kimi-cli",
+        budget_zone="green",
+        vertrauenswuerdig=True,
+    )
+
+    assert config.gang.name == "kimi-cli"
 
 
 def test_kuppeln_blocked_model_fails_closed():
