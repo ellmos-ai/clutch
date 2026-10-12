@@ -12,7 +12,7 @@ A Python library and command-line tool for routing tasks across configured langu
 
 ## Operational boundaries
 
-Remote-provider requests may include caller prompts and context and are handled under the selected provider's API and account terms. Some execution paths start external CLI processes that inherit the invoking account's permissions and environment. Saved API keys are unencrypted text; POSIX file mode 0600 is attempted where supported but is best effort. Local budget zones are estimates, not provider billing caps. The optional web interface is intended for local use; the project does not provide general egress blocking, process sandboxing, or public-hosting certification. The current HTTP app serves the root HTML page but does not define routes for its referenced local static assets, so complete browser UI behavior is not verified.
+Remote-provider requests may include caller prompts and context and are handled under the selected provider's API and account terms. Some execution paths start external CLI processes that inherit the invoking account's permissions and environment. Saved API keys are unencrypted text; POSIX file mode 0600 is attempted where supported but is best effort. Local budget zones are estimates, not provider billing caps. The optional web interface is intended for local use; the project does not provide general egress blocking, process sandboxing, or public-hosting certification. The HTTP app serves the root page and an explicit allowlist of its referenced packaged assets; this does not certify public hosting.
 
 ## Language entry points
 

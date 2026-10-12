@@ -2,7 +2,7 @@
 
 Startet einen FastAPI-Server, der die ChatRuntime über HTTP zugänglich macht.
 
-WICHTIG: FastAPI ist eine optionale Dependency (`pip install clutch[web]`).
+WICHTIG: FastAPI ist eine optionale Dependency (`pip install clutch-router[web]`).
 Der Import erfolgt lazy in create_app() / serve(), damit das Modul importierbar
 bleibt, auch wenn FastAPI nicht installiert ist.
 
@@ -25,6 +25,47 @@ import os
 from typing import Any, List, Optional
 
 
+# Only files referenced by the shipped HTML page or its web-app manifest are
+# exposed as HTTP resources. The request path never becomes a filesystem path.
+_WEB_ASSET_CONTENT_TYPES = {
+    "favicon.ico": "image/x-icon",
+    "favicon.png": "image/png",
+    "apple-touch-icon-180.png": "image/png",
+    "manifest.json": "application/manifest+json",
+    "icon-192.png": "image/png",
+    "icon-512.png": "image/png",
+    "icon-maskable-192.png": "image/png",
+    "icon-maskable-512.png": "image/png",
+}
+
+
+def _resolve_web_asset(
+    filename: str,
+    *,
+    package_root: Optional[Path] = None,
+    web_root: Optional[Path] = None,
+) -> Optional[Path]:
+    """Resolve one allowlisted packaged asset without following paths outside web/."""
+    if filename not in _WEB_ASSET_CONTENT_TYPES:
+        return None
+
+    root = Path(package_root) if package_root is not None else Path(__file__).parent
+    try:
+        root = root.resolve(strict=True)
+        asset_root = Path(web_root) if web_root is not None else root / "web"
+        asset_root = asset_root.resolve(strict=True)
+        if asset_root.parent != root or not asset_root.is_dir():
+            return None
+
+        asset_path = (asset_root / filename).resolve(strict=True)
+    except (OSError, RuntimeError):
+        return None
+
+    if asset_path.parent != asset_root or asset_path.name != filename or not asset_path.is_file():
+        return None
+    return asset_path
+
+
 # ---------------------------------------------------------------------------
 # Lazy-Import-Hilfsfunktion
 # ---------------------------------------------------------------------------
@@ -38,7 +79,7 @@ def _require_fastapi() -> None:
         raise ImportError(
             "Die Web-Oberfläche benötigt zusätzliche Pakete.\n"
             "Bitte installieren mit:\n\n"
-            "    pip install clutch[web]\n\n"
+            "    pip install clutch-router[web]\n\n"
             f"Fehlendes Paket: {e.name}"
         ) from e
 
@@ -78,7 +119,7 @@ def create_app(
 
     from fastapi import FastAPI, HTTPException, UploadFile, File, Query, Request
     from fastapi.middleware.cors import CORSMiddleware
-    from fastapi.responses import HTMLResponse, JSONResponse
+    from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
     from starlette.middleware.trustedhost import TrustedHostMiddleware
 
     from clutch.chat_runtime import ChatRuntime
@@ -182,6 +223,23 @@ def create_app(
         # statische Fallback im Paket bleibt für direktes Öffnen erhalten.
         inhalt = inhalt.replace('<html lang="de">', f'<html lang="{sprachcode}">', 1)
         return HTMLResponse(content=inhalt)
+
+    def _web_asset_endpoint(filename: str, content_type: str):
+        async def serve_asset():
+            asset_path = _resolve_web_asset(filename)
+            if asset_path is None:
+                raise HTTPException(status_code=404, detail="Web-Asset nicht gefunden")
+            return FileResponse(asset_path, media_type=content_type)
+
+        return serve_asset
+
+    for _asset_name, _content_type in _WEB_ASSET_CONTENT_TYPES.items():
+        app.add_api_route(
+            f"/{_asset_name}",
+            _web_asset_endpoint(_asset_name, _content_type),
+            methods=["GET"],
+            include_in_schema=False,
+        )
 
     @app.get("/api/i18n")
     async def i18n(request: Request, requested_lang: Optional[str] = Query(default=None, alias="lang")) -> dict:
@@ -523,7 +581,7 @@ def serve(
 ) -> None:
     """Startet den uvicorn-Server mit der clutch-Web-App.
 
-    Wirft ImportError (mit Hinweis auf pip install clutch[web]), wenn
+    Wirft ImportError (mit Hinweis auf pip install clutch-router[web]), wenn
     fastapi oder uvicorn fehlen.
     """
     _require_fastapi()
