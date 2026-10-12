@@ -88,6 +88,7 @@ def _cmd_route(args: argparse.Namespace) -> int:
             effort_override=args.effort,
             ausschluss=args.exclude,
             praeferenz=args.prefer,
+            model_override=getattr(args, "model", None),
         )
 
         ergebnis = {
@@ -440,38 +441,77 @@ def _cmd_cost(args: argparse.Namespace) -> int:
         return 1
 
 
-def _one_shot(prompt: str, db_path: Optional[str], als_json: bool) -> int:
+def _one_shot(prompt: str, db_path: Optional[str], als_json: bool, model: Optional[str] = None) -> int:
     """Routet und führt einen Prompt aus (one-shot)."""
     try:
         from clutch.motorblock import MotorBlock
+        from clutch.kupplung import FahrtConfig
         fahrer = _fahrer_erstellen(db_path)
         block = MotorBlock()
 
-        # Prüfen ob der gewünschte Provider verfügbar ist
-        verfuegbar = block.verfuegbare_motoren()
+        if model:
+            # Explizite Modellwahl: exakter Treffer, fail-closed
+            try:
+                gang = fahrer.loese_modell(model)
+            except Exception as e:
+                print(f"Modell-Fehler: {e}", file=sys.stderr)
+                return 1
 
-        # Routing-Vorab-Check: Welcher Provider würde gewählt?
-        profil = fahrer.strecke_analysieren(prompt)
-        from clutch.scorer import get_scorer
-        scorer = get_scorer()
-        score_ergebnis = scorer.bewerte(prompt)
-        config_vorschau = fahrer.kuppeln(profil, zweck=score_ergebnis.zweck)
-        gewaehlter_provider = config_vorschau.provider
+            if fahrer.getriebe.ist_deaktiviert(gang.name):
+                print(f"Modell '{gang.name}' ist deaktiviert.", file=sys.stderr)
+                return 2
 
-        if not verfuegbar.get(gewaehlter_provider, False):
-            # Provider nicht verfügbar — route anzeigen statt Crash
-            print(
-                t("run.motor_nicht_verfuegbar", provider=gewaehlter_provider),
-                file=sys.stderr,
-            )
-            print(t("run.routing_vorschau"), file=sys.stderr)
-            print(f"  {t('route.gang'):<9} {config_vorschau.gang.name}", file=sys.stderr)
-            print(f"  {t('route.provider'):<9} {gewaehlter_provider}", file=sys.stderr)
-            print(f"  {t('route.zweck'):<9} {score_ergebnis.zweck}", file=sys.stderr)
-            print(f"  {t('route.score'):<9} {score_ergebnis.score}/100", file=sys.stderr)
-            return 2
+            verbrauch_pct = fahrer.tankuhr.verbrauch_pct()
+            system_status = fahrer.bordcomputer.pruefe(verbrauch_pct)
+            if gang.name in system_status.gesperrte_modelle:
+                print(f"Modell '{gang.name}' ist derzeit gesperrt (Circuit Breaker).", file=sys.stderr)
+                return 2
 
-        ergebnis = fahrer.fahren(prompt, handler=block.handler())
+            try:
+                motor = block.motor_fuer(gang.provider)
+                fake_cfg = FahrtConfig(
+                    gang=gang,
+                    gas=fahrer.kupplungs_mechanik.pedal.stellung(0.5),
+                    muster="einzelfahrt",
+                )
+                is_ready = motor.ist_verfuegbar(fake_cfg) if gang.provider == "ollama" else motor.ist_verfuegbar()
+            except Exception:
+                is_ready = False
+
+            if not is_ready:
+                print(
+                    t("run.motor_nicht_verfuegbar", provider=gang.provider),
+                    file=sys.stderr,
+                )
+                return 2
+
+            ergebnis = fahrer.fahren(prompt, handler=block.handler(), kontext={"model_override": gang.name})
+        else:
+            # Unverändertes Auto-Routing wie bisher
+            verfuegbar = block.verfuegbare_motoren()
+
+            # Routing-Vorab-Check: Welcher Provider würde gewählt?
+            profil = fahrer.strecke_analysieren(prompt)
+            from clutch.scorer import get_scorer
+            scorer = get_scorer()
+            score_ergebnis = scorer.bewerte(prompt)
+            config_vorschau = fahrer.kuppeln(profil, zweck=score_ergebnis.zweck)
+            gewaehlter_provider = config_vorschau.provider
+
+            if not verfuegbar.get(gewaehlter_provider, False):
+                # Provider nicht verfügbar — route anzeigen statt Crash
+                print(
+                    t("run.motor_nicht_verfuegbar", provider=gewaehlter_provider),
+                    file=sys.stderr,
+                )
+                print(t("run.routing_vorschau"), file=sys.stderr)
+                print(f"  {t('route.gang'):<9} {config_vorschau.gang.name}", file=sys.stderr)
+                print(f"  {t('route.provider'):<9} {gewaehlter_provider}", file=sys.stderr)
+                print(f"  {t('route.zweck'):<9} {score_ergebnis.zweck}", file=sys.stderr)
+                print(f"  {t('route.score'):<9} {score_ergebnis.score}/100", file=sys.stderr)
+                return 2
+
+            ergebnis = fahrer.fahren(prompt, handler=block.handler())
 
         if not ergebnis.erfolg:
             print(t("run.fahrt_fehlgeschlagen", ergebnis=ergebnis), file=sys.stderr)
@@ -507,7 +547,7 @@ def _one_shot(prompt: str, db_path: Optional[str], als_json: bool) -> int:
 
 def _cmd_run(args: argparse.Namespace) -> int:
     """One-shot-Ausführung via 'run'-Subcommand."""
-    return _one_shot(args.prompt, args.db, args.json)
+    return _one_shot(args.prompt, args.db, args.json, model=getattr(args, "model", None))
 
 
 def _cmd_serve(args: argparse.Namespace) -> int:
@@ -602,6 +642,30 @@ def _cmd_chat(args: argparse.Namespace) -> int:
     """Minimaler REPL — liest Zeilen von stdin, je Zeile one-shot."""
     db_path = args.db
     als_json = args.json
+    model = getattr(args, "model", None)
+
+    if model:
+        fahrer = _fahrer_erstellen(db_path)
+        try:
+            gang = fahrer.loese_modell(model)
+        except Exception as e:
+            print(f"Modell-Fehler: {e}", file=sys.stderr)
+            return 1
+        if fahrer.getriebe.ist_deaktiviert(gang.name):
+            print(f"Modell '{gang.name}' ist deaktiviert.", file=sys.stderr)
+            return 2
+        from clutch.motorblock import MotorBlock
+        from clutch.kupplung import FahrtConfig
+        block = MotorBlock()
+        try:
+            motor = block.motor_fuer(gang.provider)
+            fake_cfg = FahrtConfig(gang=gang, gas=fahrer.kupplungs_mechanik.pedal.stellung(0.5), muster="einzelfahrt")
+            is_ready = motor.ist_verfuegbar(fake_cfg) if gang.provider == "ollama" else motor.ist_verfuegbar()
+        except Exception:
+            is_ready = False
+        if not is_ready:
+            print(t("run.motor_nicht_verfuegbar", provider=gang.provider), file=sys.stderr)
+            return 2
 
     print(t("chat.begruessung"))
     print()
@@ -619,7 +683,7 @@ def _cmd_chat(args: argparse.Namespace) -> int:
             print(t("chat.auf_wiedersehen"))
             return 0
 
-        rc = _one_shot(zeile, db_path, als_json)
+        rc = _one_shot(zeile, db_path, als_json, model=model)
         if rc not in (0, 2):
             # Fehler, aber REPL weiterführen
             print(t("chat.fehler_repl"))
@@ -651,6 +715,7 @@ def _build_subparser(subparsers: argparse._SubParsersAction) -> None:  # noqa: S
     p_route.add_argument("--exclude", "--skip", action="extend", nargs="+", default=[], metavar="GANG")
     p_route.add_argument("--zweck", default=None, metavar="ZWECK")
     p_route.add_argument("--effort", choices=["none", "low", "medium", "high", "xhigh", "max", "max-delegate"])
+    p_route.add_argument("--model", metavar="MODELL", default=None, help="Bestimmtes Modell für die Routing-Vorschau wählen")
 
     # --- models ---
     p_models = subparsers.add_parser(
@@ -737,6 +802,7 @@ def _build_subparser(subparsers: argparse._SubParsersAction) -> None:  # noqa: S
     p_run.add_argument("prompt", help="Der Prompt")
     p_run.add_argument("--json", action="store_true", help="JSON-Ausgabe")
     p_run.add_argument("--db", metavar="PFAD", default=None)
+    p_run.add_argument("--model", metavar="MODELL", default=None, help="Bestimmtes Modell explizit wählen")
 
     # --- chat ---
     p_chat = subparsers.add_parser(
@@ -745,6 +811,7 @@ def _build_subparser(subparsers: argparse._SubParsersAction) -> None:  # noqa: S
     )
     p_chat.add_argument("--json", action="store_true", help="JSON-Ausgabe je Antwort")
     p_chat.add_argument("--db", metavar="PFAD", default=None)
+    p_chat.add_argument("--model", metavar="MODELL", default=None, help="Bestimmtes Modell explizit wählen")
 
     # --- serve ---
     p_serve = subparsers.add_parser(
@@ -840,6 +907,12 @@ def _build_top_parser() -> argparse.ArgumentParser:
         choices=LANGS,
         help=f"Ausgabesprache ({', '.join(LANGS)})",
     )
+    parser.add_argument(
+        "--model",
+        metavar="MODELL",
+        default=None,
+        help="Bestimmtes Modell explizit wählen",
+    )
     subparsers = parser.add_subparsers(dest="subcommand")
     _build_subparser(subparsers)
     return parser
@@ -863,9 +936,9 @@ def main(argv: list[str] | None = None) -> int:
 
     # Wenn das erste nicht-Flag-Argument ein bekannter Subcommand ist,
     # normal parsen. Sonst: als positionales Prompt behandeln.
-    # Werte von wert-tragenden Flags (--db/--lang) duerfen NICHT als
+    # Werte von wert-tragenden Flags (--db/--lang/--model) duerfen NICHT als
     # Positional zaehlen, sonst misslingt z.B. `clutch --lang de route ...`.
-    _value_flags = {"--db", "--lang"}
+    _value_flags = {"--db", "--lang", "--model"}
     positional_tokens = []
     _i = 0
     while _i < len(argv):
@@ -888,6 +961,7 @@ def main(argv: list[str] | None = None) -> int:
         db_val: Optional[str] = None
         als_json = False
         lang_val: Optional[str] = None
+        model_val: Optional[str] = None
         while i < len(argv):
             tok = argv[i]
             if tok == "--json":
@@ -898,6 +972,9 @@ def main(argv: list[str] | None = None) -> int:
             elif tok == "--lang" and i + 1 < len(argv):
                 lang_val = argv[i + 1]
                 i += 1
+            elif tok == "--model" and i + 1 < len(argv):
+                model_val = argv[i + 1]
+                i += 1
             elif tok.startswith("-"):
                 flags.append(tok)
             else:
@@ -907,7 +984,7 @@ def main(argv: list[str] | None = None) -> int:
             set_lang(lang_val)
         prompt = " ".join(prompt_parts)
         if prompt:
-            return _one_shot(prompt, db_val, als_json)
+            return _one_shot(prompt, db_val, als_json, model=model_val)
         # Kein Prompt -> Hilfe zeigen
         _build_top_parser().print_help()
         return 0

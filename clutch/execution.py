@@ -816,6 +816,90 @@ def _catalog_diff(
     )
 
 
+def resolve_model(
+    selector: str,
+    getriebe: Getriebe | None = None,
+) -> Gang:
+    """Löst einen Modell-Selektor zu einem konkreten Gang aus dem Getriebe auf.
+
+    Wiederverwendet den Execution-Resolver und Getriebe-Lookups.
+    Akzeptiert:
+    - Exakte Gangnamen (z. B. 'claude-sonnet', 'ollama-glm-5.3', 'gemini-3.7-flash')
+    - Exakte model_id (z. B. 'glm-5.3:cloud', 'gpt-5.6-terra', 'claude-sonnet-4-6')
+    - Runner-, Familien- und Profil-Selektoren (z. B. 'gpt5', 'claude', 'ollama')
+
+    Wirft ValueError bei unbekanntem oder deaktiviertem Modell (fail-closed).
+    """
+    if not selector or not isinstance(selector, str):
+        raise ValueError("Modell-Selektor darf nicht leer sein.")
+
+    token = selector.strip()
+    if not token:
+        raise ValueError("Modell-Selektor darf nicht leer sein.")
+
+    if getriebe is None:
+        getriebe = Getriebe()
+
+    # 1. Direkter Treffer über Gangnamen (inklusive Aliase)
+    gang = getriebe.gang(token, einschliesslich_deaktiviert=True)
+    if gang is not None:
+        if getriebe.ist_deaktiviert(gang.name):
+            raise ValueError(f"Modell '{gang.name}' ist deaktiviert (user_overrides).")
+        return gang
+
+    # 2. Direkter Treffer über model_id
+    gang = next(
+        (g for g in getriebe.alle_gaenge(einschliesslich_deaktiviert=True) if g.model_id == token),
+        None,
+    )
+    if gang is not None:
+        if getriebe.ist_deaktiviert(gang.name):
+            raise ValueError(f"Modell '{gang.name}' ist deaktiviert (user_overrides).")
+        return gang
+
+    # 3. Öffentlichen Selektor über resolve_execution_selector auflösen
+    res = resolve_execution_selector(token, registry=getriebe)
+    if not res.get("resolved"):
+        reason = res.get("reason") or "nicht im Register"
+        raise ValueError(f"Unbekanntes Modell / Selektor: '{selector}' ({reason})")
+
+    if res.get("registry_name"):
+        gang = getriebe.gang(res["registry_name"], einschliesslich_deaktiviert=True)
+        if gang is not None:
+            if getriebe.ist_deaktiviert(gang.name):
+                raise ValueError(f"Modell '{gang.name}' ist deaktiviert (user_overrides).")
+            return gang
+
+    if res.get("canonical_selector"):
+        gang = getriebe.gang(res["canonical_selector"], einschliesslich_deaktiviert=True)
+        if gang is not None:
+            if getriebe.ist_deaktiviert(gang.name):
+                raise ValueError(f"Modell '{gang.name}' ist deaktiviert (user_overrides).")
+            return gang
+
+    # Profil (family / runner)
+    reg = ExecutionRegistry(getriebe)
+    profile = reg.profiles.get(res.get("canonical_selector") or "")
+    if profile:
+        matched = [
+            g for g in getriebe.alle_gaenge(einschliesslich_deaktiviert=True)
+            if reg._profile_matches(profile, g)
+        ]
+        active = [g for g in matched if not getriebe.ist_deaktiviert(g.name)]
+        if active:
+            return max(active, key=lambda g: g.gang)
+        if matched:
+            raise ValueError(f"Alle Modelle für Selektor '{selector}' sind deaktiviert.")
+
+    if res.get("eligible_models"):
+        for m_name in res["eligible_models"]:
+            gang = getriebe.gang(m_name)
+            if gang is not None:
+                return gang
+
+    raise ValueError(f"Kein ausführbares Modell für Selektor '{selector}' gefunden.")
+
+
 __all__ = [
     "AVAILABILITY_STAGES",
     "LIFECYCLES",
@@ -834,4 +918,5 @@ __all__ = [
     "normalize_selector_token",
     "refresh_provider_catalog",
     "resolve_execution_selector",
+    "resolve_model",
 ]

@@ -210,11 +210,12 @@ def create_app(
         try:
             session_id = daten.get("session_id") or None
             hat_bild = bool(daten.get("hat_bild", False))
+            model_choice = daten.get("model") or daten.get("model_override") or None
 
             # Neue Session anlegen, wenn keine angegeben
             if not session_id:
                 sp_an = daten.get("system_prompt_on", True)
-                session = rt.neue_session(system_prompt_on=bool(sp_an))
+                session = rt.neue_session(system_prompt_on=bool(sp_an), model_override=model_choice)
                 session_id = session.id
 
             # Web/API gilt als untrusted: keine agentischen CLI-Motoren mit Auto-Approve.
@@ -223,11 +224,16 @@ def create_app(
                 user_text=text,
                 hat_bild=hat_bild,
                 vertrauenswuerdig=False,
+                model=model_choice,
             )
             return ergebnis
 
         except HTTPException:
             raise
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        except RuntimeError as e:
+            raise HTTPException(status_code=503, detail=str(e))
         except Exception as e:
             raise HTTPException(status_code=500, detail="Interner Fehler") from e
 

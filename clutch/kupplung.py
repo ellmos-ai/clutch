@@ -125,6 +125,7 @@ class Kupplung:
         effort_override: Optional[str] = None,
         ausschluss: Optional[list[str]] = None,
         praeferenz: Optional[list[str]] = None,
+        model_override: Optional[str] = None,
     ) -> FahrtConfig:
         """Bestimmt die optimale FahrtConfig fuer ein StreckenProfil.
 
@@ -154,6 +155,55 @@ class Kupplung:
             effort_override if effort_override is not None else basis.get("effort")
         )
 
+        # Budgetgrenzen gelten auch fuer eine explizite Modellwahl. Ein
+        # expliziter Selektor darf die harte Zone nicht umgehen oder still auf
+        # ein anderes Modell umgeleitet werden.
+        limit = max_gang if max_gang is not None else 5
+        if budget_zone:
+            zone_limit = max_gang_fuer_zone(self._budget_zonen, budget_zone)
+            if zone_limit == 0:
+                raise BudgetErschoepftError(
+                    f"kein verfügbarer Gang: Budget-Zone {budget_zone!r} "
+                    "erlaubt keinen LLM-Einsatz"
+                )
+            limit = min(limit, zone_limit)
+        if limit <= 0:
+            raise BudgetErschoepftError(
+                "kein verfügbarer Gang: das Budgetlimit erlaubt keinen LLM-Einsatz"
+            )
+
+        if model_override:
+            # Explizite Modellwahl: exakter Treffer, fail-closed, kein stilles Ersetzen/Exploration
+            gang = self.getriebe.loese_modell(model_override)
+            if gang.name in blockiert:
+                raise RuntimeError(f"Modell '{gang.name}' ist deaktiviert oder gesperrt")
+            if gang.gang > limit:
+                zone_text = f" in Budget-Zone {budget_zone!r}" if budget_zone else ""
+                raise RuntimeError(
+                    f"Modell '{gang.name}' überschreitet das Budgetlimit G{limit}{zone_text}"
+                )
+            if not vertrauenswuerdig and gang.provider in AGENTIC_CLI_PROVIDERS:
+                raise RuntimeError(
+                    f"Modell '{gang.name}' ist für nicht vertrauenswürdige Quellen gesperrt"
+                )
+            basis_gas = basis.get("gas", 0.5)
+            gas_wert = self.pedal.anpassen(
+                basis_gas,
+                profil.schwierigkeit,
+                profil.tempo.value,
+            )
+            muster = self._muster_waehlen(basis.get("muster", "einzelfahrt"), profil)
+            return FahrtConfig(
+                gang=gang,
+                gas=self.pedal.stellung(gas_wert),
+                muster=muster,
+                ist_erkundung=False,
+                entscheidungs_grund=f"explizite Modellwahl: {gang.name}",
+                effort=effort,
+                effective_effort=effort,
+                alternativen=[],
+            )
+
         # 2. Gang waehlen
         gang_name = basis.get("gang", "claude-sonnet")
         gang = self.getriebe.gang(gang_name)
@@ -179,15 +229,7 @@ class Kupplung:
                 gang = hochgeschaltet
 
         # 6. Budget-Constraint
-        limit = max_gang if max_gang is not None else 5
         if budget_zone:
-            zone_limit = max_gang_fuer_zone(self._budget_zonen, budget_zone)
-            if zone_limit == 0:
-                raise BudgetErschoepftError(
-                    f"kein verfuegbarer Gang: Budget-Zone {budget_zone!r} "
-                    "erlaubt keinen LLM-Einsatz"
-                )
-            limit = min(limit, zone_limit)
             if gang and gang.gang > limit:
                 guenstigere = self.getriebe.filter(max_gang=limit)
                 if guenstigere:
