@@ -9,7 +9,9 @@ echten LLM-Aufrufe stattfinden.
 
 import sys
 import tempfile
+from html.parser import HTMLParser
 from pathlib import Path
+from urllib.parse import urlsplit
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -44,16 +46,32 @@ def _fake_handler(antwort: str = "WEBOK"):
     return handler
 
 
-def _make_client(tmp_dir: str) -> TestClient:
+def _make_client(tmp_dir: str, *, auth_token: str | None = None) -> TestClient:
     """Erstellt einen TestClient mit injizierter Fake-Runtime."""
     db_path = Path(tmp_dir) / "clutch.db"
     handler = _fake_handler()
     rt = ChatRuntime(db_path=db_path, handler=handler)
 
     from clutch.webapp import create_app
-    app = create_app(db_path=db_path, runtime=rt)
+    app = create_app(db_path=db_path, runtime=rt, auth_token=auth_token)
     # base_url 127.0.0.1 -> Host-Header passt zur TrustedHostMiddleware.
     return TestClient(app, base_url="http://127.0.0.1")
+
+
+class _LocalResourceParser(HTMLParser):
+    """Collect local link and source URLs from the served application page."""
+
+    def __init__(self):
+        super().__init__()
+        self.paths: list[str] = []
+
+    def handle_starttag(self, tag, attrs):  # noqa: ANN001
+        for name, value in attrs:
+            if name not in {"href", "src"} or not value:
+                continue
+            parsed = urlsplit(value)
+            if not parsed.scheme and not parsed.netloc and parsed.path:
+                self.paths.append(parsed.path.lstrip("/"))
 
 
 # ---------------------------------------------------------------------------
@@ -69,6 +87,82 @@ def test_index_liefert_html():
         # Entweder echtes HTML oder Fallback -- beides ist HTML
         ct = antwort.headers.get("content-type", "")
         assert "html" in ct.lower()
+
+
+def test_html_und_manifest_assets_are_served_from_package_allowlist():
+    with tempfile.TemporaryDirectory() as tmp:
+        client = _make_client(tmp)
+        page = client.get("/")
+        assert page.status_code == 200
+
+        parser = _LocalResourceParser()
+        parser.feed(page.text)
+        assert {"favicon.ico", "favicon.png", "apple-touch-icon-180.png", "manifest.json"} <= set(parser.paths)
+
+        asset_root = Path(__file__).parent.parent / "clutch" / "web"
+        content_types = {
+            "favicon.ico": "image/x-icon",
+            "favicon.png": "image/png",
+            "apple-touch-icon-180.png": "image/png",
+            "manifest.json": "application/manifest+json",
+        }
+        for asset_name in parser.paths:
+            response = client.get(f"/{asset_name}")
+            assert response.status_code == 200, asset_name
+            assert response.headers["content-type"].startswith(content_types[asset_name])
+            assert response.content == (asset_root / asset_name).read_bytes()
+
+        manifest_response = client.get("/manifest.json")
+        assert manifest_response.headers["content-type"].startswith("application/manifest+json")
+        manifest = manifest_response.json()
+        assert manifest["start_url"] == "/"
+        for icon in manifest["icons"]:
+            response = client.get(f"/{icon['src']}")
+            assert response.status_code == 200, icon["src"]
+            assert response.headers["content-type"].startswith(icon["type"])
+            assert response.content == (asset_root / icon["src"]).read_bytes()
+
+
+def test_unknown_and_encoded_traversal_paths_do_not_expose_files():
+    with tempfile.TemporaryDirectory() as tmp:
+        client = _make_client(tmp)
+        for path in (
+            "/icon.png",  # packaged but deliberately not referenced/allowlisted
+            "/icon.svg",
+            "/unknown.js",
+            "/%2e%2e/pyproject.toml",
+            "/..%2fpyproject.toml",
+            "/favicon.ico%2f..%2f..%2fpyproject.toml",
+        ):
+            response = client.get(path, follow_redirects=False)
+            assert response.status_code in {400, 404}, (path, response.status_code)
+            assert b"[build-system]" not in response.content
+
+
+def test_asset_resolver_rejects_web_root_outside_package(tmp_path):
+    from clutch.webapp import _resolve_web_asset
+
+    package_root = tmp_path / "package"
+    package_root.mkdir()
+    outside_root = tmp_path / "outside"
+    outside_root.mkdir()
+    (outside_root / "favicon.ico").write_bytes(b"outside")
+
+    assert _resolve_web_asset(
+        "favicon.ico", package_root=package_root, web_root=outside_root
+    ) is None
+    assert _resolve_web_asset("../pyproject.toml", package_root=package_root) is None
+
+
+def test_static_assets_keep_host_policy_and_api_bearer_gate():
+    with tempfile.TemporaryDirectory() as tmp:
+        client = _make_client(tmp, auth_token="test-token")
+        assert client.get("/favicon.ico").status_code == 200
+        assert client.get("/api/i18n").status_code == 401
+        assert client.get(
+            "/api/i18n", headers={"Authorization": "Bearer test-token"}
+        ).status_code == 200
+        assert client.get("/favicon.ico", headers={"Host": "attacker.example"}).status_code == 400
 
 
 def test_chat_neue_session():
