@@ -101,6 +101,7 @@ class Getriebe:
         self._disabled_models: set[str] = set()
         self._preferred_models: list[str] = []
         self._preferred_providers: list[str] = []
+        self._role_preferred_models: dict[str, list[str]] = {}
         self._aliases: dict[str, str] = {}
         self._model_max_gang: dict[str, object] = {}
         self._model_cost_overrides: dict[str, object] = {}
@@ -205,6 +206,7 @@ class Getriebe:
             for name in overrides.get("preferred_models", [])
         ]
         self._preferred_providers = list(overrides.get("preferred_providers", []))
+        self._role_preferred_models = overrides.get("role_preferred_models", {})
         self._model_max_gang = {
             self._aliases.get(name, name): value
             for name, value in overrides.get("model_max_gang", {}).items()
@@ -282,6 +284,18 @@ class Getriebe:
     @property
     def preferred_providers(self) -> list[str]:
         return list(getattr(self, "_preferred_providers", []))
+
+    def role_preferred_models(self, role: str) -> list[str]:
+        """Return a strictly configured role preference, never a guessed model."""
+        if role not in {"thinker", "worker", "draft", "reviewer", "escalation"}:
+            raise ValueError(f"unknown routing role: {role}")
+        models = self._role_preferred_models.get(role)
+        if not models:
+            raise ValueError(f"no model preference configured for role: {role}")
+        for name in models:
+            if self.gang(name, einschliesslich_deaktiviert=True) is None:
+                raise ValueError(f"unknown model for role {role}: {name}")
+        return list(models)
 
     @property
     def aliases(self) -> dict[str, str]:

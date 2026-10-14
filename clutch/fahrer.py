@@ -127,7 +127,8 @@ class Fahrer:
                 vertrauenswuerdig: bool = True,
                 effort_override: Optional[str] = None,
                 ausschluss: Optional[list[str]] = None,
-                praeferenz: Optional[list[str]] = None) -> FahrtConfig:
+                praeferenz: Optional[list[str]] = None,
+                rolle: Optional[str] = None) -> FahrtConfig:
         """Kuppelt: Waehlt Gang und Gas basierend auf Strecke + Systemzustand.
 
         zweck (coding/vision/research/...) steuert das Zweck-Routing (M2):
@@ -151,6 +152,7 @@ class Fahrer:
             effort_override=effort_override,
             ausschluss=ausschluss,
             praeferenz=praeferenz,
+            rolle=rolle,
         )
 
         # Gesperrtes Modell Fallback

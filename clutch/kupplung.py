@@ -125,6 +125,7 @@ class Kupplung:
         effort_override: Optional[str] = None,
         ausschluss: Optional[list[str]] = None,
         praeferenz: Optional[list[str]] = None,
+        rolle: Optional[str] = None,
     ) -> FahrtConfig:
         """Bestimmt die optimale FahrtConfig fuer ein StreckenProfil.
 
@@ -279,7 +280,10 @@ class Kupplung:
         if gang.name not in {kandidat.name for kandidat in kandidaten}:
             gang = min(kandidaten, key=lambda kandidat: (abs(kandidat.gang - gang.gang), -kandidat.gang))
             ist_erkundung = False
-        tokens = [*(praeferenz or []), *self.getriebe.preferred_models, *self.getriebe.preferred_providers]
+        rollenmodelle = self.getriebe.role_preferred_models(rolle) if rolle is not None else []
+        tokens = [*rollenmodelle, *(praeferenz or []), *self.getriebe.preferred_models, *self.getriebe.preferred_providers]
+        if rolle is not None and self._bevorzugter_gang(rollenmodelle, kandidaten, gang) is None:
+            raise RuntimeError(f"no available model for role: {rolle}")
         bevorzugt = self._bevorzugter_gang(tokens, kandidaten, gang)
         if bevorzugt is not None and bevorzugt.name != gang.name:
             gang = bevorzugt
