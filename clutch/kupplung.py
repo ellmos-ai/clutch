@@ -155,6 +155,23 @@ class Kupplung:
             effort_override if effort_override is not None else basis.get("effort")
         )
 
+        # Budgetgrenzen gelten auch fuer eine explizite Modellwahl. Ein
+        # expliziter Selektor darf die harte Zone nicht umgehen oder still auf
+        # ein anderes Modell umgeleitet werden.
+        limit = max_gang if max_gang is not None else 5
+        if budget_zone:
+            zone_limit = max_gang_fuer_zone(self._budget_zonen, budget_zone)
+            if zone_limit == 0:
+                raise BudgetErschoepftError(
+                    f"kein verfügbarer Gang: Budget-Zone {budget_zone!r} "
+                    "erlaubt keinen LLM-Einsatz"
+                )
+            limit = min(limit, zone_limit)
+        if limit <= 0:
+            raise BudgetErschoepftError(
+                "kein verfügbarer Gang: das Budgetlimit erlaubt keinen LLM-Einsatz"
+            )
+
         if model_override:
             # Explizite Modellwahl: exakter Treffer, fail-closed, kein stilles Ersetzen/Exploration
             gang = self.getriebe.loese_modell(model_override)
@@ -164,21 +181,17 @@ class Kupplung:
                 rollenmodelle = self.getriebe.role_preferred_models(rolle)
                 if gang.name not in rollenmodelle:
                     raise ValueError(f"model {gang.name} is not configured for role: {rolle}")
-                limit = max_gang if max_gang is not None else 5
-                if budget_zone:
-                    zone_limit = max_gang_fuer_zone(self._budget_zonen, budget_zone)
-                    if zone_limit == 0:
-                        raise BudgetErschoepftError(
-                            f"kein verfuegbarer Gang: Budget-Zone {budget_zone!r} "
-                            "erlaubt keinen LLM-Einsatz"
-                        )
-                    limit = min(limit, zone_limit)
-                if gang.gang > limit:
-                    raise RuntimeError(f"model {gang.name} exceeds budget limit for role: {rolle}")
-                if not vertrauenswuerdig and gang.provider in AGENTIC_CLI_PROVIDERS:
-                    raise RuntimeError(f"model {gang.name} is not trusted for role: {rolle}")
                 if zweck == "vision" and "vision" not in gang.staerken:
                     raise RuntimeError(f"model {gang.name} lacks required vision for role: {rolle}")
+            if gang.gang > limit:
+                zone_text = f" in Budget-Zone {budget_zone!r}" if budget_zone else ""
+                raise RuntimeError(
+                    f"Modell '{gang.name}' überschreitet das Budgetlimit G{limit}{zone_text}"
+                )
+            if not vertrauenswuerdig and gang.provider in AGENTIC_CLI_PROVIDERS:
+                raise RuntimeError(
+                    f"Modell '{gang.name}' ist für nicht vertrauenswürdige Quellen gesperrt"
+                )
             basis_gas = basis.get("gas", 0.5)
             gas_wert = self.pedal.anpassen(
                 basis_gas,
@@ -222,15 +235,7 @@ class Kupplung:
                 gang = hochgeschaltet
 
         # 6. Budget-Constraint
-        limit = max_gang if max_gang is not None else 5
         if budget_zone:
-            zone_limit = max_gang_fuer_zone(self._budget_zonen, budget_zone)
-            if zone_limit == 0:
-                raise BudgetErschoepftError(
-                    f"kein verfuegbarer Gang: Budget-Zone {budget_zone!r} "
-                    "erlaubt keinen LLM-Einsatz"
-                )
-            limit = min(limit, zone_limit)
             if gang and gang.gang > limit:
                 guenstigere = self.getriebe.filter(max_gang=limit)
                 if guenstigere:

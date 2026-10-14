@@ -137,10 +137,22 @@ def test_explicit_model_and_role_must_match_and_obey_hard_gates(tmp_path):
     assert clutch.einlegen(task, rolle="reviewer", model_override="claude-haiku").gang.name == "claude-haiku"
     with pytest.raises(ValueError, match="not configured for role"):
         clutch.einlegen(task, rolle="reviewer", model_override="claude-opus")
-    with pytest.raises(RuntimeError, match="exceeds budget limit"):
+    with pytest.raises(RuntimeError, match="Budgetlimit"):
         clutch.einlegen(task, rolle="reviewer", model_override="claude-haiku", max_gang=0)
     with pytest.raises(RuntimeError, match="gesperrt"):
         clutch.einlegen(task, rolle="reviewer", model_override="claude-haiku", ausschluss=["claude-haiku"])
+
+    profile_path.write_text(json.dumps({"schema_version": "1.0.0", "models": [
+        _profile_model(name="claude-opus"),
+    ]}), encoding="utf-8")
+    with pytest.raises(RuntimeError, match="Budgetlimit"):
+        clutch.einlegen(task, rolle="reviewer", model_override="claude-opus", max_gang=1)
+
+    profile_path.write_text(json.dumps({"schema_version": "1.0.0", "models": [
+        _profile_model(name="claude-code", provider="claude-code"),
+    ]}), encoding="utf-8")
+    with pytest.raises(RuntimeError, match="nicht vertrauenswürdig"):
+        clutch.einlegen(task, rolle="reviewer", model_override="claude-code", vertrauenswuerdig=False)
 
 
 @pytest.mark.parametrize("models, error", [
