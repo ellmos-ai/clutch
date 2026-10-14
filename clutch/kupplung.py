@@ -126,6 +126,7 @@ class Kupplung:
         ausschluss: Optional[list[str]] = None,
         praeferenz: Optional[list[str]] = None,
         model_override: Optional[str] = None,
+        rolle: Optional[str] = None,
     ) -> FahrtConfig:
         """Bestimmt die optimale FahrtConfig fuer ein StreckenProfil.
 
@@ -138,7 +139,6 @@ class Kupplung:
             if isinstance(name, str) and name.strip()
         }
         blockiert = set(gesperrte) | ausgeschlossen
-
         # 1. Strecken-Lookup
         strecken_key = profil.typ.value
         if strecken_key in self._overrides:
@@ -160,6 +160,25 @@ class Kupplung:
             gang = self.getriebe.loese_modell(model_override)
             if gang.name in blockiert:
                 raise RuntimeError(f"Modell '{gang.name}' ist deaktiviert oder gesperrt")
+            if rolle is not None:
+                rollenmodelle = self.getriebe.role_preferred_models(rolle)
+                if gang.name not in rollenmodelle:
+                    raise ValueError(f"model {gang.name} is not configured for role: {rolle}")
+                limit = max_gang if max_gang is not None else 5
+                if budget_zone:
+                    zone_limit = max_gang_fuer_zone(self._budget_zonen, budget_zone)
+                    if zone_limit == 0:
+                        raise BudgetErschoepftError(
+                            f"kein verfuegbarer Gang: Budget-Zone {budget_zone!r} "
+                            "erlaubt keinen LLM-Einsatz"
+                        )
+                    limit = min(limit, zone_limit)
+                if gang.gang > limit:
+                    raise RuntimeError(f"model {gang.name} exceeds budget limit for role: {rolle}")
+                if not vertrauenswuerdig and gang.provider in AGENTIC_CLI_PROVIDERS:
+                    raise RuntimeError(f"model {gang.name} is not trusted for role: {rolle}")
+                if zweck == "vision" and "vision" not in gang.staerken:
+                    raise RuntimeError(f"model {gang.name} lacks required vision for role: {rolle}")
             basis_gas = basis.get("gas", 0.5)
             gas_wert = self.pedal.anpassen(
                 basis_gas,
@@ -303,7 +322,10 @@ class Kupplung:
         if gang.name not in {kandidat.name for kandidat in kandidaten}:
             gang = min(kandidaten, key=lambda kandidat: (abs(kandidat.gang - gang.gang), -kandidat.gang))
             ist_erkundung = False
-        tokens = [*(praeferenz or []), *self.getriebe.preferred_models, *self.getriebe.preferred_providers]
+        rollenmodelle = self.getriebe.role_preferred_models(rolle) if rolle is not None else []
+        tokens = [*rollenmodelle, *(praeferenz or []), *self.getriebe.preferred_models, *self.getriebe.preferred_providers]
+        if rolle is not None and self._bevorzugter_gang(rollenmodelle, kandidaten, gang) is None:
+            raise RuntimeError(f"no available model for role: {rolle}")
         bevorzugt = self._bevorzugter_gang(tokens, kandidaten, gang)
         if bevorzugt is not None and bevorzugt.name != gang.name:
             gang = bevorzugt

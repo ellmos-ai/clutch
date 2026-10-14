@@ -22,8 +22,7 @@ from pathlib import Path
 from typing import Any, Callable, Optional
 
 from clutch.strecke import StreckenAnalyse, StreckenProfil
-from clutch.gang import Gang
-from clutch.getriebe import Getriebe
+from clutch.getriebe import Gang, Getriebe
 from clutch.kupplung import Kupplung, FahrtConfig
 from clutch.fahrtenbuch import Fahrtenbuch
 from clutch.bordcomputer import Bordcomputer
@@ -133,7 +132,8 @@ class Fahrer:
                 effort_override: Optional[str] = None,
                 ausschluss: Optional[list[str]] = None,
                 praeferenz: Optional[list[str]] = None,
-                model_override: Optional[str] = None) -> FahrtConfig:
+                model_override: Optional[str] = None,
+                rolle: Optional[str] = None) -> FahrtConfig:
         """Kuppelt: Waehlt Gang und Gas basierend auf Strecke + Systemzustand.
 
         zweck (coding/vision/research/...) steuert das Zweck-Routing (M2):
@@ -159,6 +159,7 @@ class Fahrer:
             ausschluss=ausschluss,
             praeferenz=praeferenz,
             model_override=model_override,
+            rolle=rolle,
         )
 
         # Gesperrtes Modell Fallback (nur bei Auto-Routing)

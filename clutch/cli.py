@@ -89,6 +89,7 @@ def _cmd_route(args: argparse.Namespace) -> int:
             ausschluss=args.exclude,
             praeferenz=args.prefer,
             model_override=getattr(args, "model", None),
+            rolle=args.rolle,
         )
 
         ergebnis = {
@@ -714,6 +715,8 @@ def _build_subparser(subparsers: argparse._SubParsersAction) -> None:  # noqa: S
     p_route.add_argument("--prefer", action="extend", nargs="+", default=[], metavar="GANG|PROVIDER")
     p_route.add_argument("--exclude", "--skip", action="extend", nargs="+", default=[], metavar="GANG")
     p_route.add_argument("--zweck", default=None, metavar="ZWECK")
+    p_route.add_argument("--rolle", choices=["thinker", "worker", "draft", "reviewer", "escalation"],
+                         help="Explizite Rolle; benötigt role_preferred_models oder role_profile_path im privaten Overlay")
     p_route.add_argument("--effort", choices=["none", "low", "medium", "high", "xhigh", "max", "max-delegate"])
     p_route.add_argument("--model", metavar="MODELL", default=None, help="Bestimmtes Modell für die Routing-Vorschau wählen")
 
