@@ -102,7 +102,7 @@ class Getriebe:
         self._preferred_models: list[str] = []
         self._preferred_providers: list[str] = []
         self._role_preferred_models: dict[str, list[str]] = {}
-        self._role_profile_path: Optional[str] = None
+        self._role_profile_path: object = None
         self._aliases: dict[str, str] = {}
         self._model_max_gang: dict[str, object] = {}
         self._model_cost_overrides: dict[str, object] = {}
@@ -292,7 +292,7 @@ class Getriebe:
         if role not in {"thinker", "worker", "draft", "reviewer", "escalation"}:
             raise ValueError(f"unknown routing role: {role}")
         configured = self._role_preferred_models
-        if self._role_profile_path:
+        if self._role_profile_path is not None:
             if configured:
                 raise ValueError("role profile and manual role preferences are mutually exclusive")
             configured = self._load_role_profile()
@@ -306,7 +306,9 @@ class Getriebe:
 
     def _load_role_profile(self) -> dict[str, list[str]]:
         """Read an explicitly selected private model-strategy profile for role routing."""
-        path = Path(self._role_profile_path or "")
+        if not isinstance(self._role_profile_path, str) or not self._role_profile_path:
+            raise ValueError("role profile path must be a nonempty absolute string")
+        path = Path(self._role_profile_path)
         if not path.is_absolute() or not path.is_file():
             raise ValueError("role profile must be an existing absolute file")
         try:

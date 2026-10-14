@@ -154,6 +154,17 @@ def test_private_profile_path_schema_and_conflicting_manual_map_fail_closed(tmp_
                              encoding="utf-8")
     with pytest.raises(ValueError, match="mutually exclusive"):
         Getriebe(overrides_path=override_path).role_preferred_models("reviewer")
+    override_path.write_text(json.dumps({"role_profile_path": 42,
+                                         "role_preferred_models": {"reviewer": ["claude-haiku"]}}),
+                             encoding="utf-8")
+    with pytest.raises(ValueError, match="mutually exclusive"):
+        Getriebe(overrides_path=override_path).role_preferred_models("reviewer")
+    override_path.write_text(json.dumps({"role_profile_path": 42}), encoding="utf-8")
+    with pytest.raises(ValueError, match="nonempty absolute string"):
+        Getriebe(overrides_path=override_path).role_preferred_models("reviewer")
+    override_path.write_text(json.dumps({"role_profile_path": ""}), encoding="utf-8")
+    with pytest.raises(ValueError, match="nonempty absolute string"):
+        Getriebe(overrides_path=override_path).role_preferred_models("reviewer")
     override_path.write_text(json.dumps({"role_profile_path": "relative.json"}), encoding="utf-8")
     with pytest.raises(ValueError, match="absolute"):
         Getriebe(overrides_path=override_path).role_preferred_models("reviewer")
