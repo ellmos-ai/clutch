@@ -14,6 +14,7 @@ DEFAULT_OVERRIDES: dict[str, Any] = {
     "preferred_models": [],
     "preferred_providers": [],
     "role_preferred_models": {},
+    "role_profile_path": None,
     "model_max_gang": {},
     "aliases": {},
     "model_cost_override": {},
@@ -52,6 +53,8 @@ def normalisiere_overrides(data: Any) -> dict[str, Any]:
         role: _normalisiere_liste(models)
         for role, models in roles.items()
     } if isinstance(roles, dict) else {}
+    profile_path = source.get("role_profile_path")
+    result["role_profile_path"] = profile_path if isinstance(profile_path, str) else None
     for key in ("model_max_gang", "aliases", "model_cost_override"):
         result[key] = source.get(key) if isinstance(source.get(key), dict) else {}
     return result

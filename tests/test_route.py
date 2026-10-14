@@ -77,6 +77,95 @@ def test_cli_role_reaches_private_overlay_reader(tmp_path, monkeypatch, capsys):
     assert "no available model for role: reviewer" in capsys.readouterr().err
 
 
+def _write_role_profile(tmp_path, models):
+    path = tmp_path / "models.profile.json"
+    path.write_text(json.dumps({"schema_version": "1.0.0", "models": models}), encoding="utf-8")
+    return path
+
+
+def _profile_model(name="claude-haiku", provider="anthropic", verified=True,
+                   roles=None):
+    return {"id": name, "provider": provider, "verified": verified,
+            "deprecated": False, "roles": roles or ["reviewer"]}
+
+
+def test_explicit_private_profile_is_read_and_mapped_to_role_candidates(tmp_path):
+    profile_path = _write_role_profile(tmp_path, [_profile_model()])
+    override_path = tmp_path / "user_overrides.json"
+    override_path.write_text(json.dumps({"role_profile_path": str(profile_path)}), encoding="utf-8")
+    gearbox = Getriebe(overrides_path=override_path)
+    clutch = Kupplung(gearbox)
+    clutch.set_erkundungsrate(0)
+    task = StreckenAnalyse().analysiere("Fix the typo in the docstring")
+    baseline = clutch.einlegen(task).gang.name
+    assert gearbox.role_preferred_models("reviewer") == ["claude-haiku"]
+    assert clutch.einlegen(task, rolle="reviewer").gang.name == "claude-haiku"
+    assert clutch.einlegen(task).gang.name == baseline
+    profile_path.write_text(json.dumps({"schema_version": "1.0.0",
+                                        "models": [_profile_model(verified=False)]}),
+                            encoding="utf-8")
+    with pytest.raises(ValueError, match="unverified"):
+        clutch.einlegen(task, rolle="reviewer")
+    assert clutch.einlegen(task).gang.name == baseline
+
+
+def test_explicit_profile_cannot_override_disabled_budget_or_trust_gates(tmp_path):
+    profile_path = _write_role_profile(tmp_path, [_profile_model(name="claude-opus")])
+    override_path = tmp_path / "user_overrides.json"
+    override_path.write_text(json.dumps({"role_profile_path": str(profile_path)}), encoding="utf-8")
+    clutch = Kupplung(Getriebe(overrides_path=override_path))
+    clutch.set_erkundungsrate(0)
+    task = StreckenAnalyse().analysiere("Fix the typo in the docstring")
+    with pytest.raises(RuntimeError, match="no available model"):
+        clutch.einlegen(task, rolle="reviewer", max_gang=3)
+    profile_path.write_text(json.dumps({"schema_version": "1.0.0", "models": [
+        _profile_model(name="claude-code", provider="claude-code")]}), encoding="utf-8")
+    with pytest.raises(RuntimeError, match="no available model"):
+        clutch.einlegen(task, rolle="reviewer", vertrauenswuerdig=False)
+    override_path.write_text(json.dumps({"role_profile_path": str(profile_path),
+                                         "disabled_models": ["claude-code"]}), encoding="utf-8")
+    with pytest.raises(RuntimeError, match="no available model"):
+        Kupplung(Getriebe(overrides_path=override_path)).einlegen(task, rolle="reviewer")
+
+
+@pytest.mark.parametrize("models, error", [
+    ([_profile_model(verified=False)], "unverified"),
+    ([_profile_model(name="gpt-6-luna", provider="openai-codex")], "unregistered"),
+    ([_profile_model(provider="openai-codex")], "provider"),
+    ([_profile_model(roles=["old-reviewer"])], "invalid roles"),
+    ([_profile_model(), _profile_model()], "duplicate"),
+])
+def test_private_profile_rejects_unverified_unknown_and_ambiguous_entries(
+    tmp_path, models, error,
+):
+    profile_path = _write_role_profile(tmp_path, models)
+    override_path = tmp_path / "user_overrides.json"
+    override_path.write_text(json.dumps({"role_profile_path": str(profile_path)}), encoding="utf-8")
+    gearbox = Getriebe(overrides_path=override_path)
+    with pytest.raises(ValueError, match=error):
+        gearbox.role_preferred_models("reviewer")
+
+
+def test_private_profile_path_schema_and_conflicting_manual_map_fail_closed(tmp_path):
+    profile_path = _write_role_profile(tmp_path, [_profile_model()])
+    override_path = tmp_path / "user_overrides.json"
+    override_path.write_text(json.dumps({"role_profile_path": str(profile_path),
+                                         "role_preferred_models": {"reviewer": ["claude-haiku"]}}),
+                             encoding="utf-8")
+    with pytest.raises(ValueError, match="mutually exclusive"):
+        Getriebe(overrides_path=override_path).role_preferred_models("reviewer")
+    override_path.write_text(json.dumps({"role_profile_path": "relative.json"}), encoding="utf-8")
+    with pytest.raises(ValueError, match="absolute"):
+        Getriebe(overrides_path=override_path).role_preferred_models("reviewer")
+    profile_path.write_text("{bad json", encoding="utf-8")
+    override_path.write_text(json.dumps({"role_profile_path": str(profile_path)}), encoding="utf-8")
+    with pytest.raises(ValueError, match="invalid JSON"):
+        Getriebe(overrides_path=override_path).role_preferred_models("reviewer")
+    profile_path.write_text(json.dumps({"schema_version": "future", "models": []}), encoding="utf-8")
+    with pytest.raises(ValueError, match="schema"):
+        Getriebe(overrides_path=override_path).role_preferred_models("reviewer")
+
+
 def test_feldweg_erkennung():
     """Triviale Tasks (Typos, Formatting) -> Feldweg."""
     a = StreckenAnalyse()
