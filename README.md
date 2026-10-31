@@ -400,19 +400,22 @@ After `pip install -e .` the `clutch` command is available:
 ```bash
 clutch route "Fix the auth bug"      # show the routing decision (dry-run, no LLM call)
 clutch route "..." --prefer codex --exclude claude-sonnet --zweck coding --effort high
-clutch "Explain quantum computing"    # one-shot: route + execute, print the answer
-clutch run "..." --json               # machine-readable output (for other agents)
-clutch chat                           # interactive REPL
-clutch models [--status] [--json]     # models plus optional availability/reset reason
-clutch models disable claude-sonnet   # persistent, update-safe user override
+clutch route "..." --model ollama-glm-5.3     # preview route for an explicit model
+clutch "Explain quantum computing"            # one-shot: auto-route + execute, print answer
+clutch "..." --model ollama-glm-5.3           # one-shot: explicit model (fail-closed if unavailable)
+clutch run "..." --model claude-sonnet        # run with explicit model
+clutch run "..." --json                       # machine-readable output (for other agents)
+clutch chat [--model <selector>]              # interactive REPL (auto-route or explicit model)
+clutch models [--status] [--json]             # models plus optional availability/reset reason
+clutch models disable claude-sonnet           # persistent, update-safe user override
 clutch models enable claude-sonnet
-clutch resolve gpt5 --runner codex --json  # resolve only; never executes a model
-clutch config prefer openai           # prefer a model or provider persistently
-clutch stats                          # usage / budget / health dashboard
-clutch config <key> [value]           # read/set CLI settings
-clutch keys set MOONSHOT_API_KEY      # store an API key (hidden input; values never shown)
-clutch keys list                      # list stored key names (not values)
-clutch serve --web                    # start the web UI (needs: pip install clutch[web])
+clutch resolve gpt5 --runner codex --json     # resolve only; never executes a model
+clutch config prefer openai                   # prefer a model or provider persistently
+clutch stats                                  # usage / budget / health dashboard
+clutch config <key> [value]                   # read/set CLI settings
+clutch keys set MOONSHOT_API_KEY              # store an API key (hidden input; values never shown)
+clutch keys list                              # list stored key names (not values)
+clutch serve --web                            # start the web UI (needs: pip install clutch[web])
 ```
 
 Three usage modes: **console** (humans), **web UI** (humans, graphical), and **CLI/API**

@@ -101,6 +101,8 @@ class Getriebe:
         self._disabled_models: set[str] = set()
         self._preferred_models: list[str] = []
         self._preferred_providers: list[str] = []
+        self._role_preferred_models: dict[str, list[str]] = {}
+        self._role_profile_path: object = None
         self._aliases: dict[str, str] = {}
         self._model_max_gang: dict[str, object] = {}
         self._model_cost_overrides: dict[str, object] = {}
@@ -205,6 +207,8 @@ class Getriebe:
             for name in overrides.get("preferred_models", [])
         ]
         self._preferred_providers = list(overrides.get("preferred_providers", []))
+        self._role_preferred_models = overrides.get("role_preferred_models", {})
+        self._role_profile_path = overrides.get("role_profile_path")
         self._model_max_gang = {
             self._aliases.get(name, name): value
             for name, value in overrides.get("model_max_gang", {}).items()
@@ -264,6 +268,11 @@ class Getriebe:
             return None
         return self._gaenge.get(canonical)
 
+    def loese_modell(self, selector: str) -> Gang:
+        """Löst einen Modell-Selektor zu einem konkreten Gang auf."""
+        from clutch.execution import resolve_model
+        return resolve_model(selector, getriebe=self)
+
     def alle_gaenge(self, einschliesslich_deaktiviert: bool = False) -> list[Gang]:
         """Alle registrierten Gaenge, sortiert nach Gang-Nummer."""
         values = self._gaenge.values()
@@ -282,6 +291,62 @@ class Getriebe:
     @property
     def preferred_providers(self) -> list[str]:
         return list(getattr(self, "_preferred_providers", []))
+
+    def role_preferred_models(self, role: str) -> list[str]:
+        """Return a strictly configured role preference, never a guessed model."""
+        if role not in {"thinker", "worker", "draft", "reviewer", "escalation"}:
+            raise ValueError(f"unknown routing role: {role}")
+        configured = self._role_preferred_models
+        if self._role_profile_path is not None:
+            if configured:
+                raise ValueError("role profile and manual role preferences are mutually exclusive")
+            configured = self._load_role_profile()
+        models = configured.get(role)
+        if not models:
+            raise ValueError(f"no model preference configured for role: {role}")
+        for name in models:
+            if self.gang(name, einschliesslich_deaktiviert=True) is None:
+                raise ValueError(f"unknown model for role {role}: {name}")
+        return list(models)
+
+    def _load_role_profile(self) -> dict[str, list[str]]:
+        """Read an explicitly selected private model-strategy profile for role routing."""
+        if not isinstance(self._role_profile_path, str) or not self._role_profile_path:
+            raise ValueError("role profile path must be a nonempty absolute string")
+        path = Path(self._role_profile_path)
+        if not path.is_absolute() or not path.is_file():
+            raise ValueError("role profile must be an existing absolute file")
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, json.JSONDecodeError) as error:
+            raise ValueError("role profile is unreadable or invalid JSON") from error
+        if not isinstance(data, dict) or data.get("schema_version") != "1.0.0":
+            raise ValueError("unsupported role profile schema")
+        entries = data.get("models")
+        if not isinstance(entries, list) or not entries:
+            raise ValueError("role profile needs a nonempty models list")
+        known_roles = {"thinker", "worker", "draft", "reviewer", "escalation"}
+        by_role: dict[str, list[str]] = {}
+        seen: set[str] = set()
+        for entry in entries:
+            if not isinstance(entry, dict):
+                raise ValueError("invalid role profile model entry")
+            name, provider, roles = entry.get("id"), entry.get("provider"), entry.get("roles")
+            if not isinstance(name, str) or not name or name in seen:
+                raise ValueError("invalid or duplicate role profile model ID")
+            seen.add(name)
+            gang = self._gaenge.get(name)
+            if gang is None or gang.provider != provider:
+                raise ValueError(f"unregistered model or provider in role profile: {name}")
+            if entry.get("verified") is not True or entry.get("deprecated") is not False:
+                raise ValueError(f"unverified or deprecated role profile model: {name}")
+            if not isinstance(roles, list) or not roles or any(
+                not isinstance(item, str) or item not in known_roles for item in roles
+            ) or len(set(roles)) != len(roles):
+                raise ValueError(f"invalid roles in role profile model: {name}")
+            for item in roles:
+                by_role.setdefault(item, []).append(name)
+        return by_role
 
     @property
     def aliases(self) -> dict[str, str]:

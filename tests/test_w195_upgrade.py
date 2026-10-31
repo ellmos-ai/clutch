@@ -232,7 +232,7 @@ def test_u2_overlay_deaktiviert_alias_begrenzt_gang_und_kosten(tmp_path):
     kupplung.set_erkundungsrate(0)
     config = kupplung.einlegen(StreckenAnalyse().analysiere("smoke"))
     assert config.gang.name == "openai-codex"
-    with pytest.raises(RuntimeError, match="kein verfuegbarer Gang"):
+    with pytest.raises(RuntimeError, match="kein verfügbarer Gang"):
         kupplung.einlegen(StreckenAnalyse().analysiere("smoke"), budget_zone="red")
 
 

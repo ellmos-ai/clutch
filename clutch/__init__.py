@@ -37,6 +37,7 @@ from clutch.execution import (
     normalize_selector_token,
     refresh_provider_catalog,
     resolve_execution_selector,
+    resolve_model,
 )
 
 __all__ = [
@@ -48,5 +49,5 @@ __all__ = [
     "ModelAvailability", "ProviderCatalogAdapter", "ProviderCatalogApplyResult",
     "ProviderCatalogDiff", "ProviderCatalogEntry", "ProviderCatalogSnapshot",
     "ProviderRefreshResult", "apply_provider_catalog", "normalize_selector_token",
-    "refresh_provider_catalog", "resolve_execution_selector",
+    "refresh_provider_catalog", "resolve_execution_selector", "resolve_model",
 ]

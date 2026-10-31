@@ -90,10 +90,11 @@ class ChatRuntime:
     # -- Chat --------------------------------------------------------------
 
     def chat(self, session_id: str, user_text: str, hat_bild: bool = False,
-             vertrauenswuerdig: bool = True) -> dict:
+             vertrauenswuerdig: bool = True,
+             model: Optional[str] = None) -> dict:
         session = self.sessions.session(session_id)
         if session is None:
-            session = self.neue_session()
+            session = self.neue_session(model_override=model)
             session_id = session.id
 
         vollprompt = self._baue_vollprompt(session, user_text)
@@ -103,8 +104,10 @@ class ChatRuntime:
                                   attachments=["<bild>"] if hat_bild else None)
 
         kontext = {"hat_bild": hat_bild, "vertrauenswuerdig": vertrauenswuerdig}
-        if session.model_override:
-            kontext["model_override"] = session.model_override
+        model_choice = model or session.model_override
+        if model_choice:
+            gang = self.fahrer.loese_modell(model_choice)
+            kontext["model_override"] = gang.name
 
         erg = self.fahrer.fahren(vollprompt, handler=self.handler, kontext=kontext)
 
