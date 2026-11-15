@@ -75,6 +75,8 @@ def get_lang() -> str:
 
 def _lade_locale(lang: str) -> dict[str, str]:
     """Lädt und cached locales/<lang>.json. Gibt {} bei Fehler zurück."""
+    if lang not in LANGS:
+        return {}
     if lang in _cache:
         return _cache[lang]
     pfad = _LOCALES_DIR / f"{lang}.json"

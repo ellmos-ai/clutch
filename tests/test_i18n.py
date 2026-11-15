@@ -42,6 +42,20 @@ def test_verfuegbare_sprachen_entspricht_langs():
     assert set(verfuegbare_sprachen()) == set(LANGS)
 
 
+def test_lade_locale_verwirft_path_traversal(tmp_path, monkeypatch):
+    locales_dir = tmp_path / "locales"
+    locales_dir.mkdir()
+    (tmp_path / "sentinel.json").write_text(
+        '{"outside": "must not be loaded"}', encoding="utf-8"
+    )
+    monkeypatch.setattr(i18n, "_LOCALES_DIR", locales_dir)
+    i18n._cache.pop("../sentinel", None)
+    try:
+        assert i18n._lade_locale("../sentinel") == {}
+    finally:
+        i18n._cache.pop("../sentinel", None)
+
+
 # ---------------------------------------------------------------------------
 # set_lang / get_lang
 # ---------------------------------------------------------------------------
