@@ -35,31 +35,18 @@ def test_katalog_gemini_37_flash():
     print(f"[OK] Katalog kennt {NEU} ({neu.model_id})")
 
 
-def test_37_ist_der_bevorzugte_flash_gang():
-    """Bevorzugung entsteht durch die Position vor gemini-flash im Katalog.
-
-    Bei gleicher Stufe gewinnt der zuerst eingetragene Gang: `filter` sortiert
-    stabil, `naechster_gang_hoch`/`-runter` nehmen das erste Extremum.
+def test_37_bleibt_bevorzugter_3x_flash_fallback():
+    """Gemini 3.7 Flash steht seit 2026-11-23 hinter Gemini 4 Hydrogen, bleibt
+    aber weiterhin vor dem aelteren gemini-flash (3.5) geordnet.
     """
     g = Getriebe()
 
-    hoch = g.naechster_gang_hoch("claude-haiku")
-    assert hoch is not None and hoch.name == NEU, (
-        f"Upshift aus G1 muss auf {NEU} laufen, ging auf "
-        f"{hoch.name if hoch else None}"
-    )
-
-    runter = g.naechster_gang_runter("claude-sonnet")
-    assert runter is not None and runter.name == NEU, (
-        f"Downshift aus G3 muss auf {NEU} laufen, ging auf "
-        f"{runter.name if runter else None}"
-    )
-
-    # Innerhalb der Google-Flash-Stufe steht 3.7 vor 3.5.
+    # Innerhalb der Google-G2-Stufe: Gemini 4 Hydrogen -> 3.7 Flash -> 3.5 Flash.
     google_g2 = [x.name for x in g.filter(provider="google", max_gang=2)]
+    assert google_g2.index("gemini-4-hydrogen") < google_g2.index(NEU)
     assert google_g2.index(NEU) < google_g2.index(ALT)
 
-    print(f"[OK] {NEU} ist der bevorzugte Flash-Gang")
+    print(f"[OK] {NEU} bleibt bevorzugter 3.x-Flash-Fallback vor {ALT}")
 
 
 def test_gemini_35_flash_bleibt_als_fallback():
@@ -70,11 +57,13 @@ def test_gemini_35_flash_bleibt_als_fallback():
     assert alt.model_id == "gemini-3.5-flash"
     assert alt.gang == 2
 
-    # Faellt 3.7 aus (Circuit-Breaker), bleibt in der Flash-Stufe ein
-    # Google-Gang uebrig -- der Fallback ist real erreichbar.
-    ohne_37 = [x for x in g.filter(provider="google", max_gang=2)
-               if x.name != NEU]
-    assert [x.name for x in ohne_37] == [ALT]
+    # Fallen Hydrogen und 3.7 aus (Circuit-Breaker), bleibt in G2 weiterhin
+    # gemini-flash (3.5) als Google-Fallback erreichbar.
+    ohne_neuere = [
+        x for x in g.filter(provider="google", max_gang=2)
+        if x.name not in {"gemini-4-hydrogen", NEU}
+    ]
+    assert [x.name for x in ohne_neuere] == [ALT]
 
     print(f"[OK] {ALT} bleibt als Fallback erhalten")
 
@@ -106,7 +95,7 @@ def test_keine_umgewichtung_anderer_gaenge():
 
 if __name__ == "__main__":
     test_katalog_gemini_37_flash()
-    test_37_ist_der_bevorzugte_flash_gang()
+    test_37_bleibt_bevorzugter_3x_flash_fallback()
     test_gemini_35_flash_bleibt_als_fallback()
     test_keine_umgewichtung_anderer_gaenge()
     print("\n=== ALLE 4 TESTS BESTANDEN ===")

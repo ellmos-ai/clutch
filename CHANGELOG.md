@@ -11,6 +11,7 @@ Provider-Katalogvertrag, ohne zwischenzeitliche Modell-, CI- oder
 Multi-Host-Änderungen zu überschreiben.
 
 ### Added
+- **Google Gemini-4-Modellfamilie (`2026-11-23`)**: Neue direkte Google-API-Gänge `gemini-4-carbon` (G5), `gemini-4-neon` (G5), `gemini-4-argon` (G4) und `gemini-4-hydrogen` (G2, neuer bevorzugter schneller Google-Gang vor `gemini-3.7-flash` und `gemini-flash`) sowie die live über `agy 1.5.14` verifizierten `agy`-Gänge `agy-gemini-4-carbon`, `agy-gemini-4-neon`, `agy-gemini-4-argon` und `agy-gemini-4-hydrogen` im Getriebe (`clutch/config/getriebe.json`) ergänzt. Bestehende `3.x`-Gänge (`gemini-pro`, `gemini-3.7-flash`, `gemini-flash`, `agy-gemini-3.x`) bleiben rückwärtskompatibel als Fallbacks erhalten.
 - Öffentliche, JSON-fähige Auflösung für Runner, `self`, Familien, exakte
   Registrynamen und Modell-IDs samt Aliasnormalisierung und stabilem
   Registry-Fingerprint; `clutch resolve` stellt denselben Vertrag per CLI bereit.
