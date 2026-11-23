@@ -111,6 +111,10 @@ def test_fahrer_verbucht_tokens_und_kosten():
                 output_tokens=500,
                 model_id=config.model_id,
                 provider=config.provider,
+                # Ohne gemessenen Usage-Status bucht der Fahrer bewusst keine
+                # Kosten (unmetered). Die Gang-Wahl ist explorativ und trifft
+                # gelegentlich einen bezahlten Gang -- dann muss gebucht werden.
+                usage_status="observed",
             )
 
         erg = fahrer.fahren("Implementiere ein neues Feature", handler=handler)
