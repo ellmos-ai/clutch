@@ -93,14 +93,16 @@ def test_pyproject_configuration_and_classifiers():
 
 
 def test_readme_google_model_table_matches_catalog():
-    """Verify that maintained READMEs document the current preferred Google Flash gear."""
+    """Verify that maintained READMEs document the current Gemini 4 lineup and fallbacks."""
     readme_en = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
     readme_de = (REPO_ROOT / "README_de.md").read_text(encoding="utf-8")
 
-    assert "Gemini 3.7 Flash (preferred)" in readme_en, "README.md must list Gemini 3.7 Flash as preferred"
-    assert "Gemini 3.5 Flash fallback" in readme_en, "README.md must keep Gemini 3.5 Flash as fallback"
-    assert "Gemini 3.7 Flash (bevorzugt)" in readme_de, "README_de.md must list Gemini 3.7 Flash as preferred"
-    assert "Gemini 3.5 Flash als Fallback" in readme_de, "README_de.md must keep Gemini 3.5 Flash as fallback"
+    assert "Gemini 4 Carbon" in readme_en, "README.md must list Gemini 4 Carbon"
+    assert "Gemini 4 Hydrogen (preferred)" in readme_en, "README.md must list Gemini 4 Hydrogen as preferred"
+    assert "Gemini 3.5 Flash" in readme_en, "README.md must keep Gemini 3.5 Flash fallback"
+    assert "Gemini 4 Carbon" in readme_de, "README_de.md must list Gemini 4 Carbon"
+    assert "Gemini 4 Hydrogen (bevorzugt)" in readme_de, "README_de.md must list Gemini 4 Hydrogen as preferred"
+    assert "Gemini 3.5 Flash" in readme_de, "README_de.md must keep Gemini 3.5 Flash fallback"
     assert "Execution selectors and provider evidence" in readme_en
     assert "Ausführungsselektoren und Provider-Evidenz" in readme_de
 

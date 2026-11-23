@@ -48,6 +48,51 @@
       "schwaechen": ["komplexe_tasks", "architektur"],
       "max_context": 200000
     },
+    "gemini-4-carbon": {
+      "provider": "google",
+      "model_id": "gemini-4-carbon",
+      "gang": 5,
+      "leistung": "max",
+      "kosten_input_1k": 0.002,
+      "kosten_output_1k": 0.010,
+      "_doc": "Googles staerkstes Gemini-4-Frontier-Reasoning-Modell fuer schwerste Wissenschafts-, Architektur-, Security- und Agentenaufgaben (1M einheitlicher Kontext, Long-Decode bis 1M). Einfuehrungspreis bis 2026-11-30: 2.00/10.00 USD je 1M Token (Cached Input 0.10 USD); ab 2026-12-01 gilt laut Google 4.00/20.00 USD je 1M Token (Cached Input 0.20 USD) -- dann hier nachziehen. Unterstuetzt thinking_level low/medium/high (Default medium); der GeminiMotor reicht efforts derzeit noch nicht direkt an die API durch.",
+      "staerken": ["komplexes_reasoning", "wissenschaft", "coding", "architektur", "agentisch", "grosse_kontexte", "multimodal"],
+      "schwaechen": ["kosten", "latenz"],
+      "max_context": 1048576,
+      "efforts": ["low", "medium", "high"],
+      "catalog_checked_at": "2026-11-23",
+      "catalog_source": "https://ai.google.dev/gemini-api/docs/models"
+    },
+    "gemini-4-neon": {
+      "provider": "google",
+      "model_id": "gemini-4-neon",
+      "gang": 5,
+      "leistung": "max",
+      "kosten_input_1k": 0.003,
+      "kosten_output_1k": 0.015,
+      "_doc": "Gemini 4 Neon: Frontier-Allrounder zwischen Hydrogen und Carbon fuer anspruchsvolle Coding-, Analyse- und Agentenaufgaben (1M einheitlicher Kontext). Preis: 3.00/15.00 USD je 1M Token (Cached Input 0.15 USD, 95 % Rabatt). Unterstuetzt thinking_level low/medium/high/xhigh (Default high).",
+      "staerken": ["komplexes_reasoning", "coding", "agentisch", "grosse_kontexte", "multimodal"],
+      "schwaechen": ["kosten"],
+      "max_context": 1048576,
+      "efforts": ["low", "medium", "high", "xhigh"],
+      "catalog_checked_at": "2026-11-23",
+      "catalog_source": "https://ai.google.dev/gemini-api/docs/models"
+    },
+    "gemini-4-argon": {
+      "provider": "google",
+      "model_id": "gemini-4-argon",
+      "gang": 4,
+      "leistung": "hoch",
+      "kosten_input_1k": 0.002,
+      "kosten_output_1k": 0.010,
+      "_doc": "Gemini 4 Argon: Effizientes Frontier-Reasoning-Modell mit 1M einheitlichem Kontext und moderaterem Thinking-Verbrauch als Carbon. Steht bewusst VOR 'gemini-pro' (3.1-pro-preview) als bevorzugter G4-Google-Gang. Einfuehrungspreis bis 2026-11-30: 2.00/10.00 USD je 1M Token; ab 2026-12-01 laut Google 4.00/20.00 USD je 1M Token.",
+      "staerken": ["reasoning", "grosse_kontexte", "multimodal", "agentisch", "coding"],
+      "schwaechen": ["api_kosten"],
+      "max_context": 1048576,
+      "efforts": ["low", "medium", "high"],
+      "catalog_checked_at": "2026-11-23",
+      "catalog_source": "https://ai.google.dev/gemini-api/docs/models"
+    },
     "gemini-pro": {
       "provider": "google",
       "model_id": "gemini-3.1-pro-preview",
@@ -55,12 +100,27 @@
       "leistung": "hoch",
       "kosten_input_1k": 0.002,
       "kosten_output_1k": 0.012,
-      "_doc": "Aktueller offizieller Pro-API-Weg. Preview-Modell; Preise gelten fuer Prompts bis 200k Token, darueber gelten hoehere Raten.",
+      "_doc": "Aelterer offizieller Pro-Preview-API-Weg; seit 2026-11-23 Fallback hinter 'gemini-4-argon' (bleibt fuer Rueckwaertskompatibilitaet und Overrides erhalten). Preise gelten fuer Prompts bis 200k Token, darueber gelten hoehere Raten.",
       "staerken": ["reasoning", "grosse_kontexte", "multimodal", "agentisch", "coding"],
       "schwaechen": ["preview_lifecycle", "hoehere_preise_ueber_200k"],
       "max_context": 1048576,
       "catalog_checked_at": "2026-07-28",
       "catalog_source": "https://ai.google.dev/gemini-api/docs/models/gemini-3.1-pro-preview"
+    },
+    "gemini-4-hydrogen": {
+      "provider": "google",
+      "model_id": "gemini-4-hydrogen",
+      "gang": 2,
+      "leistung": "mittel",
+      "kosten_input_1k": 0.0015,
+      "kosten_output_1k": 0.0075,
+      "_doc": "Aktuelles schnelles Gemini-4-Standardmodell fuer Coding, Alltags- und Agenten-Workflows und offizieller Nachfolger der Gemini-3.x-Flash-Reihe [U 2026-11-23]. REIHENFOLGE IST BEDEUTSAM -- steht bewusst VOR 'gemini-3.7-flash' und 'gemini-flash' (3.5), damit Upshift aus G1 und Downshift aus G3 auf Gemini 4 Hydrogen landen, waehrend die 3.x-Flash-Eintraege als Fallback erreichbar bleiben. Einheitlicher 1M-Kontext; Preis 1.50/7.50 USD je 1M Token (Cached Input 0.075 USD). Unterstuetzt thinking_level low/medium/high/xhigh (Default high); der GeminiMotor reicht efforts derzeit noch nicht direkt an die API durch.",
+      "staerken": ["speed", "agentisch", "coding", "grosse_kontexte", "bulk"],
+      "schwaechen": ["tiefe_analyse"],
+      "max_context": 1048576,
+      "efforts": ["low", "medium", "high", "xhigh"],
+      "catalog_checked_at": "2026-11-23",
+      "catalog_source": "https://ai.google.dev/gemini-api/docs/models"
     },
     "gemini-3.7-flash": {
       "provider": "google",
@@ -69,7 +129,7 @@
       "leistung": "mittel",
       "kosten_input_1k": 0.00075,
       "kosten_output_1k": 0.00375,
-      "_doc": "Aktuelles Flash-Modell und bevorzugter Flash-Gang: Laut Nutzer stabiler und besser als die Vorgaenger-Generation [U 2026-08-13]. REIHENFOLGE IST BEDEUTSAM -- dieser Eintrag steht bewusst VOR 'gemini-flash' (3.5): Bei gleicher Stufe gewinnt der zuerst eingetragene Gang (stabile Sortierung in Getriebe.filter, erstes Minimum in naechster_gang_hoch/-runter), dadurch ist 3.7 der Standard und 3.5 bleibt als Fallback erreichbar. Stufe bewusst G2 wie 'gemini-flash', damit sich die Auswahl anderer Modelle nicht verschiebt; 'staerken' sind absichtlich identisch zu 'gemini-flash'. Preise sind der Einfuehrungspreis (0.75/3.75 USD je 1M Token) und liegen damit unter dem 3.5-Flash-Eintrag; ab 2027-01-01 gilt laut Google 1.50/7.50 -- dann hier nachziehen. 'efforts' gibt die Denkstufen des Modells wieder (thinking_level, Default medium); der GeminiMotor reicht sie derzeit NICHT an die API durch -- die Reasoning-Tiefe steuert clutch ueber das Gaspedal (grob low~0.3 / medium~0.5 / high~0.9). Max. Ausgabe 64k Token.",
+      "_doc": "Aelteres Flash-Modell (Gemini 3.7 Flash): Seit 2026-11-23 durch 'gemini-4-hydrogen' als Standard-G2-Google-Gang abgeloest; bleibt bewusst VOR 'gemini-flash' (3.5) als Legacy-Fallback erhalten. Preise sind der Einfuehrungspreis (0.75/3.75 USD je 1M Token); ab 2027-01-01 gilt laut Google 1.50/7.50. 'efforts' gibt die Denkstufen des Modells wieder (thinking_level, Default medium); der GeminiMotor reicht sie derzeit NICHT an die API durch. Max. Ausgabe 64k Token.",
       "staerken": ["speed", "agentisch", "grosse_kontexte", "bulk"],
       "schwaechen": ["tiefe_analyse"],
       "max_context": 1048576,
@@ -266,6 +326,66 @@
       "staerken": ["tool_use", "code_ausfuehrung", "dateisystem", "git", "multi_agent", "kontext_bewusstsein"],
       "schwaechen": ["kein_api_zugang", "session_gebunden"],
       "max_context": 200000
+    },
+    "agy-gemini-4-carbon": {
+      "provider": "agy",
+      "model_id": "gemini-4-carbon",
+      "gang": 5,
+      "leistung": "max",
+      "kosten_input_1k": 0.0,
+      "kosten_output_1k": 0.0,
+      "_doc": "Live aus agy 1.5.14 ermittelt (2026-11-23); Ausfuehrung ueber companion-for-agy. Subscription-/Session-Kosten werden nicht als Tokenpreise gemessen.",
+      "staerken": ["komplexes_reasoning", "wissenschaft", "architektur", "agent_cli", "grosse_kontexte"],
+      "schwaechen": ["kein_usage_tracking", "login_noetig", "internet_noetig", "latenz"],
+      "max_context": 1048576,
+      "efforts": ["high", "medium", "low"],
+      "catalog_checked_at": "2026-11-23",
+      "catalog_source": "agy-invalid-model-probe"
+    },
+    "agy-gemini-4-neon": {
+      "provider": "agy",
+      "model_id": "gemini-4-neon",
+      "gang": 5,
+      "leistung": "max",
+      "kosten_input_1k": 0.0,
+      "kosten_output_1k": 0.0,
+      "_doc": "Live aus agy 1.5.14 ermittelt (2026-11-23); Ausfuehrung ueber companion-for-agy.",
+      "staerken": ["komplexes_reasoning", "coding", "agent_cli", "grosse_kontexte"],
+      "schwaechen": ["kein_usage_tracking", "login_noetig", "internet_noetig"],
+      "max_context": 1048576,
+      "efforts": ["high", "xhigh", "medium", "low"],
+      "catalog_checked_at": "2026-11-23",
+      "catalog_source": "agy-invalid-model-probe"
+    },
+    "agy-gemini-4-argon": {
+      "provider": "agy",
+      "model_id": "gemini-4-argon",
+      "gang": 4,
+      "leistung": "hoch",
+      "kosten_input_1k": 0.0,
+      "kosten_output_1k": 0.0,
+      "_doc": "Live aus agy 1.5.14 ermittelt (2026-11-23); Ausfuehrung ueber companion-for-agy.",
+      "staerken": ["reasoning", "analyse", "agent_cli", "grosse_kontexte"],
+      "schwaechen": ["kein_usage_tracking", "login_noetig", "internet_noetig"],
+      "max_context": 1048576,
+      "efforts": ["high", "medium", "low"],
+      "catalog_checked_at": "2026-11-23",
+      "catalog_source": "agy-invalid-model-probe"
+    },
+    "agy-gemini-4-hydrogen": {
+      "provider": "agy",
+      "model_id": "gemini-4-hydrogen",
+      "gang": 3,
+      "leistung": "hoch",
+      "kosten_input_1k": 0.0,
+      "kosten_output_1k": 0.0,
+      "_doc": "Live aus agy 1.5.14 ermittelt (2026-11-23); Ausfuehrung ueber companion-for-agy. Aktueller schneller Gemini-4-Alltags-Gang in agy.",
+      "staerken": ["ausgewogen", "speed", "coding", "agent_cli", "grosse_kontexte"],
+      "schwaechen": ["kein_usage_tracking", "login_noetig", "internet_noetig"],
+      "max_context": 1048576,
+      "efforts": ["high", "xhigh", "medium", "low"],
+      "catalog_checked_at": "2026-11-23",
+      "catalog_source": "agy-invalid-model-probe"
     },
     "agy-gemini-3.6-flash": {
       "provider": "agy",
@@ -480,7 +600,7 @@
       "google": {
         "lifecycle": "ga",
         "catalog_source": "https://ai.google.dev/gemini-api/docs/models",
-        "catalog_checked_at": "2026-08-22",
+        "catalog_checked_at": "2026-11-23",
         "runners": ["clutch"],
         "availability": {"provider_documented": true, "provider_api_listed": null, "account_accessible": null, "runner_compatible": true, "host_ready": null}
       },
@@ -494,7 +614,7 @@
       "agy": {
         "lifecycle": "ga",
         "catalog_source": "https://github.com/ellmos-ai/companion-for-agy",
-        "catalog_checked_at": "2026-07-28",
+        "catalog_checked_at": "2026-11-23",
         "runners": ["agy"],
         "availability": {"provider_documented": true, "provider_api_listed": null, "account_accessible": null, "runner_compatible": true, "host_ready": null}
       },
@@ -546,6 +666,6 @@
   "fahrer_optionen": {
     "_doc": "Welche Modelle als Fahrer (Orchestrator) fungieren koennen. claude-code = die aktuelle Claude Code Session (z.B. du selbst)",
     "standard": "claude-code",
-    "alternativen": ["claude-fable", "claude-opus", "claude-sonnet", "gemini-pro", "openai-gpt-5.6-sol"]
+    "alternativen": ["claude-fable", "claude-opus", "claude-sonnet", "gemini-4-carbon", "gemini-4-neon", "gemini-pro", "openai-gpt-5.6-sol"]
   }
 }

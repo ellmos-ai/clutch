@@ -28,6 +28,10 @@ def test_agy_registry_has_live_catalog_metadata():
     getriebe = Getriebe()
     models = getriebe.filter(provider="agy")
     assert {gang.model_id for gang in models} == {
+        "gemini-4-carbon",
+        "gemini-4-neon",
+        "gemini-4-argon",
+        "gemini-4-hydrogen",
         "gemini-3.6-flash",
         "gemini-3.5-flash",
         "gemini-3.1-pro",
@@ -35,8 +39,13 @@ def test_agy_registry_has_live_catalog_metadata():
         "claude-opus-4.6",
         "gpt-oss-120b",
     }
-    assert all(gang.catalog_checked_at == "2026-07-28" for gang in models)
+    assert all(
+        gang.catalog_checked_at in {"2026-07-28", "2026-11-23"} for gang in models
+    )
     assert all(gang.catalog_source == "agy-invalid-model-probe" for gang in models)
+    assert getriebe.gang("agy-gemini-4-carbon").efforts == ["high", "medium", "low"]
+    assert getriebe.gang("agy-gemini-4-neon").efforts == ["high", "xhigh", "medium", "low"]
+    assert getriebe.gang("agy-gemini-4-hydrogen").efforts == ["high", "xhigh", "medium", "low"]
     assert getriebe.gang("agy-gemini-3.6-flash").efforts == ["high", "medium", "low"]
 
 

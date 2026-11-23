@@ -226,7 +226,7 @@ flowchart TD
     subgraph ENGINES["Einheitliche MotorBlock-Provider-Schicht"]
         MotorBlock["MOTORBLOCK (Einheitlicher API-Adapter)"]
         Anthropic["Anthropic (Claude Sonnet / Opus / Haiku)"]
-        Gemini["Google (Gemini 3.7 Flash / 3.5 Fallback / Pro)"]
+        Gemini["Google (Gemini 4 Carbon / Neon / Argon / Hydrogen + 3.x-Fallbacks)"]
         OpenAI["OpenAI (GPT-5.6 / Codex)"]
         Ollama["Ollama (Lokale & Remote Modelle)"]
         Agy["agy (companion-for-agy)"]
@@ -547,7 +547,7 @@ Routing, bevor ein LLM ausgewählt wird.
 | Provider | Modelle | Lokal |
 |----------|---------|-------|
 | **Anthropic** | Claude Fable 5, Haiku, Sonnet, Opus | Nein |
-| **Google** | Gemini 3.7 Flash (bevorzugt), Gemini 3.5 Flash als Fallback, Gemini 3.1 Pro Preview | Nein |
+| **Google** | Gemini 4 Carbon, Gemini 4 Neon, Gemini 4 Argon, Gemini 4 Hydrogen (bevorzugt); Gemini 3.7 Flash, Gemini 3.5 Flash & Gemini 3.1 Pro Preview als Fallback | Nein |
 | **OpenAI** | GPT-5.6 Luna/Terra/Sol via Responses API, GPT-5.3-Codex | Nein |
 | **Ollama** | Qwen, Mistral und weitere (lokal & remote); Kimi K3, GLM 5.3, K2.7 Code via Ollama Cloud | Ja / Cloud |
 | **Claude Code** | Subprozess-CLI-Sitzung | Ja |
