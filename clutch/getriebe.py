@@ -43,6 +43,10 @@ class Gang:
     lifecycle: str = "unknown"
     availability: dict[str, Optional[bool]] = field(default_factory=dict)
     runners: list[str] = field(default_factory=list)
+    num_ctx_safe: Optional[int] = None
+    recommended_max_tool_rounds: Optional[int] = None
+    min_ram_gib: Optional[int] = None
+    confidence_tier: Optional[str] = None
 
     @property
     def ist_lokal(self) -> bool:
@@ -188,6 +192,27 @@ class Getriebe:
         from clutch.execution import apply_provider_catalog
 
         return apply_provider_catalog(self, snapshot)
+
+    def apply_local_tuning_catalog(
+        self,
+        *,
+        host_ram_gib: float,
+        catalog_path: Optional[Path] = None,
+        catalog_data: Optional[dict] = None,
+        endpoint: str = "http://localhost:11434",
+        include_unsupported: bool = False,
+    ) -> dict[str, Gang]:
+        """Overlay hardware-/RAM-matched local Ollama gears from ocean.model-tuning-catalog.v1."""
+        from clutch.local_catalog_bridge import sync_local_gears_into_getriebe
+
+        return sync_local_gears_into_getriebe(
+            self,
+            host_ram_gib=host_ram_gib,
+            catalog_path=catalog_path,
+            catalog_data=catalog_data,
+            endpoint=endpoint,
+            include_unsupported=include_unsupported,
+        )
 
     def _apply_user_overrides(self) -> None:
         overrides = lade_user_overrides(self.overrides_path)
